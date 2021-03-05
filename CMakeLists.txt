@@ -1,34 +1,28 @@
-﻿# CMakeList.txt : CMake project for Game, include source and define
-# project specific logic here.
+﻿# CMakeList.txt : CMake PROJECT for Game, include source and define
+# PROJECT specific logic here.
 #
-cmake_minimum_required (VERSION 3.8)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.16)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
-project (Game)
+FIND_PACKAGE(OpenGL REQUIRED)
+FIND_PACKAGE(GLM REQUIRED)
+FIND_PACKAGE(GLFW3 REQUIRED)
+FIND_PACKAGE(GLEW REQUIRED)
+FIND_PACKAGE(GLI REQUIRED)
 
-file(GLOB_RECURSE HEADER_FILES
-	${CMAKE_SOURCE_DIR}/src/*.hpp)
+# SET(CMAKE_CXX_STANDARD 17)
+# SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-file(GLOB_RECURSE SOURCE_FILES
-	${CMAKE_SOURCE_DIR}/src/*.cpp)
+PROJECT(game LANGUAGES CXX)
 
-# Add source to this project's executable.
-add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES})
+# ADD_EXECUTABLE(${PROJECT_NAME} main.cpp "ui/src/UI.cpp")
 
-find_package(OpenGL REQUIRED)
-target_link_libraries(${PROJECT_NAME} opengl32)
+add_subdirectory(ui)
 
-find_package(GLM REQUIRED)
-target_link_libraries(${PROJECT_NAME} GLM)
+add_subdirectory(app)
 
-find_package(GLFW3 REQUIRED)
-target_link_libraries(${PROJECT_NAME} GLFW3)
-
-find_package(GLEW REQUIRED)
-target_link_libraries(${PROJECT_NAME} GLEW)
-
-find_package(GLI REQUIRED)
-target_link_libraries(${PROJECT_NAME} GLI)
-
+# TARGET_INCLUDE_DIRECTORIES(${PROJECT_NAME} PRIVATE src)
+# TARGET_COMPILE_FEATURES(${PROJECT_NAME} PRIVATE cxx_std_17)
+# SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES CXX_EXTENSIONS OFF)
 
