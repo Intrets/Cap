@@ -1,9 +1,26 @@
 #include <iostream>
 
-#include <ui/UI.h>
+#include <ui/ui.h>
+#include <mem/ReferenceManager.h>
 
-int main (){
-  std::cout << "hello app\n";
+class TestClass
+{
+public:
+	int32_t num = 123;
+	Handle selfHandle;
 
-  testUI();
+	TestClass(Handle h) : selfHandle(h) {
+	};
+};
+
+int main() {
+	ReferenceManager<TestClass> test;
+
+	auto test2 = test.makeUniqueRef<TestClass>();
+
+	std::cout << "hello app\n";
+
+	std::cout << "ref test: " << test2.get()->num << '\n';
+
+	testUI();
 }

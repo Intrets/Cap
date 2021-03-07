@@ -19,6 +19,8 @@ PROJECT(game LANGUAGES CXX)
 # ADD_EXECUTABLE(${PROJECT_NAME} main.cpp "ui/src/UI.cpp")
 
 add_subdirectory(ui)
+add_subdirectory(mem)
+add_subdirectory(misc)
 
 add_subdirectory(app)
 

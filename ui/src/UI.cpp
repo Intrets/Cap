@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "ui/UI.h"
+#include "ui/ui.h"
 
 void testUI() {
 	std::cout << "hello UI\n";
