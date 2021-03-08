@@ -1,54 +1,54 @@
 #include "Base.h"
 
-// #include "PlayerState.h"
-
 #include <misc/Rectangle.h>
+#include <game/player/PlayerInfo.h>
+#include <ui/State.h>
 
 namespace ui
 {
-	ScreenRectangle const& UIOBase::getScreenRectangle() const {
+	ScreenRectangle const& Base::getScreenRectangle() const {
 		return this->screenRectangle;
 	}
 
-	TYPE UIOBase::getUIOType() {
+	TYPE Base::getUIOType() {
 		return TYPE::UNSPECIFIED;
 	}
 
-	Handle UIOBase::getSelfHandle() {
+	Handle Base::getSelfHandle() {
 		return this->selfHandle;
 	}
 
-	void UIOBaseMulti::clear() {
+	void BaseMulti::clear() {
 		this->elements.clear();
 	}
 
-	void UIOBaseMulti::addElement(UniqueReference<UIOBase, UIOBase> element) {
+	void BaseMulti::addElement(UniqueReference<Base, Base> element) {
 		this->elements.push_back(std::move(element));
 	}
 
-	void UIOBase::activate() {
+	void Base::activate() {
 		this->active = true;
 	}
 
-	void UIOBase::deactivate() {
+	void Base::deactivate() {
 		this->active = false;
 	}
 
-	void UIOBaseMulti::translate(glm::vec2 p) {
+	void BaseMulti::translate(glm::vec2 p) {
 		this->screenRectangle.translate(p);
 		for (auto& element : this->elements) {
 			element.get()->translate(p);
 		}
 	}
 
-	void UIOBaseMulti::setScreenPixels(glm::ivec2 px) {
+	void BaseMulti::setScreenPixels(glm::ivec2 px) {
 		this->screenRectangle.setPixelSize(px);
 		for (auto& element : this->elements) {
 			element.get()->setScreenPixels(px);
 		}
 	}
 
-	ScreenRectangle UIOBaseMulti::updateSize(ScreenRectangle newScreenRectangle) {
+	ScreenRectangle BaseMulti::updateSize(ScreenRectangle newScreenRectangle) {
 		this->screenRectangle = newScreenRectangle;
 
 		for (auto& element : this->elements) {
@@ -58,73 +58,73 @@ namespace ui
 		return this->screenRectangle;
 	}
 
-	void UIOBase::moveTopLeftTo(glm::vec2 p) {
+	void Base::moveTopLeftTo(glm::vec2 p) {
 		translate(p - this->screenRectangle.getTopLeft());
 	}
 
-	bool UIOBase::contains(glm::vec2 p) const {
+	bool Base::contains(glm::vec2 p) const {
 		return this->screenRectangle.contains(p);
 	}
 
-	void UIOBase::addGlobalBind(BindControl bindControl, CallBack callBack) {
+	void Base::addGlobalBind(BindControl bindControl, CallBack callBack) {
 		this->globalBinds.push_back(std::make_pair(bindControl, callBack));
 	}
 
-	void UIOBase::addFocussedBind(BindControl bindControl, CallBack callBack) {
+	void Base::addFocussedBind(BindControl bindControl, CallBack callBack) {
 		this->focussedBinds.push_back(std::make_pair(bindControl, callBack));
 	}
 
-	void UIOBase::addOnHoverBind(BindControl bindControl, CallBack callBack) {
+	void Base::addOnHoverBind(BindControl bindControl, CallBack callBack) {
 		this->onHoverBinds.push_back(std::make_pair(bindControl, callBack));
 	}
 
-	void UIOBase::addActiveBind(BindControl bindControl, CallBack callBack) {
+	void Base::addActiveBind(BindControl bindControl, CallBack callBack) {
 		this->activeBinds.push_back(std::make_pair(bindControl, callBack));
 	}
 
-	void UIOBase::addGameWorldBind(BindControl bindControl, CallBack callBack) {
+	void Base::addGameWorldBind(BindControl bindControl, CallBack callBack) {
 		this->gameWorldBinds.push_back(std::make_pair(bindControl, callBack));
 	}
 
-	void UIOBase::addGlobalBinds(std::vector<BindControl> const& bindControls, CallBack callBack) {
+	void Base::addGlobalBinds(std::vector<BindControl> const& bindControls, CallBack callBack) {
 		for (auto const& control : bindControls) {
 			this->addGlobalBind(control, callBack);
 		}
 	}
 
-	void UIOBase::addFocussedBinds(std::vector<BindControl> const& bindControls, CallBack callBack) {
+	void Base::addFocussedBinds(std::vector<BindControl> const& bindControls, CallBack callBack) {
 		for (auto const& control : bindControls) {
 			this->addFocussedBind(control, callBack);
 		}
 	}
 
-	void UIOBase::addOnHoverBinds(std::vector<BindControl> const& bindControls, CallBack callBack) {
+	void Base::addOnHoverBinds(std::vector<BindControl> const& bindControls, CallBack callBack) {
 		for (auto const& control : bindControls) {
 			this->addOnHoverBind(control, callBack);
 		}
 	}
 
-	void UIOBase::addActiveBinds(std::vector<BindControl> const& bindControls, CallBack callBack) {
+	void Base::addActiveBinds(std::vector<BindControl> const& bindControls, CallBack callBack) {
 		for (auto const& control : bindControls) {
 			this->addActiveBind(control, callBack);
 		}
 	}
 
-	void UIOBase::addGameWorldBinds(std::vector<BindControl> const& bindControls, CallBack callBack) {
+	void Base::addGameWorldBinds(std::vector<BindControl> const& bindControls, CallBack callBack) {
 		for (auto const& control : bindControls) {
 			this->addGameWorldBind(control, callBack);
 		}
 	}
 
-	CallBackBindResult UIOBase::runGlobalBinds(PlayerState& playerState) {
+	CallBackBindResult Base::runGlobalBinds(PlayerInfo& playerInfo) {
 		CallBackBindResult sumResult = 0;
 
 		for (auto& [control, bind] : this->globalBinds) {
-			if (playerState.controlState.activated(control)) {
-				CallBackBindResult bindResult = bind(playerState, this);
+			if (playerInfo.controlState.activated(control)) {
+				CallBackBindResult bindResult = bind(playerInfo, this);
 				sumResult |= bindResult;
 				if (bindResult & BIND::RESULT::CONSUME) {
-					playerState.controlState.consumeBufferControl(control.control);
+					playerInfo.controlState.consumeBufferControl(control.control);
 				}
 				if (sumResult & BIND::RESULT::STOP) {
 					return sumResult;
@@ -135,14 +135,14 @@ namespace ui
 		return sumResult;
 	}
 
-	CallBackBindResult UIOBase::runFocussedBinds(PlayerState& playerState) {
+	CallBackBindResult Base::runFocussedBinds(PlayerInfo& playerInfo) {
 		CallBackBindResult sumResult = 0;
 
 		for (auto& [control, bind] : this->focussedBinds) {
-			if (playerState.controlState.activated(control)) {
-				CallBackBindResult bindResult = bind(playerState, this);
+			if (playerInfo.controlState.activated(control)) {
+				CallBackBindResult bindResult = bind(playerInfo, this);
 				if (bindResult & BIND::RESULT::CONSUME) {
-					playerState.controlState.consumeBufferControl(control.control);
+					playerInfo.controlState.consumeBufferControl(control.control);
 				}
 				sumResult |= bindResult;
 				if (sumResult & BIND::RESULT::STOP) {
@@ -154,15 +154,15 @@ namespace ui
 		return sumResult;
 	}
 
-	CallBackBindResult UIOBase::runOnHoverBinds(PlayerState& playerState) {
+	CallBackBindResult Base::runOnHoverBinds(PlayerInfo& playerInfo) {
 		CallBackBindResult sumResult = 0;
 
 		for (auto& [control, bind] : onHoverBinds) {
-			if (playerState.controlState.activated(control)) {
-				CallBackBindResult bindResult = bind(playerState, this);
+			if (playerInfo.controlState.activated(control)) {
+				CallBackBindResult bindResult = bind(playerInfo, this);
 				sumResult |= bindResult;
 				if (bindResult & BIND::RESULT::CONSUME) {
-					playerState.controlState.consumeBufferControl(control.control);
+					playerInfo.controlState.consumeBufferControl(control.control);
 				}
 				if (sumResult & BIND::RESULT::STOP) {
 					return sumResult;
@@ -173,16 +173,16 @@ namespace ui
 		return sumResult;
 	}
 
-	CallBackBindResult UIOBase::runActiveBinds(PlayerState& playerState) {
+	CallBackBindResult Base::runActiveBinds(PlayerInfo& playerInfo) {
 		CallBackBindResult sumResult = 0;
 
 		if (this->active) {
 			for (auto& [control, bind] : activeBinds) {
-				if (playerState.controlState.activated(control)) {
-					CallBackBindResult bindResult = bind(playerState, this);
+				if (playerInfo.controlState.activated(control)) {
+					CallBackBindResult bindResult = bind(playerInfo, this);
 					sumResult |= bindResult;
 					if (bindResult & BIND::RESULT::CONSUME) {
-						playerState.controlState.consumeBufferControl(control.control);
+						playerInfo.controlState.consumeBufferControl(control.control);
 					}
 					if (sumResult & BIND::RESULT::STOP) {
 						return sumResult;
@@ -194,15 +194,15 @@ namespace ui
 		return sumResult;
 	}
 
-	CallBackBindResult UIOBase::runGameWorldBinds(PlayerState& playerState) {
+	CallBackBindResult Base::runGameWorldBinds(PlayerInfo& playerInfo) {
 		CallBackBindResult sumResult = 0;
 
 		for (auto& [control, bind] : this->gameWorldBinds) {
-			if (playerState.controlState.activated(control)) {
-				CallBackBindResult bindResult = bind(playerState, this);
+			if (playerInfo.controlState.activated(control)) {
+				CallBackBindResult bindResult = bind(playerInfo, this);
 				sumResult |= bindResult;
 				if (bindResult & BIND::RESULT::CONSUME) {
-					playerState.controlState.consumeBufferControl(control.control);
+					playerInfo.controlState.consumeBufferControl(control.control);
 				}
 				if (sumResult & BIND::RESULT::STOP) {
 					return sumResult;
@@ -213,80 +213,80 @@ namespace ui
 		return sumResult;
 	}
 
-	CallBackBindResult UIOBaseMulti::runGlobalBinds(PlayerState& playerState) {
+	CallBackBindResult BaseMulti::runGlobalBinds(PlayerInfo& playerInfo) {
 		CallBackBindResult sumResult = 0;
 
 		for (auto& element : this->elements) {
-			CallBackBindResult elementResult = element.get()->runGlobalBinds(playerState);
+			CallBackBindResult elementResult = element.get()->runGlobalBinds(playerInfo);
 			sumResult |= elementResult;
 			if (sumResult & BIND::RESULT::STOP) {
 				return sumResult;
 			}
 		}
 
-		return sumResult | this->UIOBase::runGlobalBinds(playerState);
+		return sumResult | this->Base::runGlobalBinds(playerInfo);
 	}
 
-	CallBackBindResult UIOBaseMulti::runFocussedBinds(PlayerState& playerState) {
+	CallBackBindResult BaseMulti::runFocussedBinds(PlayerInfo& playerInfo) {
 		CallBackBindResult sumResult = 0;
 
 		for (auto& element : this->elements) {
-			CallBackBindResult elementResult = element.get()->runFocussedBinds(playerState);
+			CallBackBindResult elementResult = element.get()->runFocussedBinds(playerInfo);
 			sumResult |= elementResult;
 			if (sumResult & BIND::RESULT::STOP) {
 				return sumResult;
 			}
 		}
 
-		return sumResult | this->UIOBase::runFocussedBinds(playerState);
+		return sumResult | this->Base::runFocussedBinds(playerInfo);
 	}
 
-	CallBackBindResult UIOBaseMulti::runOnHoverBinds(PlayerState& playerState) {
+	CallBackBindResult BaseMulti::runOnHoverBinds(PlayerInfo& playerInfo) {
 		CallBackBindResult sumResult = 0;
-		if (!this->screenRectangle.contains(playerState.uiState.getCursorPositionScreen())) {
+		if (!this->screenRectangle.contains(playerInfo.uiState.getCursorPositionScreen())) {
 			return sumResult;
 		}
 
 		for (auto& element : this->elements) {
-			CallBackBindResult elementResult = element.get()->runOnHoverBinds(playerState);
+			CallBackBindResult elementResult = element.get()->runOnHoverBinds(playerInfo);
 			sumResult |= elementResult;
 			if (sumResult & BIND::RESULT::STOP) {
 				return sumResult;
 			}
 		}
 
-		return sumResult | this->UIOBase::runOnHoverBinds(playerState);
+		return sumResult | this->Base::runOnHoverBinds(playerInfo);
 	}
 
-	CallBackBindResult UIOBaseMulti::runActiveBinds(PlayerState& playerState) {
+	CallBackBindResult BaseMulti::runActiveBinds(PlayerInfo& playerInfo) {
 		CallBackBindResult sumResult = 0;
 
 		for (auto& element : this->elements) {
-			CallBackBindResult elementResult = element.get()->runActiveBinds(playerState);
+			CallBackBindResult elementResult = element.get()->runActiveBinds(playerInfo);
 			sumResult |= elementResult;
 			if (sumResult & BIND::RESULT::STOP) {
 				return sumResult;
 			}
 		}
 
-		return sumResult | this->UIOBase::runActiveBinds(playerState);
+		return sumResult | this->Base::runActiveBinds(playerInfo);
 	}
 
-	CallBackBindResult UIOBaseMulti::runGameWorldBinds(PlayerState& playerState) {
+	CallBackBindResult BaseMulti::runGameWorldBinds(PlayerInfo& playerInfo) {
 		CallBackBindResult sumResult = 0;
 
 		for (auto& element : this->elements) {
-			CallBackBindResult elementResult = element.get()->runGameWorldBinds(playerState);
+			CallBackBindResult elementResult = element.get()->runGameWorldBinds(playerInfo);
 			sumResult |= elementResult;
 			if (sumResult & BIND::RESULT::STOP) {
 				return sumResult;
 			}
 		}
 
-		return sumResult | this->UIOBase::runGameWorldBinds(playerState);
+		return sumResult | this->Base::runGameWorldBinds(playerInfo);
 	}
 
-	int32_t UIOBaseMulti::addRenderInfo(GameState& gameState, RenderInfo& renderInfo, int32_t depth) {
+	int32_t BaseMulti::addRenderInfo(GameState& gameState, RenderInfo& renderInfo, int32_t depth) {
 		int32_t maxDepth = 0;
 		for (auto& element : this->elements) {
 			maxDepth = glm::max(maxDepth, element.get()->addRenderInfo(gameState, renderInfo, depth));
@@ -294,93 +294,93 @@ namespace ui
 		return 1 + maxDepth;
 	}
 
-	void UIOBaseSingle::addElement(UniqueReference<UIOBase, UIOBase> element) {
+	void BaseSingle::addElement(UniqueReference<Base, Base> element) {
 		assert(main.isNull());
 		this->main = std::move(element);
 	}
 
-	void UIOBaseSingle::translate(glm::vec2 p) {
+	void BaseSingle::translate(glm::vec2 p) {
 		assert(this->main.isNotNull());
 		this->screenRectangle.translate(p);
 		this->main.get()->translate(p);
 	}
 
-	void UIOBaseSingle::setScreenPixels(glm::ivec2 px) {
+	void BaseSingle::setScreenPixels(glm::ivec2 px) {
 		assert(this->main.isNotNull());
 		this->screenRectangle.setPixelSize(px);
 		this->main.get()->setScreenPixels(px);
 	}
 
-	ScreenRectangle UIOBaseSingle::updateSize(ScreenRectangle newScreenRectangle) {
+	ScreenRectangle BaseSingle::updateSize(ScreenRectangle newScreenRectangle) {
 		this->screenRectangle = this->main.get()->updateSize(newScreenRectangle);
 		return this->screenRectangle;
 	}
 
-	CallBackBindResult UIOBaseSingle::runGlobalBinds(PlayerState& playerState) {
-		CallBackBindResult sumResult = this->main.get()->runGlobalBinds(playerState);
+	CallBackBindResult BaseSingle::runGlobalBinds(PlayerInfo& playerInfo) {
+		CallBackBindResult sumResult = this->main.get()->runGlobalBinds(playerInfo);
 		if (sumResult & BIND::RESULT::STOP) {
 			return sumResult;
 		}
 
-		return sumResult | this->UIOBase::runGlobalBinds(playerState);
+		return sumResult | this->Base::runGlobalBinds(playerInfo);
 	}
 
-	CallBackBindResult UIOBaseSingle::runFocussedBinds(PlayerState& playerState) {
-		CallBackBindResult sumResult = this->main.get()->runFocussedBinds(playerState);
+	CallBackBindResult BaseSingle::runFocussedBinds(PlayerInfo& playerInfo) {
+		CallBackBindResult sumResult = this->main.get()->runFocussedBinds(playerInfo);
 		if (sumResult & BIND::RESULT::STOP) {
 			return sumResult;
 		}
 
-		return sumResult | this->UIOBase::runFocussedBinds(playerState);
+		return sumResult | this->Base::runFocussedBinds(playerInfo);
 	}
 
-	CallBackBindResult UIOBaseSingle::runOnHoverBinds(PlayerState& playerState) {
+	CallBackBindResult BaseSingle::runOnHoverBinds(PlayerInfo& playerInfo) {
 		CallBackBindResult sumResult = 0;
-		if (!this->screenRectangle.contains(playerState.uiState.getCursorPositionScreen())) {
+		if (!this->screenRectangle.contains(playerInfo.uiState.getCursorPositionScreen())) {
 			return sumResult;
 		}
 
-		sumResult = this->main.get()->runOnHoverBinds(playerState);
+		sumResult = this->main.get()->runOnHoverBinds(playerInfo);
 
 		if (sumResult & BIND::RESULT::STOP) {
 			return sumResult;
 		}
 
-		return sumResult | this->UIOBase::runOnHoverBinds(playerState);
+		return sumResult | this->Base::runOnHoverBinds(playerInfo);
 	}
 
-	CallBackBindResult UIOBaseSingle::runActiveBinds(PlayerState& playerState) {
-		CallBackBindResult sumResult = this->main.get()->runActiveBinds(playerState);
+	CallBackBindResult BaseSingle::runActiveBinds(PlayerInfo& playerInfo) {
+		CallBackBindResult sumResult = this->main.get()->runActiveBinds(playerInfo);
 		if (sumResult & BIND::RESULT::STOP) {
 			return sumResult;
 		}
 
-		return sumResult | this->UIOBase::runActiveBinds(playerState);
+		return sumResult | this->Base::runActiveBinds(playerInfo);
 	}
 
-	CallBackBindResult UIOBaseSingle::runGameWorldBinds(PlayerState& playerState) {
-		CallBackBindResult sumResult = this->main.get()->runGameWorldBinds(playerState);
+	CallBackBindResult BaseSingle::runGameWorldBinds(PlayerInfo& playerInfo) {
+		CallBackBindResult sumResult = this->main.get()->runGameWorldBinds(playerInfo);
 		if (sumResult & BIND::RESULT::STOP) {
 			return sumResult;
 		}
 
-		return sumResult | this->UIOBase::runGameWorldBinds(playerState);
+		return sumResult | this->Base::runGameWorldBinds(playerInfo);
 	}
 
-	int32_t UIOBaseSingle::addRenderInfo(GameState& gameState, RenderInfo& renderInfo, int32_t depth) {
+	int32_t BaseSingle::addRenderInfo(GameState& gameState, RenderInfo& renderInfo, int32_t depth) {
 		assert(main.isNotNull());
 		return this->main.get()->addRenderInfo(gameState, renderInfo, depth);
 	}
 
-	void UIOBaseEnd::addElement(UniqueReference<UIOBase, UIOBase> element) {
+	void BaseEnd::addElement(UniqueReference<Base, Base> element) {
 		assert(0);
 	}
 
-	void UIOBaseEnd::translate(glm::vec2 p) {
+	void BaseEnd::translate(glm::vec2 p) {
 		this->screenRectangle.translate(p);
 	}
 
-	void UIOBaseEnd::setScreenPixels(glm::ivec2 px) {
+	void BaseEnd::setScreenPixels(glm::ivec2 px) {
 		this->screenRectangle.setPixelSize(px);
 	}
 }

@@ -4,6 +4,27 @@
 
 namespace ui
 {
+	enum SIZETYPE
+	{
+		FH,
+		PX,
+		STATIC_PX,
+		ABSOLUTE_HEIGHT,
+		ABSOLUTE_WIDTH,
+		RELATIVE_HEIGHT,
+		RELATIVE_WIDTH,
+	};
+
+	namespace TEXTDISPLAY
+	{
+		enum class MODE
+		{
+			INSERT,
+			NORMAL,
+			VISUAL,
+		};
+	}
+
 	enum class TYPE
 	{
 		CONSTRAIN_SIZE,
@@ -30,35 +51,46 @@ namespace ui
 		BOTTOMRIGHT,
 		CENTER,
 	};
+
+	enum class DIR
+	{
+		LEFT,
+		RIGHT,
+		UP,
+		DOWN,
+		LEFT_REVERSE,
+		RIGHT_REVERSE,
+		UP_REVERSE,
+		DOWN_REVERSE,
+	};
+
+	class ConstrainSize;
+	class Pad;
+	class List;
+	class Grid;
+
+	template<>
+	constexpr TYPE GET_TYPE<ConstrainSize>() {
+		return TYPE::CONSTRAIN_SIZE;
+	}
+
+	template<>
+	constexpr TYPE GET_TYPE<Pad>() {
+		return TYPE::PAD;
+	}
+
+	template<>
+	constexpr TYPE GET_TYPE<List>() {
+		return TYPE::LIST;
+	}
+
+	template<>
+	constexpr TYPE GET_TYPE<Grid>() {
+		return TYPE::GRID;
+	}
+
+	template<class T>
+	constexpr TYPE GET_TYPE() {
+		return TYPE::UNSPECIFIED;
+	}
 }
-
-class UIOConstrainSize;
-class UIOPad;
-class UIOList;
-class UIOGrid;
-
-template<>
-constexpr ui::TYPE ui::GET_TYPE<UIOConstrainSize>() {
-	return ui::TYPE::CONSTRAIN_SIZE;
-}
-
-template<>
-constexpr ui::TYPE ui::GET_TYPE<UIOPad>() {
-	return ui::TYPE::PAD;
-}
-
-template<>
-constexpr ui::TYPE ui::GET_TYPE<UIOList>() {
-	return ui::TYPE::LIST;
-}
-
-template<>
-constexpr ui::TYPE ui::GET_TYPE<UIOGrid>() {
-	return ui::TYPE::GRID;
-}
-
-template<class T>
-constexpr ui::TYPE ui::GET_TYPE() {
-	return ui::TYPE::UNSPECIFIED;
-}
-

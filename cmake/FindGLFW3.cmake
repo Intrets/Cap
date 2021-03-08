@@ -19,7 +19,7 @@ if (WIN32)
 	)
 
 	if (GLFW3_LIB)
-		message(STATUS "glfw3.lib found: ${glfw3_lib}")
+		message(STATUS "glfw3.lib found: ${GLFW3_LIB}")
 	else()
 		message(VERBOSE "glfw3.lib searched for in: ${glfw3_search_dirs}")
 		message(FATAL_ERROR "glfw3.lib not found. see above for paths searched in.")
@@ -31,7 +31,7 @@ if (WIN32)
 	)
 
 	if (GLFW3_DLL)
-		message(STATUS "glfw3.dll found: ${glfw3_lib}")
+		message(STATUS "glfw3.dll found: ${GLFW3_DLL}")
 	else()
 		message(VERBOSE "glfw3.dll searched for in: ${glfw3_search_dirs}")
 		message(FATAL_ERROR "glfw3.dll not found. see above for paths searched in.")
@@ -57,7 +57,7 @@ endif()
 
 add_library(GLFW3 STATIC IMPORTED)
 set_target_properties(GLFW3 PROPERTIES
-	IMPORTED_LOCATION ${GLFW3_DLL}
+	IMPORTED_LOCATION ${GLFW3_LIB}
 	IMPORTED_IMPLIB ${GLFW3_LIB}
 	INTERFACE_INCLUDE_DIRECTORIES "${GLFW3_INCLUDE_DIR}"
 )

@@ -19,7 +19,7 @@ if (WIN32)
 	)
 
 	if (GLEW_LIB)
-		message(STATUS "glew32.lib found: ${glew32_lib}")
+		message(STATUS "glew32.lib found: ${GLEW_LIB}")
 	else()
 		message(verbose "glew32.lib searched for in: ${glew32_search_dirs}")
 		message(fatal_error "glew32.lib not found. see above for paths searched in.")
@@ -31,7 +31,7 @@ if (WIN32)
 	)
 
 	if (GLEW_DLL)
-		message(STATUS "glew32.dll found: ${glew32_lib}")
+		message(STATUS "glew32.dll found: ${GLEW_DLL}")
 	else()
 		message(VERBOSE "glew32.dll searched for in: ${glew32_search_dirs}")
 		message(FATAL_ERROR "glew32.dll not found. see above for paths searched in.")
@@ -57,7 +57,7 @@ endif()
 
 add_library(GLEW STATIC IMPORTED)
 set_target_properties(GLEW PROPERTIES
-	IMPORTED_LOCATION ${GLEW_DLL}
+	IMPORTED_LOCATION ${GLEW_LIB}
 	IMPORTED_IMPLIB ${GLEW_LIB}
 	INTERFACE_INCLUDE_DIRECTORIES "${GLEW_INCLUDE_DIR}"
 )

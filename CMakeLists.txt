@@ -14,13 +14,14 @@ FIND_PACKAGE(GLI REQUIRED)
 # SET(CMAKE_CXX_STANDARD 17)
 # SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-PROJECT(game LANGUAGES CXX)
+PROJECT(game_thing LANGUAGES CXX)
 
 # ADD_EXECUTABLE(${PROJECT_NAME} main.cpp "ui/src/UI.cpp")
 
 add_subdirectory(ui)
 add_subdirectory(mem)
 add_subdirectory(misc)
+add_subdirectory(game)
 
 add_subdirectory(app)
 
