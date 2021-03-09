@@ -4,6 +4,15 @@
 
 namespace ui
 {
+	namespace CURSOR
+	{
+		enum class TYPE
+		{
+			BLOCK,
+			LINE,
+		};
+	}
+
 	enum SIZETYPE
 	{
 		FH,
@@ -22,6 +31,30 @@ namespace ui
 			INSERT,
 			NORMAL,
 			VISUAL,
+		};
+	}
+
+	namespace PAD
+	{
+		enum class TYPE
+		{
+			SHRINK,
+			FREE,
+			SIZETYPE,
+		};
+	}
+
+	namespace WINDOW
+	{
+		enum TYPE
+		{
+			MINIMISE = 1 << 0,
+			CLOSE = 1 << 1,
+			RESIZE = 1 << 2,
+			RESIZEHORIZONTAL = 1 << 3,
+			RESIZEVERTICAL = 1 << 4,
+			MOVE = 1 << 5,
+			HIDE = 1 << 6,
 		};
 	}
 

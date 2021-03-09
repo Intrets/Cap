@@ -22,6 +22,7 @@ add_subdirectory(ui)
 add_subdirectory(mem)
 add_subdirectory(misc)
 add_subdirectory(game)
+add_subdirectory(render)
 
 add_subdirectory(app)
 

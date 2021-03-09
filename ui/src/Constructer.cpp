@@ -1,7 +1,24 @@
 #include "Constructer.h"
 
+#include <game/player/PlayerInfo.h>
+#include <misc/StringHelpers.h>
+
+#include "State.h"
+#include "SizeType.h"
+#include "binds/Binds.h"
+
 #include "Proxy.h"
 #include "TextDisplay.h"
+#include "SizeType.h"
+#include "ConstrainSize.h"
+#include "Button.h"
+#include "Pad.h"
+#include "Window.h"
+#include "List.h"
+#include "Empty.h"
+#include "ColoredBackground.h"
+#include "Destructible.h"
+#include "AnchoredProxy.h"
 
 namespace ui
 {
@@ -143,15 +160,15 @@ namespace ui
 		WeakReference<Base, Base> leaf = mainPad;
 
 		auto mainPadPtr = mainPad.get();
-		mainPadPtr->top = { ::SIZETYPE::FH, 1.2f };
-		if (types & Window::TYPE::RESIZE) {
-			types |= Window::TYPE::RESIZEHORIZONTAL | Window::TYPE::RESIZEVERTICAL;
+		mainPadPtr->top = { SIZETYPE::FH, 1.2f };
+		if (types & WINDOW::TYPE::RESIZE) {
+			types |= WINDOW::TYPE::RESIZEHORIZONTAL | WINDOW::TYPE::RESIZEVERTICAL;
 		}
-		if (types & Window::TYPE::RESIZEHORIZONTAL) {
-			mainPadPtr->right = { ::SIZETYPE::PX, resizeSliverSize };
+		if (types & WINDOW::TYPE::RESIZEHORIZONTAL) {
+			mainPadPtr->right = { SIZETYPE::PX, resizeSliverSize };
 		}
-		if (types & Window::TYPE::RESIZEVERTICAL) {
-			mainPadPtr->bottom = { ::SIZETYPE::PX, resizeSliverSize };
+		if (types & WINDOW::TYPE::RESIZEVERTICAL) {
+			mainPadPtr->bottom = { SIZETYPE::PX, resizeSliverSize };
 		}
 
 		// ------------------
@@ -163,8 +180,8 @@ namespace ui
 		free();
 		auto windowPtr = makeEnd<Window>();
 		windowPtr.get()->addElement(std::move(mainPad));
-		Binds::Base::focusable(windowPtr.get());
-		Binds::Base::blockWorldBinds(windowPtr.get());
+		BASE::focusable(windowPtr.get());
+		BASE::blockWorldBinds(windowPtr.get());
 		windowPtr.get()->screenRectangle.set(size);
 
 		UniqueReference<Base, Base> windowRef = Global::pop();
@@ -176,10 +193,10 @@ namespace ui
 		Global::push();
 
 		alignTop();
-		constrainHeight({ ::SIZETYPE::FH, 1.2f });
-		auto topBar = startList(::DIR::RIGHT_REVERSE);
-		Binds::Base::focusable(topBar.get());
-		Binds::Base::blockWorldBinds(topBar.get());
+		constrainHeight({ SIZETYPE::FH, 1.2f });
+		auto topBar = startList(DIR::RIGHT_REVERSE);
+		BASE::focusable(topBar.get());
+		BASE::blockWorldBinds(topBar.get());
 
 		// ----------------------
 		// Top Bar Elements setup
@@ -195,17 +212,17 @@ namespace ui
 			auto button = textButton(title);
 			button.get()->addFocussedBind(
 				{ CONTROL::KEY::MOUSE_POS_CHANGED, CONTROL::STATE::PRESSED },
-				[windowPtr = windowPtr.get()](PlayerState& playerState, Base* self_)->CallBackBindResult
+				[windowPtr = windowPtr.get()](PlayerInfo& playerInfo, Base* self_)->CallBackBindResult
 			{
 				auto self = static_cast<Button*>(self_);
 				if (self->isDown()) {
-					windowPtr->moveTopLeftTo(playerState.uiState.getCursorPositionScreenClamped(0.99f) - self->getMousePressOffset());
+					windowPtr->moveTopLeftTo(playerInfo.uiState.getCursorPositionScreenClamped(0.99f) - self->getMousePressOffset());
 				}
 				return BIND::RESULT::CONTINUE;
 			});
 		}
 		else {
-			pad({ ::SIZETYPE::PX, 1 });
+			pad({ SIZETYPE::PX, 1 });
 			textDisplaySingle(title);
 		}
 
@@ -218,9 +235,9 @@ namespace ui
 		if (types & Window::TYPE::MINIMISE) {
 			Global::push();
 
-			constrainSize({ ::SIZETYPE::FH, 1.2f });
+			constrainSize({ SIZETYPE::FH, 1.2f });
 			auto button = textButton(" _");
-			button.get()->setOnRelease([windowPtr = windowPtr.get()](PlayerState& playerState, Base* self_)->CallBackBindResult
+			button.get()->setOnRelease([windowPtr = windowPtr.get()](PlayerInfo& playerInfo, Base* self_)->CallBackBindResult
 			{
 				windowPtr->minimized = !windowPtr->minimized;
 				return BIND::RESULT::CONTINUE;
@@ -236,14 +253,14 @@ namespace ui
 		if (types & Window::TYPE::CLOSE || types & Window::TYPE::HIDE) {
 			Global::push();
 
-			constrainSize({ ::SIZETYPE::FH, 1.2f });
+			constrainSize({ SIZETYPE::FH, 1.2f });
 			auto button = textButton(" x");
 
 			if (types & Window::TYPE::CLOSE) {
-				Binds::Button::close(button.get());
+				BUTTON::close(button.get());
 			}
 			else if (types & Window::TYPE::HIDE) {
-				Binds::Button::hide(button.get());
+				BUTTON::hide(button.get());
 
 			}
 
@@ -262,22 +279,22 @@ namespace ui
 			Global::push();
 
 			alignBottomLeft();
-			constrainHeight({ ::SIZETYPE::PX, resizeSliverSize });
-			padRight({ ::SIZETYPE::PX, types & Window::TYPE::RESIZEHORIZONTAL ? resizeSliverSize : 0 });
-			padLeft({ ::SIZETYPE::PX, 1 });
-			padTop({ ::SIZETYPE::PX, 1 });
-			auto button = button();
+			constrainHeight({ SIZETYPE::PX, resizeSliverSize });
+			padRight({ SIZETYPE::PX, types & Window::TYPE::RESIZEHORIZONTAL ? resizeSliverSize : 0 });
+			padLeft({ SIZETYPE::PX, 1 });
+			padTop({ SIZETYPE::PX, 1 });
+			auto button = ui::button();
 			makeEnd<Empty>();
 
 			button.get()->addFocussedBind(
 				{ CONTROL::KEY::MOUSE_POS_CHANGED, CONTROL::STATE::PRESSED },
-				[windowPtr = windowPtr.get()](PlayerState& playerState, Base* self_)->CallBackBindResult
+				[windowPtr = windowPtr.get()](PlayerInfo& playerInfo, Base* self_)->CallBackBindResult
 			{
 				auto self = static_cast<Button*>(self_);
 				if (self->isDown()) {
 					auto bottomRight = windowPtr->screenRectangle.getBottomRight();
 					bottomRight.y =
-						playerState.uiState.getCursorPositionScreenClamped(0.99f).y
+						playerInfo.uiState.getCursorPositionScreenClamped(0.99f).y
 						- self->getMousePressOffset().y - self->screenRectangle.getAbsSize().y;
 					if (windowPtr->screenRectangle.getTop() - bottomRight.y < 0.2f) {
 						bottomRight.y = windowPtr->screenRectangle.getTop() - 0.2f;
@@ -295,22 +312,22 @@ namespace ui
 			Global::push();
 
 			alignRight();
-			constrainWidth({ ::SIZETYPE::PX, resizeSliverSize });
-			padLeft({ ::SIZETYPE::PX, 1 });
-			padTop({ ::SIZETYPE::FH, 1.2f });
-			padBot({ ::SIZETYPE::PX, types & Window::TYPE::RESIZEVERTICAL ? resizeSliverSize : 0 });
-			auto button = button();
+			constrainWidth({ SIZETYPE::PX, resizeSliverSize });
+			padLeft({ SIZETYPE::PX, 1 });
+			padTop({ SIZETYPE::FH, 1.2f });
+			padBot({ SIZETYPE::PX, types & Window::TYPE::RESIZEVERTICAL ? resizeSliverSize : 0 });
+			auto button = ui::button();
 			makeEnd<Empty>();
 
 			button.get()->addFocussedBind(
 				{ CONTROL::KEY::MOUSE_POS_CHANGED, CONTROL::STATE::PRESSED },
-				[windowPtr = windowPtr.get()](PlayerState& playerState, Base* self_)->CallBackBindResult
+				[windowPtr = windowPtr.get()](PlayerInfo& playerInfo, Base* self_)->CallBackBindResult
 			{
 				auto self = static_cast<Button*>(self_);
 				if (self->isDown()) {
 					auto bottomRight = windowPtr->screenRectangle.getBottomRight();
 					bottomRight.x =
-						playerState.uiState.getCursorPositionScreenClamped(0.99f).x
+						playerInfo.uiState.getCursorPositionScreenClamped(0.99f).x
 						- self->getMousePressOffset().x + self->screenRectangle.getAbsSize().x;
 					if (bottomRight.x - windowPtr->screenRectangle.getLeft() < 0.2f) {
 						bottomRight.x = windowPtr->screenRectangle.getLeft() + 0.2f;
@@ -328,19 +345,19 @@ namespace ui
 			Global::push();
 
 			alignBottomRight();
-			constrainWidth({ ::SIZETYPE::PX, resizeSliverSize });
-			constrainHeight({ ::SIZETYPE::PX, resizeSliverSize });
-			auto button = button();
+			constrainWidth({ SIZETYPE::PX, resizeSliverSize });
+			constrainHeight({ SIZETYPE::PX, resizeSliverSize });
+			auto button = ui::button();
 			makeEnd<Empty>();
 
 			button.get()->addFocussedBind(
 				{ CONTROL::KEY::MOUSE_POS_CHANGED, CONTROL::STATE::PRESSED },
-				[windowPtr = windowPtr.get()](PlayerState& playerState, Base* self_)->CallBackBindResult
+				[windowPtr = windowPtr.get()](PlayerInfo& playerInfo, Base* self_)->CallBackBindResult
 			{
 				auto self = static_cast<Button*>(self_);
 				if (self->isDown()) {
 					auto bottomRight =
-						playerState.uiState.getCursorPositionScreenClamped(0.99f)
+						playerInfo.uiState.getCursorPositionScreenClamped(0.99f)
 						- self->getMousePressOffset() + glm::vec2(1.0f, -1.0f) * self->screenRectangle.getAbsSize();
 					if (bottomRight.x - windowPtr->screenRectangle.getLeft() < 0.2f) {
 						bottomRight.x = windowPtr->screenRectangle.getLeft() + 0.2f;
@@ -377,46 +394,46 @@ namespace ui
 		return ptr;
 	}
 
-	WeakReference<Base, ConstrainSize> align(ui::ALIGNMENT alignment) {
+	WeakReference<Base, ConstrainSize> align(ALIGNMENT alignment) {
 		auto ptr = Global::getState()->addOrModifySingle<ConstrainSize>();
 		ptr.get()->setAlignment(alignment);
 		return ptr;
 	}
 
 	WeakReference<Base, ConstrainSize> alignCenter() {
-		return align(ui::ALIGNMENT::CENTER);
+		return align(ALIGNMENT::CENTER);
 	}
 
 	WeakReference<Base, ConstrainSize> alignTop() {
-		return align(ui::ALIGNMENT::TOP);
+		return align(ALIGNMENT::TOP);
 	}
 
 	WeakReference<Base, ConstrainSize> alignBottom() {
-		return align(ui::ALIGNMENT::BOTTOM);
+		return align(ALIGNMENT::BOTTOM);
 	}
 
 	WeakReference<Base, ConstrainSize> alignLeft() {
-		return align(ui::ALIGNMENT::LEFT);
+		return align(ALIGNMENT::LEFT);
 	}
 
 	WeakReference<Base, ConstrainSize> alignRight() {
-		return align(ui::ALIGNMENT::RIGHT);
+		return align(ALIGNMENT::RIGHT);
 	}
 
 	WeakReference<Base, ConstrainSize> alignBottomLeft() {
-		return align(ui::ALIGNMENT::BOTTOMLEFT);
+		return align(ALIGNMENT::BOTTOMLEFT);
 	}
 
 	WeakReference<Base, ConstrainSize> alignBottomRight() {
-		return align(ui::ALIGNMENT::BOTTOMRIGHT);
+		return align(ALIGNMENT::BOTTOMRIGHT);
 	}
 
 	WeakReference<Base, ConstrainSize> alignTopLeft() {
-		return align(ui::ALIGNMENT::TOPLEFT);
+		return align(ALIGNMENT::TOPLEFT);
 	}
 
 	WeakReference<Base, ConstrainSize> alignTopRight() {
-		return align(ui::ALIGNMENT::TOPRIGHT);
+		return align(ALIGNMENT::TOPRIGHT);
 	}
 
 	WeakReference<Base, FreeSize> free() {
@@ -470,7 +487,7 @@ namespace ui
 		return ptr;
 	}
 
-	WeakReference<Base, List> startList(ui::DIR dir) {
+	WeakReference<Base, List> startList(DIR dir) {
 		auto ref = Global::getManager().makeUniqueRef<List>(dir);
 		auto res = ref.as<List>();
 
@@ -489,32 +506,32 @@ namespace ui
 	}
 
 	WeakReference<Base, List> menu(std::string const& text, std::optional<SizeType> width, std::function<void()> f) {
-		auto list = startList(::DIR::RIGHT);
+		auto list = startList(DIR::RIGHT);
 
 		auto button = textButton(text);
 		if (width.has_value()) {
 			constrainWidth(width.value());
 		}
 		else {
-			constrainWidth({ ::SIZETYPE::FH, 10.0f });
+			constrainWidth({ SIZETYPE::FH, 10.0f });
 		}
 
 		auto proxy = makeEnd<AnchoredProxy>();
 
 		endList();
 
-		button.get()->setOnPress([proxy = proxy.get(), f](PlayerState& playerState, Base* self_)->CallBackBindResult
+		button.get()->setOnPress([proxy = proxy.get(), f](PlayerInfo& playerInfo, Base* self_)->CallBackBindResult
 		{
 			Global::push();
 
-			padTop({ ::SIZETYPE::PX, 3 });
-			padRight({ ::SIZETYPE::PX, 3 });
-			padLeft({ ::SIZETYPE::PX, 3 });
+			padTop({ SIZETYPE::PX, 3 });
+			padRight({ SIZETYPE::PX, 3 });
+			padLeft({ SIZETYPE::PX, 3 });
 			background(COLORS::DARKEN2(COLORS::UI::BACKGROUND));
 
 			f();
 
-			proxy->setProxy(Global::pop(), playerState.uiState);
+			proxy->setProxy(Global::pop(), playerInfo.uiState);
 
 			return BIND::RESULT::CONTINUE;
 		});
@@ -527,8 +544,8 @@ namespace ui
 	}
 
 	std::pair<WeakReference<Base, Button>, WeakReference<Base, TextDisplay>> textButton2(std::string const& text_) {
-		pad({ ::SIZETYPE::PX, 1 });
-		auto button = button();
+		pad({ SIZETYPE::PX, 1 });
+		auto button = ui::button();
 		alignCenter();
 		auto text = textDisplaySingle(text_);
 
@@ -544,17 +561,17 @@ namespace ui
 
 		ptr->mode = TEXTDISPLAY::MODE::INSERT;
 
-		Binds::TextEdit::clickSelect(ptr);
-		Binds::Base::activatable(ptr);
+		TEXTEDIT::clickSelect(ptr);
+		BASE::activatable(ptr);
 
-		Binds::TextEdit::left(ptr);
-		Binds::TextEdit::right(ptr);
+		TEXTEDIT::left(ptr);
+		TEXTEDIT::right(ptr);
 
-		Binds::TextEdit::inputNoLineBreaks(ptr);
+		TEXTEDIT::inputNoLineBreaks(ptr);
 
-		Binds::TextEdit::backspace(ptr);
-		Binds::TextEdit::del(ptr);
-		Binds::TextEdit::tab(ptr);
+		TEXTEDIT::backspace(ptr);
+		TEXTEDIT::del(ptr);
+		TEXTEDIT::tab(ptr);
 
 		makeEnd(std::move(res));
 		return ref;
@@ -570,27 +587,27 @@ namespace ui
 			ptr->text.addLine(line);
 		}
 
-		Binds::TextEdit::clickSelect(ptr);
-		Binds::Base::activatable(ptr);
+		TEXTEDIT::clickSelect(ptr);
+		BASE::activatable(ptr);
 
-		Binds::TextEdit::up(ptr);
-		Binds::TextEdit::down(ptr);
-		Binds::TextEdit::left(ptr);
-		Binds::TextEdit::right(ptr);
+		TEXTEDIT::up(ptr);
+		TEXTEDIT::down(ptr);
+		TEXTEDIT::left(ptr);
+		TEXTEDIT::right(ptr);
 
-		Binds::TextEdit::normalbinds(ptr);
+		TEXTEDIT::normalbinds(ptr);
 
-		Binds::TextEdit::normal(ptr);
-		Binds::TextEdit::insert(ptr);
+		TEXTEDIT::normal(ptr);
+		TEXTEDIT::insert(ptr);
 
-		Binds::TextEdit::input(ptr);
+		TEXTEDIT::input(ptr);
 
-		Binds::TextEdit::backspace(ptr);
-		Binds::TextEdit::del(ptr);
-		Binds::TextEdit::tab(ptr);
+		TEXTEDIT::backspace(ptr);
+		TEXTEDIT::del(ptr);
+		TEXTEDIT::tab(ptr);
 
-		Binds::TextEdit::viewDown(ptr);
-		Binds::TextEdit::viewUp(ptr);
+		TEXTEDIT::viewDown(ptr);
+		TEXTEDIT::viewUp(ptr);
 
 		makeEnd(std::move(ref));
 
@@ -599,7 +616,7 @@ namespace ui
 
 	WeakReference<Base, TextDisplay> textEditMulti(std::string const& text, bool lineWrap) {
 		std::vector<std::string> lines;
-		split(0, text, lines, '\n', true);
+		misc::split(0, text, lines, '\n', true, false);
 		return textEditMulti(lines, lineWrap);
 	}
 
@@ -624,8 +641,8 @@ namespace ui
 		auto ptr = ref.get();
 		ptr->text.setLines(text);
 
-		Binds::TextEdit::viewDown(ptr);
-		Binds::TextEdit::viewUp(ptr);
+		TEXTEDIT::viewDown(ptr);
+		TEXTEDIT::viewUp(ptr);
 
 		makeEnd(std::move(ref));
 

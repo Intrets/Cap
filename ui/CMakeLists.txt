@@ -12,7 +12,17 @@ set(MODULE_FILES
 	Proxy
 	TextDisplay
 	impl/Text
+	binds/Binds
 	SizeType
+	ConstrainSize
+	Button
+	Pad
+	Window
+	"List"
+	Empty
+	ColoredBackground
+	AnchoredProxy
+	Destructible
 )
 
 make_module(${MODULE_NAME} "${MODULE_FILES}")
@@ -24,4 +34,5 @@ target_link_libraries(${MODULE_NAME} PRIVATE
 	mem::mem
 	misc::misc
 	game::game
+	render::render
 )

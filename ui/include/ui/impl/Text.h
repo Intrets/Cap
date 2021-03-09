@@ -3,10 +3,20 @@
 #include <vector>
 #include <string>
 #include <optional>
+#include <map>
 #include <functional>
 
 #include <misc/Rectangle.h>
 #include <misc/UpdatedCache.h>
+#include <render/Enums.h>
+
+#include "Enums.h"
+
+namespace render
+{
+	enum class FONT;
+	struct RenderInfo;
+}
 
 namespace ui
 {
@@ -30,7 +40,7 @@ namespace ui
 		public:
 			ScreenRectangle lastScreenRectangle;
 			std::optional<WindowTextRenderInfo> cachedRenderInfo;
-			FONTS::FONT lastFont;
+			render::FONT lastFont;
 			bool lastWrap;
 
 			glm::vec2 getView();
@@ -42,9 +52,9 @@ namespace ui
 			std::optional<Rect> getCursorQuadScreen();
 
 			void invalidateCache();
-			void makeRenderInfo(ScreenRectangle screenRectangle, FONTS::FONT font, bool wrap, bool clickSupport);
+			void makeRenderInfo(ScreenRectangle screenRectangle, render::FONT font, bool wrap, bool clickSupport);
 
-			int32_t addRenderInfo(ScreenRectangle screenRectangle, RenderInfo& renderInfo, FONTS::FONT font, int32_t depth, bool wrap, int32_t tick, bool renderCursor, bool clickSupport, CURSOR::TYPE cursorType);
+			int32_t addRenderInfo(ScreenRectangle screenRectangle, render::RenderInfo& renderInfo, render::FONT font, int32_t depth, bool wrap, int32_t tick, bool renderCursor, bool clickSupport, CURSOR::TYPE cursorType);
 
 			bool deleteChar();
 			bool backspaceChar();

@@ -7,6 +7,7 @@ set(MODULE_FILES
 	NumHelpers
 	Misc
 	UpdatedCache
+	StringHelpers
 )
 
 make_module(${MODULE_NAME} "${MODULE_FILES}")
