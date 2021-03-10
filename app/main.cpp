@@ -23,4 +23,8 @@ int main() {
 	std::cout << "ref test: " << test2.get()->num << '\n';
 
 	testUI();
+
+	int tt;
+
+	std::cin >> tt;
 }

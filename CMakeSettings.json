@@ -11,7 +11,8 @@
       "buildCommandArgs": "",
       "ctestCommandArgs": "",
       "variables": [],
-      "intelliSenseMode": "windows-msvc-x64"
+      "intelliSenseMode": "windows-msvc-x64",
+      "cmakeExecutable": "C:/Program Files/CMake/bin/cmake.exe"
     }
   ]
 }

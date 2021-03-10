@@ -19,6 +19,15 @@ set(MODULE_FILES
 	GLEnabler
 )
 
+file(TIMESTAMP "./shaders/Blit.frag" FRAG "%Y-%m-%dT%H:%M:%SZ")
+file(WRITE "./shaders/Blit.frag.inc" ${FRAG})
+file(TIMESTAMP "./shaders/Blit.frag.inc" TIME)
+
+message(STATUS "timescamp ${FRAG}")
+message(STATUS ${CMAKE_VERSION})
+
+#message(STATUS ${FRAG})
+
 make_module(${MODULE_NAME} "${MODULE_FILES}")
 
 target_link_libraries(${MODULE_NAME} PRIVATE
