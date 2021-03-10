@@ -23,7 +23,7 @@ namespace ui
 		ConstrainSize(Handle self);
 		~ConstrainSize() = default;
 
-		virtual TYPE getType() override;
+		virtual TYPE getUIOType() override;
 
 		virtual ScreenRectangle updateSize(ScreenRectangle newScreenRectangle) override;
 	};

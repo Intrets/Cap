@@ -4,6 +4,11 @@
 #include "Enums.h"
 #include "impl/Text.h"
 
+namespace render
+{
+	struct RenderInfo;
+}
+
 namespace ui
 {
 	class TextDisplay : public BaseEnd
@@ -57,6 +62,6 @@ namespace ui
 		void deleteChar();
 
 		virtual ScreenRectangle updateSize(ScreenRectangle newScreenRectangle) override;
-		virtual int32_t addRenderInfo(GameState& gameState, RenderInfo& renderInfo, int32_t depth) override;
+		virtual int32_t addRenderInfo(GameState& gameState, render::RenderInfo& renderInfo, int32_t depth) override;
 	};
 }

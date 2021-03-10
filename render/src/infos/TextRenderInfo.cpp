@@ -1,6 +1,8 @@
 #include "infos/TextRenderInfo.h"
 
 #include <misc/Misc.h>
+#include <mem/Locator.h>
+#include <render/Fonts.h>
 
 #include "Enums.h"
 

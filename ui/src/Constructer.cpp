@@ -19,6 +19,9 @@
 #include "ColoredBackground.h"
 #include "Destructible.h"
 #include "AnchoredProxy.h"
+#include "Hideable.h"
+#include "Grid.h"
+#include "FreeSize.h"
 
 namespace ui
 {

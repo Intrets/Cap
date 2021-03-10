@@ -8,8 +8,19 @@ set(MODULE_FILES
 	Misc
 	UpdatedCache
 	StringHelpers
+	Option
+	FunctionHelpers
+	IOWrapped
+	PathManager
+	Enums
+	Log
 )
 
 make_module(${MODULE_NAME} "${MODULE_FILES}")
 
-target_link_libraries(${MODULE_NAME} PRIVATE GLM)
+target_link_libraries(${MODULE_NAME} PRIVATE
+	GLM
+	GLEW
+	mem::mem
+	render::render
+)

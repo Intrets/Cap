@@ -2,6 +2,11 @@
 
 #include <render/Enums.h>
 #include <render/infos/RenderInfo.h>
+#include <render/Colors.h>
+#include <render/Fonts.h>
+#include <misc/Misc.h>
+#include <misc/FunctionHelpers.h>
+#include <mem/Locator.h>
 
 namespace ui
 {
@@ -101,7 +106,7 @@ namespace ui
 			this->lastFont = font;
 			this->lastWrap = wrap;
 			this->lastClickSupport = clickSupport;
-			WindowTextRenderInfo textInfo(screenRectangle, wrap, clickSupport);
+			render::WindowTextRenderInfo textInfo(screenRectangle, wrap, clickSupport);
 
 			for (auto& line : lines) {
 				textInfo.addString(font, line);
@@ -418,7 +423,7 @@ namespace ui
 		}
 
 		void Text::moveView(glm::ivec2 p) {
-			int32_t pxHeight = Locator<Fonts>::ref().getFont(this->lastFont).charSize[0].y;
+			int32_t pxHeight = Locator<render::Fonts>::ref().getFont(this->lastFont).charSize[0].y;
 
 			if (this->lastScreenRectangle.getPixelSize().y == 0) {
 				return;

@@ -9,13 +9,25 @@ set(MODULE_FILES
 	infos/TextRenderInfo
 	infos/UIRenderInfo
 	Colors
+	Fonts
+	BufferWrappers
+	loaders/ShaderLoader
+	loaders/ModelLoader
+	loaders/TextureLoader
+	loaders/vboindexer
+	BlitRenderer
+	GLEnabler
 )
 
 make_module(${MODULE_NAME} "${MODULE_FILES}")
 
 target_link_libraries(${MODULE_NAME} PRIVATE
 	GLM
+	GLI
+	GLEW
+	GLFW3
 	ui::ui
 	misc::misc
 	render::render
+	mem::mem
 )

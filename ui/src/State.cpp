@@ -3,6 +3,8 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include <render/infos/RenderInfo.h>
+
 namespace ui
 {
 	CallBackBindResult State::runFrontBinds(PlayerInfo& playerInfo) {
@@ -180,7 +182,7 @@ namespace ui
 		this->cursorWorld = cam + this->cursorScreen * viewport;
 	}
 
-	void State::appendRenderInfo(GameState& gameState, RenderInfo& renderInfo) {
+	void State::appendRenderInfo(GameState& gameState, render::RenderInfo& renderInfo) {
 		int32_t depth = 10;
 		for (auto& UI : this->UIs) {
 			depth = UI.get()->addRenderInfo(gameState, renderInfo, depth);

@@ -1,16 +1,15 @@
 #pragma once
 
+#include "../Enums.h"
+
 #include <vector>
 #include <string>
 #include <optional>
 #include <map>
 #include <functional>
 
-#include <misc/Rectangle.h>
 #include <misc/UpdatedCache.h>
-#include <render/Enums.h>
-
-#include "Enums.h"
+#include <render/infos/TextRenderInfo.h>
 
 namespace render
 {
@@ -39,7 +38,7 @@ namespace ui
 
 		public:
 			ScreenRectangle lastScreenRectangle;
-			std::optional<WindowTextRenderInfo> cachedRenderInfo;
+			std::optional<render::WindowTextRenderInfo> cachedRenderInfo;
 			render::FONT lastFont;
 			bool lastWrap;
 

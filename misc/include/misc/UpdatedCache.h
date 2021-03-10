@@ -1,5 +1,7 @@
 #pragma once
 
+#include <misc/Misc.h>
+
 template <class T>
 class UpdatedCache
 {

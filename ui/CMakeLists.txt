@@ -23,6 +23,9 @@ set(MODULE_FILES
 	ColoredBackground
 	AnchoredProxy
 	Destructible
+	Hideable
+	Grid
+	FreeSize
 )
 
 make_module(${MODULE_NAME} "${MODULE_FILES}")

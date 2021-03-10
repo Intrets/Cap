@@ -20,7 +20,7 @@ namespace ui
 		this->selfHandle = self;
 	}
 
-	TYPE ConstrainSize::getType() {
+	TYPE ConstrainSize::getUIOType() {
 		return TYPE::CONSTRAIN_SIZE;
 	}
 

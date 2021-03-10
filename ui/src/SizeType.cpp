@@ -1,5 +1,8 @@
 #include "SizeType.h"
 
+#include <glm/glm.hpp>
+#include <misc/Option.h>
+
 namespace ui
 {
 	SizeType::SizeType(SIZETYPE t, int32_t val) {
@@ -19,10 +22,10 @@ namespace ui
 		auto pixelSize = screenRectangle.getPixelSize();
 		switch (this->type) {
 			case SIZETYPE::PX:
-				widthS = Option<OPTION::UI_SCALE, float>::getVal() * 2.0f * static_cast<float>(this->px) / pixelSize.x;
+				widthS = misc::Option<misc::OPTION::UI_SCALE, float>::getVal() * 2.0f * static_cast<float>(this->px) / pixelSize.x;
 				break;
 			case SIZETYPE::FH:
-				widthS = Option<OPTION::UI_SCALE, float>::getVal() * this->relative * 2.0f * 17.0f / pixelSize.x;
+				widthS = misc::Option<misc::OPTION::UI_SCALE, float>::getVal() * this->relative * 2.0f * 17.0f / pixelSize.x;
 				break;
 			case SIZETYPE::STATIC_PX:
 				widthS = 2 * static_cast<float>(this->px) / pixelSize.x;
@@ -51,10 +54,10 @@ namespace ui
 		auto pixelSize = screenRectangle.getPixelSize();
 		switch (type) {
 			case SIZETYPE::PX:
-				heightS = Option<OPTION::UI_SCALE, float>::getVal() * 2.0f * static_cast<float>(this->px) / pixelSize.y;
+				heightS = misc::Option<misc::OPTION::UI_SCALE, float>::getVal() * 2.0f * static_cast<float>(this->px) / pixelSize.y;
 				break;
 			case SIZETYPE::FH:
-				heightS = Option<OPTION::UI_SCALE, float>::getVal() * this->relative * 2.0f * 17.0f / pixelSize.y;
+				heightS = misc::Option<misc::OPTION::UI_SCALE, float>::getVal() * this->relative * 2.0f * 17.0f / pixelSize.y;
 				break;
 			case SIZETYPE::STATIC_PX:
 				heightS = 2 * static_cast<float>(this->px) / pixelSize.y;

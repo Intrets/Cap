@@ -6,6 +6,8 @@
 
 #include "Base.h"
 #include "Enums.h"
+#include "Proxy.h"
+#include "List.h"
 
 namespace ui
 {
@@ -20,9 +22,6 @@ namespace ui
 	class FreeSize;
 	class Pad;
 	class Destructible;
-
-	class Proxy;
-	class List;
 
 	struct ConstructerState
 	{
@@ -125,28 +124,28 @@ namespace ui
 		auto ref = ui::Global::getManager().makeUniqueRef<T>(std::forward<Args>(args)...);
 		auto ptr = ref.get();
 
-		UIO2::Global::getState()->addSingle(std::move(ref));
+		Global::getState()->addSingle(std::move(ref));
 
 		return ptr;
 	}
 
 	template<class T>
 	WeakReference<Base, T> makeEnd(UniqueReference<Base, T> ref) {
-		static_assert(std::is_base_of<UIOBase, T>::value);
+		static_assert(std::is_base_of<Base, T>::value);
 		auto res = ref.as<T>();
 
-		UIO2::Global::getState()->addEnd(std::move(ref));
+		Global::getState()->addEnd(std::move(ref));
 
 		return res;
 	}
 
 	template<class T, class... Args>
 	WeakReference<Base, T> makeEnd(Args&&... args) {
-		static_assert(std::is_base_of<UIOBase, T>::value);
-		auto ref = UIO2::Global::getManager().makeUniqueRef<T>(std::forward<Args>(args)...);
+		static_assert(std::is_base_of<Base, T>::value);
+		auto ref = Global::getManager().makeUniqueRef<T>(std::forward<Args>(args)...);
 		auto res = ref.as<T>();
 
-		UIO2::Global::getState()->addEnd(std::move(ref));
+		Global::getState()->addEnd(std::move(ref));
 
 		return res;
 	}
@@ -154,21 +153,21 @@ namespace ui
 	template<class T>
 	inline void ConstructerState::pop() {
 		assert(this->stack.size() > 1);
-		assert(this->stack.back().get()->getUIOType() == UIO::GET_TYPE<T>());
+		assert(this->stack.back().get()->getUIOType() == GET_TYPE<T>());
 
-		UIO2::ConstructerState::stack.pop_back();
+		ConstructerState::stack.pop_back();
 	}
 
 	template<class T>
 	WeakReference<Base, T> ConstructerState::addOrModifySingle() {
-		static_assert(UIO::GET_TYPE<T>() != UIO::TYPE::UNSPECIFIED);
+		static_assert(GET_TYPE<T>() != TYPE::UNSPECIFIED);
 
-		WeakReference<UIOBase, UIOBase> leaf;
+		WeakReference<Base, Base> leaf;
 
 		if (this->singlesLeaf.isNull() ||
-			this->singlesLeaf.get()->getUIOType() != UIO::GET_TYPE<T>()) {
+			this->singlesLeaf.get()->getUIOType() != GET_TYPE<T>()) {
 
-			this->addSingle(std::move(UIO2::Global::getManager().makeUniqueRef<T>()));
+			this->addSingle(std::move(Global::getManager().makeUniqueRef<T>()));
 		}
 
 		return this->singlesLeaf.as<T>();
@@ -176,7 +175,7 @@ namespace ui
 
 	template<class T>
 	inline WeakReference<Base, T> ConstructerState::addSingle() {
-		auto ref = UIO2::Global::getManager().makeUniqueRef<T>();
+		auto ref = Global::getManager().makeUniqueRef<T>();
 		auto res = ref.as<T>();
 
 		this->addSingle(std::move(ref));

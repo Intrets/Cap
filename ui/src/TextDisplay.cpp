@@ -2,6 +2,8 @@
 
 #include <game/player/PlayerInfo.h>
 #include <game/GameState.h>
+#include <render/infos/RenderInfo.h>
+#include <render/Colors.h>
 
 namespace ui
 {
@@ -136,7 +138,7 @@ namespace ui
 		if (this->shrinkToFit) {
 			// TODO: font customization/setting in text
 			if (!this->text.cachedRenderInfo.has_value()) {
-				this->text.makeRenderInfo(newScreenRectangle, FONTS::FONT::ROBOTO_12, this->lineWrap, this->clickSupport);
+				this->text.makeRenderInfo(newScreenRectangle, render::FONT::ROBOTO_12, this->lineWrap, this->clickSupport);
 			}
 
 			auto& renderInfo = this->text.cachedRenderInfo.value();
@@ -153,38 +155,37 @@ namespace ui
 		}
 	}
 
-	int32_t TextDisplay::addRenderInfo(GameState& gameState, RenderInfo& renderInfo, int32_t depth) {
-	// TODO: re-add
-	//	int32_t ticks = gameState.tick;
-	//	if (this->ticksSelected < 30) {
-	//		ticks = 0;
-	//	}
+	int32_t TextDisplay::addRenderInfo(GameState& gameState, render::RenderInfo& renderInfo, int32_t depth) {
+		int32_t ticks = gameState.tick;
+		if (this->ticksSelected < 30) {
+			ticks = 0;
+		}
 
-	//	CURSOR::TYPE cursorType = CURSOR::TYPE::BLOCK;
+		CURSOR::TYPE cursorType = CURSOR::TYPE::BLOCK;
 
-	//	switch (this->mode) {
-	//		case TEXTDISPLAY::MODE::INSERT:
-	//			cursorType = CURSOR::TYPE::LINE;
-	//			break;
-	//		case TEXTDISPLAY::MODE::NORMAL:
-	//			cursorType = CURSOR::TYPE::BLOCK;
-	//			break;
-	//		case TEXTDISPLAY::MODE::VISUAL:
-	//			cursorType = CURSOR::TYPE::BLOCK;
-	//			break;
-	//		default:
-	//			assert(0);
-	//			break;
-	//	}
+		switch (this->mode) {
+			case TEXTDISPLAY::MODE::INSERT:
+				cursorType = CURSOR::TYPE::LINE;
+				break;
+			case TEXTDISPLAY::MODE::NORMAL:
+				cursorType = CURSOR::TYPE::BLOCK;
+				break;
+			case TEXTDISPLAY::MODE::VISUAL:
+				cursorType = CURSOR::TYPE::BLOCK;
+				break;
+			default:
+				assert(0);
+				break;
+		}
 
-	//	depth = this->text.addRenderInfo(this->screenRectangle, renderInfo, FONTS::FONT::ROBOTO_12, depth, this->lineWrap, ticks, this->active, this->clickSupport, cursorType);
+		depth = this->text.addRenderInfo(this->screenRectangle, renderInfo, render::FONT::ROBOTO_12, depth, this->lineWrap, ticks, this->active, this->clickSupport, cursorType);
 
-	//	if (this->active) {
-	//		renderInfo.uiRenderInfo.addRectangle(this->screenRectangle.getBottomLeft(), this->screenRectangle.getTopRight(), COLORS::UI::FOCUSSED, depth++);
+		if (this->active) {
+			renderInfo.uiRenderInfo.addRectangle(this->screenRectangle.getBottomLeft(), this->screenRectangle.getTopRight(), COLORS::UI::FOCUSSED, depth++);
 
-	//		this->ticksSelected++;
-	//	}
+			this->ticksSelected++;
+		}
 
-	//	return depth;
+		return depth;
 	}
 }

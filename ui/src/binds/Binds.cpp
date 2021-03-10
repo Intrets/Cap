@@ -2,6 +2,8 @@
 
 #include <game/player/PlayerInfo.h>
 #include <misc/StringHelpers.h>
+#include <mem/Locator.h>
+#include <misc/Log.h>
 
 #include "ControlState.h"
 #include "Base.h"
@@ -63,7 +65,7 @@ namespace ui
 					auto maybeIndex = ptr->text.cachedRenderInfo.value().getIndex(click);
 					if (maybeIndex.has_value()) {
 						ptr->text.selectIndex(maybeIndex.value());
-						Locator<Log>::ref().putStreamLine(std::stringstream() << maybeIndex.value());
+						Locator<misc::Log>::ref().putStreamLine(std::stringstream() << maybeIndex.value());
 					}
 				}
 

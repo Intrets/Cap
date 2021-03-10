@@ -8,7 +8,7 @@ function(make_module MODULE_NAME MODULE_FILES)
 	add_library("${MODULE_NAME}::${MODULE_NAME}" ALIAS ${MODULE_NAME})
 
 	target_include_directories(${MODULE_NAME} PUBLIC ./include)
-	target_include_directories(${MODULE_NAME} PRIVATE "./include/${MODULE_NAME}")
+	target_include_directories(${MODULE_NAME} PUBLIC "./include/${MODULE_NAME}")
 
 	# target_link_libraries(${MODULE_NAME} PRIVATE ...)
 
