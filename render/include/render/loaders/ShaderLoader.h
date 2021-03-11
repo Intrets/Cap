@@ -4,5 +4,5 @@
 
 namespace render
 {
-	GLuint LoadShaders(const char* vertex_file_path, const char* fragment_file_path);
+	GLuint LoadShaders(const char* vertex_raw, const char* fragment_raw);
 }

@@ -343,3 +343,4 @@ healthchecksdb
 # 
 *.frag.inc
 *.vert.inc
+CMakeSettings.json

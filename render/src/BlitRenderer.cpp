@@ -2,6 +2,9 @@
 
 #include "GLEnabler.h"
 
+#include "../shaders/Blit.vert.inc"
+#include "../shaders/Blit.frag.inc"
+
 namespace render
 {
 	void BlitRenderer::render(std::vector<glm::vec4> const& uv, std::vector<glm::vec4> const& world, GLuint target, glm::ivec4 viewport, GLuint texture, std::optional<float> depth_, bool flipUVvertical, glm::vec2 offset_, std::optional<glm::vec4> maybeColor) {
@@ -64,7 +67,7 @@ namespace render
 	}
 
 	BlitRenderer::BlitRenderer() :
-		program("Blit", "BlitRenderer"),
+		program(Blit_vert, Blit_frag, "BlitRenderer"),
 		UVflip("UVflip", this->program),
 		texture_t("texture_t", this->program, 0),
 		depth("depth", this->program),

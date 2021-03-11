@@ -4,6 +4,7 @@
 
 #include <mem/Locator.h>
 #include <misc/PathManager.h>
+#include <render/loaders/ShaderLoader.h>
 
 namespace render
 {
@@ -21,7 +22,7 @@ namespace render
 		std::stringstream out;
 
 		for (auto& [index, program] : bwo::Program::refs) {
-			out << program->description << ". ID: " << index << " Shaders: " << program->fragmentShaderName << " " << program->vertexShaderName << "\n\n";
+			out << "ID: " << index << '\n' << program->description << "\n\n";
 		}
 
 		return out.str();
@@ -42,13 +43,9 @@ namespace render
 		glUseProgram(this->ID);
 	}
 
-	bwo::Program::Program(std::string const& name, std::string const& description) : Program(name, name, description) {
-	}
-
-	bwo::Program::Program(std::string const& vert, std::string const& frag, std::string const& description_) {
-		this->ID = Locator<misc::PathManager>::ref().LoadShadersP(vert + ".vert", frag + ".frag");
-		this->vertexShaderName = vert + ".vert";
-		this->fragmentShaderName = frag + ".frag";
+	bwo::Program::Program(char const* vert_raw, char const* frag_raw, std::string const& description_) {
+		//this->ID = Locator<misc::PathManager>::ref().LoadShadersP(vert + ".vert", frag + ".frag");
+		this->ID = LoadShaders(vert_raw, frag_raw);
 		this->description = description_;
 		bwo::Program::refs[this->ID] = this;
 	}

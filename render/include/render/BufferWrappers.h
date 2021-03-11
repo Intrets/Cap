@@ -185,8 +185,6 @@ namespace render
 
 			GLuint ID;
 
-			std::string vertexShaderName;
-			std::string fragmentShaderName;
 			std::string description;
 
 		public:
@@ -196,8 +194,7 @@ namespace render
 
 			void use();
 
-			Program(std::string const& name, std::string const& description);
-			Program(std::string const& vert, std::string const& frag, std::string const& description);
+			Program(char const* vert_raw, char const* frag_raw, std::string const& description);
 			~Program();
 
 			NOCOPYMOVE(Program);

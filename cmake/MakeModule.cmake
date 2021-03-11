@@ -1,4 +1,4 @@
-function(make_module_extra MODULE_NAME MODULE_FILES EXTRA_FILES)
+function(make_module MODULE_NAME MODULE_FILES)
 	foreach(FILE ${MODULE_FILES})
 		list(APPEND SOURCES_LIST "src/${FILE}.cpp")
 		list(APPEND HEADERS_LIST "${CMAKE_CURRENT_SOURCE_DIR}/include/${MODULE_NAME}/${FILE}.h")
@@ -10,8 +10,6 @@ function(make_module_extra MODULE_NAME MODULE_FILES EXTRA_FILES)
 	target_include_directories(${MODULE_NAME} PUBLIC ./include)
 	target_include_directories(${MODULE_NAME} PUBLIC "./include/${MODULE_NAME}")
 
-	# target_link_libraries(${MODULE_NAME} PRIVATE ...)
-
 	target_compile_features(${MODULE_NAME} PUBLIC cxx_std_17)
 
 	source_group(
@@ -19,8 +17,4 @@ function(make_module_extra MODULE_NAME MODULE_FILES EXTRA_FILES)
 		PREFIX "Header Files"
 		FILES ${HEADERS_LIST}
 	)
-endfunction()
-
-function(make_module MODULE_NAME MODULE_FILES)
-	make_module_extra(${MODULE_NAME} ${MODULE_FILES} "")
 endfunction()
