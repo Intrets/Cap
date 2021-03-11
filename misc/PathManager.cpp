@@ -2,11 +2,10 @@
 
 #include <fstream>
 
-#include "loaders/TextureLoader.h"
-#include "loaders/ModelLoader.h"
-#include "loaders/ShaderLoader.h"
-
-#include "BufferWrappers.h"
+#include <render/loaders/TextureLoader.h>
+#include <render/loaders/ModelLoader.h>
+#include <render/loaders/ShaderLoader.h>
+#include <render/BufferWrappers.h>
 
 namespace misc
 {
