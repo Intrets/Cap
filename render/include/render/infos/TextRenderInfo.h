@@ -1,13 +1,14 @@
 #pragma once
 
-#include <misc/Rectangle.h>
 #include <glm/glm.hpp>
-#include <render/Enums.h>
-
 #include <vector>
 #include <map>
 #include <optional>
 #include <string>
+
+#include <misc/Rectangle.h>
+
+#include "../Fonts.h"
 
 namespace render
 {

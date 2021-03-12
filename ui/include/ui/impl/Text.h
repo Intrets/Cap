@@ -9,11 +9,13 @@
 #include <functional>
 
 #include <misc/UpdatedCache.h>
+#include <misc/Rectangle.h>
+
 #include <render/infos/TextRenderInfo.h>
+#include <render/Enums.h>
 
 namespace render
 {
-	enum class FONT;
 	struct RenderInfo;
 }
 

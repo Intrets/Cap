@@ -2,10 +2,13 @@
 
 #include <mem/ReferenceManager.h>
 
-class GameState
+namespace game
 {
-private:
+	class GameState
+	{
+	private:
 
-public:
-	int32_t tick = 0;
-};
+	public:
+		int32_t tick = 0;
+	};
+}

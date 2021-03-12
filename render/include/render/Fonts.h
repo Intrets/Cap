@@ -1,12 +1,13 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <render/BufferWrappers.h>
 
 #include <string>
 #include <array>
 
 #include "Enums.h"
-#include "BufferWrappers.h"
+#include "Fonts.h"
 
 namespace render
 {
@@ -26,8 +27,8 @@ namespace render
 		FontInfo loadMonospacedFont(std::string name, glm::ivec2 charDim, glm::ivec2 gridDim);
 
 	public:
-		bwo::FrameBuffer buffer;
-		bwo::Texture2D fontAtlas;
+		render::bwo::FrameBuffer buffer;
+		render::bwo::Texture2D fontAtlas;
 
 		std::array<FontInfo, static_cast<int32_t>(FONT::FONT_MAX)> fontInfos;
 

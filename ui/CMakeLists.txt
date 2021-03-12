@@ -3,7 +3,6 @@ include("${PROJECT_SOURCE_DIR}/cmake/MakeModule.cmake")
 set(MODULE_NAME ui)
 
 set(MODULE_FILES
-	ui
 	Base
 	ControlState
 	Enums
@@ -34,8 +33,8 @@ target_link_libraries(${MODULE_NAME} PRIVATE
 	GLM
 	GLEW
 	GLFW3
-	mem::mem
-	misc::misc
-	game::game
-	render::render
+	mem
+	misc
+	game
+	render
 )

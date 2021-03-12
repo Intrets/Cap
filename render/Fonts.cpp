@@ -2,13 +2,12 @@
 
 #include <mem/Locator.h>
 #include <misc/PathManager.h>
-
-#include "BlitRenderer.h"
+#include <render/BlitRenderer.h>
 
 namespace render
 {
 	FontInfo Fonts::loadMonospacedFont(std::string name, glm::ivec2 charDim, glm::ivec2 gridDim) {
-		bwo::Texture tex;
+		render::bwo::Texture tex;
 		tex.ID = Locator<misc::PathManager>::ref().LoadFont(name);
 		std::vector<glm::vec4> uvs;
 		std::vector<glm::vec4> worlds;
@@ -62,7 +61,7 @@ namespace render
 			}
 		}
 
-		Locator<BlitRenderer>::ref().render(
+		Locator<render::BlitRenderer>::ref().render(
 			uvs,
 			worlds,
 			this->buffer.ID,
@@ -81,7 +80,7 @@ namespace render
 	}
 
 	Fonts::Fonts() :
-		fontAtlas(bwo::Texture2DHelper::makeNoFiltering(glm::ivec2(256))) {
+		fontAtlas(render::bwo::Texture2DHelper::makeNoFiltering(glm::ivec2(256))) {
 
 		this->buffer.bindTexture(GL_COLOR_ATTACHMENT0, this->fontAtlas, 0);
 

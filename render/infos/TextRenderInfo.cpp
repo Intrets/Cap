@@ -1,10 +1,9 @@
 #include "infos/TextRenderInfo.h"
 
-#include <misc/Misc.h>
 #include <mem/Locator.h>
-#include <render/Fonts.h>
 
 #include "Enums.h"
+#include "Fonts.h"
 
 namespace render
 {
@@ -101,5 +100,4 @@ namespace render
 		}
 		return std::nullopt;
 	}
-
 }

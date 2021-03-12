@@ -5,7 +5,6 @@ function(make_module MODULE_NAME MODULE_FILES)
 	endforeach()
 
 	add_library(${MODULE_NAME} ${SOURCES_LIST} ${HEADERS_LIST})
-	add_library("${MODULE_NAME}::${MODULE_NAME}" ALIAS ${MODULE_NAME})
 
 	target_include_directories(${MODULE_NAME} PUBLIC include)
 	target_include_directories(${MODULE_NAME} PRIVATE include/${MODULE_NAME})

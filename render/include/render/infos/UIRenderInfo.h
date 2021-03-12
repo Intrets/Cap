@@ -3,7 +3,7 @@
 #include <glm/glm.hpp>
 #include <vector>
 
-class Rect;
+struct Rect;
 
 namespace render
 {

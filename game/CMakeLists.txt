@@ -5,10 +5,12 @@ set(MODULE_NAME game)
 set(MODULE_FILES
 	GameState
 	player/PlayerInfo
+	Renderer
 )
 
 make_module(${MODULE_NAME} "${MODULE_FILES}")
 
 target_link_libraries(${MODULE_NAME} PRIVATE
-	mem::mem
+	mem
+	render
 )

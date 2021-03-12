@@ -1,12 +1,14 @@
 #include "impl/Text.h"
 
-#include <render/Enums.h>
 #include <render/infos/RenderInfo.h>
+#include <render/Enums.h>
 #include <render/Colors.h>
 #include <render/Fonts.h>
 #include <misc/Misc.h>
 #include <misc/FunctionHelpers.h>
 #include <mem/Locator.h>
+
+#include "impl/Text.h"
 
 namespace ui
 {

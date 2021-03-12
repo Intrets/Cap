@@ -1,7 +1,11 @@
 #include "Hideable.h"
 
-#include <render/infos/RenderInfo.h>
 #include <game/player/PlayerInfo.h>
+
+namespace render
+{
+	RenderInfo;
+}
 
 namespace ui
 {

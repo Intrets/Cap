@@ -4,12 +4,7 @@ set(MODULE_NAME render)
 
 set(MODULE_FILES
 	Enums
-	infos/RenderInfo
-	infos/CameraInfo
-	infos/TextRenderInfo
-	infos/UIRenderInfo
 	Colors
-	Fonts
 	BufferWrappers
 	loaders/ShaderLoader
 	loaders/ModelLoader
@@ -17,6 +12,10 @@ set(MODULE_FILES
 	loaders/vboindexer
 	BlitRenderer
 	GLEnabler
+	infos/RenderInfo
+	infos/TextRenderInfo
+	infos/UIRenderInfo
+	Fonts
 )
 
 set(SHADER_FILES
@@ -38,13 +37,14 @@ make_module(${MODULE_NAME} "${MODULE_FILES}")
 
 target_include_directories(${MODULE_NAME} PRIVATE "./shaders")
 
-target_link_libraries(${MODULE_NAME} PRIVATE
+target_link_libraries(${MODULE_NAME} PUBLIC
 	GLM
-	GLI
 	GLEW
+	misc
+)
+
+target_link_libraries(${MODULE_NAME} PRIVATE
+	GLI
 	GLFW3
-	ui::ui
-	misc::misc
-	render::render
-	mem::mem
+	mem
 )
