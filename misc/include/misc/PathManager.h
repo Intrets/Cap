@@ -41,7 +41,7 @@ namespace misc
 		bool openSave(std::ifstream& file, std::string name);
 		bool openSave(std::ofstream& file, std::string name);
 
-		PathManager();
+		PathManager(std::string const& root);
 		~PathManager();
 	};
 }

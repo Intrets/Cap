@@ -1,7 +1,9 @@
 #pragma once
 
+#include <string>
+
 struct GLFWwindow;
 
-int initGLFW(GLFWwindow* window, bool OPENGL_DEBUG);
+bool initGLFW(GLFWwindow*& window, bool OPENGL_DEBUG);
 
-void initManagers();
+void initManagers(std::string const& resourceRootPath);

@@ -2,6 +2,7 @@
 
 #include "../infos/TextRenderInfo.h"
 #include "../infos/UIRenderInfo.h"
+#include "../infos/CameraInfo.h"
 
 namespace render
 {
@@ -9,5 +10,6 @@ namespace render
 	{
 		TextRenderInfo textRenderInfo;
 		UIRenderInfo uiRenderInfo;
+		CameraInfo cameraInfo;
 	};
 }

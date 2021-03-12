@@ -1,6 +1,7 @@
 #include "PathManager.h"
 
 #include <fstream>
+#include <string>
 
 #include <render/loaders/TextureLoader.h>
 #include <render/loaders/ModelLoader.h>
@@ -42,13 +43,12 @@ namespace misc
 		return file.is_open();
 	}
 
-	PathManager::PathManager() {
-		const std::string r = "C:/Users/Intrets/source/Game/Game/resources/";
-		this->paths[RESOURCE_PATH::CONFIG] = r + "config/";
-		this->paths[RESOURCE_PATH::GRAPHICS] = r + "graphics/";
-		this->paths[RESOURCE_PATH::SAVE] = r + "saves/";
-		this->files[RESOURCE_FILE::OPTIONS] = r + "config/options.txt";
-		this->paths[RESOURCE_PATH::FONTS] = r + "graphics/fonts/";
+	PathManager::PathManager(std::string const& root) {
+		this->paths[RESOURCE_PATH::CONFIG] = root + "config/";
+		this->paths[RESOURCE_PATH::GRAPHICS] = root + "graphics/";
+		this->paths[RESOURCE_PATH::SAVE] = root + "saves/";
+		this->files[RESOURCE_FILE::OPTIONS] = root + "config/options.txt";
+		this->paths[RESOURCE_PATH::FONTS] = root + "graphics/fonts/";
 	}
 
 	PathManager::~PathManager() {

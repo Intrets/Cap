@@ -11,15 +11,20 @@ set(MODULE_FILES
 	loaders/TextureLoader
 	loaders/vboindexer
 	BlitRenderer
+	Renderer
+	UIBackgroundRenderer
+	TextRenderer
 	GLEnabler
 	infos/RenderInfo
 	infos/TextRenderInfo
 	infos/UIRenderInfo
+	infos/CameraInfo
 	Fonts
 )
 
 set(SHADER_FILES
 	Blit
+	UIBackground
 )
 
 foreach(SHADER ${SHADER_FILES})

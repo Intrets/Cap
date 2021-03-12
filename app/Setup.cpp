@@ -121,7 +121,7 @@ MessageCallback(GLenum source,
 	);
 }
 
-int initGLFW(GLFWwindow* window, bool OPENGL_DEBUG) {
+bool initGLFW(GLFWwindow*& window, bool OPENGL_DEBUG) {
 	if (OPENGL_DEBUG) {
 		glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
 	}
@@ -131,7 +131,7 @@ int initGLFW(GLFWwindow* window, bool OPENGL_DEBUG) {
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	if (!glfwInit()) {
-		return -1;
+		return false;
 	}
 
 	window = glfwCreateWindow(1800, 1000, "Bam", NULL, NULL);
@@ -139,7 +139,7 @@ int initGLFW(GLFWwindow* window, bool OPENGL_DEBUG) {
 	glfwSetWindowPos(window, 80, 40);
 	if (!window) {
 		glfwTerminate();
-		return -1;
+		return false;
 	}
 
 	glfwMakeContextCurrent(window);
@@ -147,7 +147,7 @@ int initGLFW(GLFWwindow* window, bool OPENGL_DEBUG) {
 
 	if (glewInit() != GLEW_OK) {
 		fprintf(stderr, "Failed to initialize GLEW\n");
-		return -1;
+		return false;
 	}
 
 	printf("OpenGL version supported by this platform (%s): \n", glGetString(GL_VERSION));
@@ -177,11 +177,11 @@ int initGLFW(GLFWwindow* window, bool OPENGL_DEBUG) {
 
 	glfwMaximizeWindow(window);
 
-	return 1;
+	return true;
 }
 
-void initManagers() {
-	Locator<misc::PathManager>::provide(new misc::PathManager());
+void initManagers(std::string const& resourceRootPath) {
+	Locator<misc::PathManager>::provide(new misc::PathManager(resourceRootPath));
 	Locator<misc::OptionManager>::provide(new misc::OptionManager());
 
 	//Locator<Timer>::provide(new Timer());

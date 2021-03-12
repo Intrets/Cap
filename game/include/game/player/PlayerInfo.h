@@ -2,17 +2,17 @@
 
 class Player;
 class GameState;
-class ControlState;
+
 namespace ui
 {
 	class State;
+	class ControlState;
 }
 
 struct PlayerInfo
 {
 	Player& player;
 	GameState& gameState;
-	ControlState& controlState;
+	ui::ControlState& controlState;
 	ui::State& uiState;
-
 };

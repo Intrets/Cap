@@ -30,7 +30,15 @@ int main(int argc, char* argv[]) {
 		return 0;
 	}
 
-	initGLFW(window, OPENGL_DEBUG);
-	initManagers();
+	if (!initGLFW(window, OPENGL_DEBUG)) {
+		std::cerr << "Fatal error: initGLFW failed.\n";
+		glfwTerminate();
+		return 0;
+	}
+
+	initManagers(std::filesystem::absolute(resourcesPath).string());
+
 	mainLoop(window);
+
+	glfwTerminate();
 }
