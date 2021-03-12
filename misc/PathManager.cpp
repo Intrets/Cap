@@ -43,7 +43,7 @@ namespace misc
 	}
 
 	PathManager::PathManager() {
-		std::string r = "C:/Users/Intrets/source/Game/Game/resources/";
+		const std::string r = "C:/Users/Intrets/source/Game/Game/resources/";
 		this->paths[RESOURCE_PATH::CONFIG] = r + "config/";
 		this->paths[RESOURCE_PATH::GRAPHICS] = r + "graphics/";
 		this->paths[RESOURCE_PATH::SAVE] = r + "saves/";
