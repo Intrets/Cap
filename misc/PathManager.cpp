@@ -44,11 +44,11 @@ namespace misc
 	}
 
 	PathManager::PathManager(std::string const& root) {
-		this->paths[RESOURCE_PATH::CONFIG] = root + "config/";
-		this->paths[RESOURCE_PATH::GRAPHICS] = root + "graphics/";
-		this->paths[RESOURCE_PATH::SAVE] = root + "saves/";
-		this->files[RESOURCE_FILE::OPTIONS] = root + "config/options.txt";
-		this->paths[RESOURCE_PATH::FONTS] = root + "graphics/fonts/";
+		this->paths[RESOURCE_PATH::CONFIG] = root + "/config/";
+		this->paths[RESOURCE_PATH::GRAPHICS] = root + "/graphics/";
+		this->paths[RESOURCE_PATH::SAVE] = root + "/saves/";
+		this->files[RESOURCE_FILE::OPTIONS] = root + "/config/options.txt";
+		this->paths[RESOURCE_PATH::FONTS] = root + "/graphics/fonts/";
 	}
 
 	PathManager::~PathManager() {

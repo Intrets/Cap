@@ -14,6 +14,6 @@ namespace ui
 		ColoredBackground(Handle self);
 		~ColoredBackground() = default;
 
-		virtual int32_t addRenderInfo(GameState& gameState, render::RenderInfo& renderInfo, int32_t depth) override;
+		virtual int32_t addRenderInfo(game::GameState& gameState, render::RenderInfo& renderInfo, int32_t depth) override;
 	};
 }

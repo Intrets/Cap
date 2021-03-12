@@ -17,6 +17,11 @@ namespace render
 	struct RenderInfo;
 }
 
+namespace game
+{
+	class GameState;
+}
+
 namespace ui
 {
 	class State
@@ -48,7 +53,7 @@ namespace ui
 
 		bool updateSize(GLFWwindow* window);
 		void updateCursor(GLFWwindow* window, glm::vec2 cam);
-		void appendRenderInfo(GameState& gameState, render::RenderInfo& renderInfo);
+		void appendRenderInfo(game::GameState& gameState, render::RenderInfo& renderInfo);
 
 		void addUI(UniqueReference<Base, Base> ref);
 

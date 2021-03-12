@@ -100,7 +100,7 @@ namespace ui
 		}
 	}
 
-	int32_t Hideable::addRenderInfo(GameState& gameState, render::RenderInfo& renderInfo, int32_t depth) {
+	int32_t Hideable::addRenderInfo(game::GameState& gameState, render::RenderInfo& renderInfo, int32_t depth) {
 		if (!this->hidden) {
 			return this->BaseSingle::addRenderInfo(gameState, renderInfo, depth);
 		}

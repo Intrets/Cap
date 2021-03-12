@@ -155,10 +155,8 @@ namespace ui
 		}
 	}
 
-	int32_t TextDisplay::addRenderInfo(GameState& gameState, render::RenderInfo& renderInfo, int32_t depth) {
-		//int32_t ticks = gameState.tick;
-		assert(0);
-		int32_t ticks = 0;
+	int32_t TextDisplay::addRenderInfo(game::GameState& gameState, render::RenderInfo& renderInfo, int32_t depth) {
+		int32_t ticks = gameState.tick;
 		if (this->ticksSelected < 30) {
 			ticks = 0;
 		}

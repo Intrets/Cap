@@ -9,7 +9,7 @@ namespace ui
 		this->selfHandle = self;
 	}
 
-	int32_t Window::addRenderInfo(GameState& gameState, render::RenderInfo& renderInfo, int32_t depth) {
+	int32_t Window::addRenderInfo(game::GameState& gameState, render::RenderInfo& renderInfo, int32_t depth) {
 		glm::vec2 px = glm::vec2(1.0f) / glm::vec2(this->screenRectangle.getPixelSize());
 		if (this->minimized) {
 			depth = this->topBar.get()->addRenderInfo(gameState, renderInfo, depth++);

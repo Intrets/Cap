@@ -19,7 +19,7 @@ namespace ui
 	void Empty::setScreenPixels(glm::ivec2 px) {
 	}
 
-	int32_t Empty::addRenderInfo(GameState& gameState, render::RenderInfo& renderInfo, int32_t depth) {
+	int32_t Empty::addRenderInfo(game::GameState& gameState, render::RenderInfo& renderInfo, int32_t depth) {
 		return depth;
 	}
 }

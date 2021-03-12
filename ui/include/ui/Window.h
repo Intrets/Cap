@@ -26,7 +26,7 @@ namespace ui
 		Window(Handle self);
 		virtual ~Window() = default;
 
-		virtual int32_t addRenderInfo(GameState& gameState, render::RenderInfo& renderInfo, int32_t depth) override;
+		virtual int32_t addRenderInfo(game::GameState& gameState, render::RenderInfo& renderInfo, int32_t depth) override;
 
 		virtual CallBackBindResult runOnHoverBinds(PlayerInfo& playerInfo) override;
 		virtual CallBackBindResult runFocussedBinds(PlayerInfo& playerInfo) override;

@@ -83,7 +83,7 @@ namespace ui
 		return this->screenRectangle;
 	}
 
-	int32_t AnchoredProxy::addRenderInfo(GameState& gameState, render::RenderInfo& renderInfo, int32_t depth) {
+	int32_t AnchoredProxy::addRenderInfo(game::GameState& gameState, render::RenderInfo& renderInfo, int32_t depth) {
 		return depth;
 	}
 

@@ -1,7 +1,11 @@
 #pragma once
 
 class Player;
-class GameState;
+
+namespace game
+{
+	class GameState;
+}
 
 namespace ui
 {
@@ -11,8 +15,8 @@ namespace ui
 
 struct PlayerInfo
 {
-	Player& player;
-	GameState& gameState;
+	// Player& player;
+	game::GameState& gameState;
 	ui::ControlState& controlState;
 	ui::State& uiState;
 };

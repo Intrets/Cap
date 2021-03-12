@@ -20,7 +20,7 @@ namespace ui
 		void setProxy(UniqueReference<Base, Base> ref, State& uiState);
 
 		virtual ScreenRectangle updateSize(ScreenRectangle newScreenRectangle) override;
-		virtual int32_t addRenderInfo(GameState& gameState, render::RenderInfo& renderInfo, int32_t depth) override;
+		virtual int32_t addRenderInfo(game::GameState& gameState, render::RenderInfo& renderInfo, int32_t depth) override;
 
 		AnchoredProxy(Handle self);
 		virtual ~AnchoredProxy();

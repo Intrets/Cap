@@ -40,7 +40,7 @@ namespace ui
 		return newScreenRectangle;
 	}
 
-	int32_t Grid::addRenderInfo(GameState& gameState, render::RenderInfo& renderInfo, int32_t depth) {
+	int32_t Grid::addRenderInfo(game::GameState& gameState, render::RenderInfo& renderInfo, int32_t depth) {
 		for (auto& element : this->elements) {
 			auto rec = element.get()->getScreenRectangle();
 		}

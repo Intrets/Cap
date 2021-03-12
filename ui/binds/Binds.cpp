@@ -47,7 +47,7 @@ namespace ui
 		}
 	}
 
-	namespace TextEdit
+	namespace TEXTEDIT
 	{
 		void clickSelect(TextDisplay* ptr) {
 			ptr->setClickSupport(true);

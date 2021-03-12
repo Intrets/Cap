@@ -2,6 +2,8 @@
 
 #include <GLFW/glfw3.h>
 
+#include <iostream>
+
 #pragma warning(push,0)
 #include <gli.hpp>
 #pragma warning(pop)
@@ -13,6 +15,7 @@ namespace render
 	GLuint loadTexture(const std::string Filename) {
 		gli::texture Texture = gli::load(Filename);
 		if (Texture.empty()) {
+			std::cerr << "Failed to load file: " << Filename << '\n';
 			return 0;
 		}
 

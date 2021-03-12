@@ -9,6 +9,8 @@
 #include <misc/Option.h>
 #include <misc/PathManager.h>
 #include <mem/Locator.h>
+#include <render/Fonts.h>
+#include <render/BlitRenderer.h>
 
 static void GLAPIENTRY
 MessageCallback(GLenum source,
@@ -183,6 +185,10 @@ bool initGLFW(GLFWwindow*& window, bool OPENGL_DEBUG) {
 void initManagers(std::string const& resourceRootPath) {
 	Locator<misc::PathManager>::provide(new misc::PathManager(resourceRootPath));
 	Locator<misc::OptionManager>::provide(new misc::OptionManager());
+
+	Locator<render::BlitRenderer>::provide(new render::BlitRenderer());
+
+	Locator<render::Fonts>::provide(new render::Fonts());
 
 	//Locator<Timer>::provide(new Timer());
 	Locator<misc::Log>::provide(new misc::Log());

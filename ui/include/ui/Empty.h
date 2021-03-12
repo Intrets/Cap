@@ -15,6 +15,6 @@ namespace ui
 		virtual void addElement(UniqueReference<Base, Base> element) override;
 		virtual void translate(glm::vec2 p) override;
 		virtual void setScreenPixels(glm::ivec2 px) override;
-		virtual int32_t addRenderInfo(GameState& gameState, render::RenderInfo& renderInfo, int32_t depth) override;
+		virtual int32_t addRenderInfo(game::GameState& gameState, render::RenderInfo& renderInfo, int32_t depth) override;
 	};
 }

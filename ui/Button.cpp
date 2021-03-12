@@ -99,7 +99,7 @@ namespace ui
 		return this->screenRectangle;
 	}
 
-	int32_t Button::addRenderInfo(GameState& gameState, render::RenderInfo& renderInfo, int32_t depth) {
+	int32_t Button::addRenderInfo(game::GameState& gameState, render::RenderInfo& renderInfo, int32_t depth) {
 		glm::vec4 c = this->color;
 		if (down) {
 			c = COLORS::DARKEN(c);

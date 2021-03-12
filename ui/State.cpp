@@ -4,6 +4,10 @@
 #include <GLFW/glfw3.h>
 
 #include <render/infos/RenderInfo.h>
+#include <misc/Option.h>
+
+#include "Constructer.h"
+#include "SizeType.h"
 
 namespace ui
 {
@@ -175,14 +179,14 @@ namespace ui
 
 		float ratio = frameSizeX / static_cast<float>(frameSizeY);
 		glm::vec2 viewport(ratio, 1.0f);
-		// TODO: re-add
-		// viewport *= Option<OPTION::CL_VIEWPORTSCALE, float>::getVal();
+
+		viewport *= misc::Option<misc::OPTION::CL_VIEWPORTSCALE, float>::getVal();
 
 		this->cursorScreen = glm::clamp(glm::vec2(x, y), -1.0f, 1.0f);
 		this->cursorWorld = cam + this->cursorScreen * viewport;
 	}
 
-	void State::appendRenderInfo(GameState& gameState, render::RenderInfo& renderInfo) {
+	void State::appendRenderInfo(game::GameState& gameState, render::RenderInfo& renderInfo) {
 		int32_t depth = 10;
 		for (auto& UI : this->UIs) {
 			depth = UI.get()->addRenderInfo(gameState, renderInfo, depth);
@@ -281,6 +285,24 @@ namespace ui
 	}
 
 	void State::init() {
+
+		// Test window
+		{
+			Global::push();
+
+			hideable();
+			window("Inventory", { {0.5f - 0.04f, -0.1f - 0.04f}, {1.0f - 0.04f, 1.0f - 0.04f} },
+				   WINDOW::TYPE::MINIMISE |
+				   WINDOW::TYPE::MOVE |
+				   WINDOW::TYPE::RESIZE |
+				   WINDOW::TYPE::HIDE);
+
+			constrainHeight({ SIZETYPE::FH, 1.2f });
+			textButton("test button");
+
+			this->addUI(Global::pop());
+		}
+
 		//// Inventory
 		//{
 		//	UIO2::Global::push();

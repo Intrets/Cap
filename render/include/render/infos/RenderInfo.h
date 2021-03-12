@@ -8,8 +8,9 @@ namespace render
 {
 	struct RenderInfo
 	{
+		glm::ivec2 frameSize;
+		CameraInfo cameraInfo;
 		TextRenderInfo textRenderInfo;
 		UIRenderInfo uiRenderInfo;
-		CameraInfo cameraInfo;
 	};
 }
