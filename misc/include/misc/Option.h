@@ -159,6 +159,11 @@ namespace misc
 		}
 	}
 
+	template<typename T>
+	inline std::string OptionValue<T>::type() {
+		return "type info not implemented";
+	}
+
 	//template<>
 	//inline std::string OptionValue<int32_t>::type() {
 	//	return "int";

@@ -7,5 +7,4 @@
 
 void mainLoop(GLFWwindow* window) {
 	game::GameState gameState;
-
 }

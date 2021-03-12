@@ -344,3 +344,7 @@ healthchecksdb
 *.frag.inc
 *.vert.inc
 CMakeSettings.json
+resources/saves/*
+!resources/saves/README
+resources/config/*
+!resources/config/README

@@ -5,6 +5,11 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include <misc/Log.h>
+#include <misc/Option.h>
+#include <misc/PathManager.h>
+#include <mem/Locator.h>
+
 static void GLAPIENTRY
 MessageCallback(GLenum source,
 				GLenum type,
@@ -173,4 +178,12 @@ int initGLFW(GLFWwindow* window, bool OPENGL_DEBUG) {
 	glfwMaximizeWindow(window);
 
 	return 1;
+}
+
+void initManagers() {
+	Locator<misc::PathManager>::provide(new misc::PathManager());
+	Locator<misc::OptionManager>::provide(new misc::OptionManager());
+
+	//Locator<Timer>::provide(new Timer());
+	Locator<misc::Log>::provide(new misc::Log());
 }

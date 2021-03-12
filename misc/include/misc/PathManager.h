@@ -28,29 +28,18 @@ namespace misc
 		{
 			CONFIG,
 			GRAPHICS,
-			SHADERS,
 			SAVE,
 			FONTS,
-			BLOCKDATA,
-			LUA,
 		};
 
 		GLuint LoadFont(std::string name);
 		GLuint LoadTextureP(std::string name);
-		render::bwo::Texture2D LoadTexture2DP(std::string name);
-		GLuint LoadShadersP(std::string vertex, std::string fragment);
-		GLuint LoadShadersP(std::string name);
 
 		void LoadModelP(std::string& path, GLuint& vertexbuffer, GLuint& uvbuffer, GLuint& normalbuffer, GLuint& indexbuffer, int32_t& indexsize);
 		bool openFile(std::ifstream& file, RESOURCE_FILE t);
 		bool openFile(std::ofstream& file, RESOURCE_FILE t);
 		bool openSave(std::ifstream& file, std::string name);
 		bool openSave(std::ofstream& file, std::string name);
-
-		bool openLUA(std::ifstream& file, std::string name);
-		bool openLUA(std::ofstream& file, std::string name);
-
-		bool openBlockData(std::ifstream& file);
 
 		PathManager();
 		~PathManager();
