@@ -133,6 +133,7 @@ namespace render
 	bwo::Texture2D load2DTexture(std::string const Filename) {
 		gli::texture Texture = gli::load(Filename);
 		if (Texture.empty()) {
+			std::cerr << "Failed to load file: " << Filename << '\n';
 			return 0;
 		}
 

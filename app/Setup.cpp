@@ -5,6 +5,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include <misc/Timer.h>
 #include <misc/Log.h>
 #include <misc/Option.h>
 #include <misc/PathManager.h>
@@ -190,6 +191,6 @@ void initManagers(std::string const& resourceRootPath) {
 
 	Locator<render::Fonts>::provide(new render::Fonts());
 
-	//Locator<Timer>::provide(new Timer());
+	Locator<misc::Timer>::provide(new misc::Timer());
 	Locator<misc::Log>::provide(new misc::Log());
 }

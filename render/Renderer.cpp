@@ -3,8 +3,11 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include <misc/Timer.h>
 #include <misc/Option.h>
+
 #include <mem/Locator.h>
+
 #include "infos/RenderInfo.h"
 
 namespace render
@@ -12,7 +15,7 @@ namespace render
 	void Renderer::render(GLFWwindow* window, RenderInfo const& renderInfo) {
 		bwo::FrameBuffer target{ window };
 
-		//Locator<Timer>::ref().newTiming("Render");
+		Locator<misc::Timer>::ref().newTiming("Render");
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
@@ -28,10 +31,10 @@ namespace render
 		if (misc::Option<misc::OPTION::GR_DEBUG, bool>::getVal()) {
 			//this->debugRenderer.render(0, renderInfo);
 		}
-		//Locator<Timer>::ref().endTiming("Render");
+		Locator<misc::Timer>::ref().endTiming("Render");
 
-		//Locator<Timer>::ref().newTiming("Swap Buffers");
+		Locator<misc::Timer>::ref().newTiming("Swap Buffers");
 		glfwSwapBuffers(window);
-		//Locator<Timer>::ref().endTiming("Swap Buffers");
+		Locator<misc::Timer>::ref().endTiming("Swap Buffers");
 	}
 }

@@ -14,6 +14,9 @@ set(MODULE_FILES
 	PathManager
 	Enums
 	Log
+	Timer
+	PeriodAverage
+	CircularArray
 )
 
 make_module(${MODULE_NAME} "${MODULE_FILES}")
@@ -24,6 +27,7 @@ target_link_libraries(${MODULE_NAME} PUBLIC
 
 target_link_libraries(${MODULE_NAME} PRIVATE
 	GLEW
+	GLFW3
 	mem
 	render
 )

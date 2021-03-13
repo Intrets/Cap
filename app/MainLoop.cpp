@@ -5,14 +5,17 @@
 
 #include <game/GameState.h>
 #include <game/player/PlayerInfo.h>
+#include <game/ui/ConstructDebugUI.h>
 
 #include <ui/State.h>
 #include <ui/ControlState.h>
+#include <ui/Constructer.h>
 
 #include <render/Renderer.h>
 #include <render/infos/RenderInfo.h>
 
 #include <misc/Option.h>
+#include <misc/Timer.h>
 
 ui::ControlState controlState;
 
@@ -52,14 +55,27 @@ void prepareRender(GLFWwindow* window, render::RenderInfo& renderInfo, PlayerInf
 
 	//gameState.appendStaticRenderInfo(renderInfo);
 
-	//Locator<Timer>::ref().newTiming("Prepare UI");
+	Locator<misc::Timer>::ref().newTiming("Prepare UI");
 	uiState.appendRenderInfo(gameState, renderInfo);
-	//Locator<Timer>::ref().endTiming("Prepare UI");
+	Locator<misc::Timer>::ref().endTiming("Prepare UI");
 }
 
 void mainLoop(GLFWwindow* window) {
 	game::GameState gameState;
 	ui::State uiState;
+
+	{
+		ui::Global::push();
+		ui::window("Debug Info", { {-1.0f, -0.8f}, {-0.7f, 1.0f} },
+				   ui::WINDOW::TYPE::MINIMISE |
+				   ui::WINDOW::TYPE::RESIZEVERTICAL |
+				   ui::WINDOW::TYPE::RESIZEHORIZONTAL |
+				   ui::WINDOW::TYPE::RESIZE |
+				   ui::WINDOW::TYPE::MOVE);
+		game::constructDebugUI();
+
+		uiState.addUI(ui::Global::pop());
+	}
 
 	render::Renderer renderer;
 
@@ -86,7 +102,6 @@ void mainLoop(GLFWwindow* window) {
 		if (glfwWindowShouldClose(window)) {
 			break;
 		}
-
 
 		renderer.render(window, renderInfo);
 	}
