@@ -1,5 +1,7 @@
 #pragma once
 
+#include <glm/glm.hpp>
+
 class Player;
 
 namespace game
@@ -15,6 +17,7 @@ namespace ui
 
 struct PlayerInfo
 {
+	glm::vec2 pos;
 	// Player& player;
 	game::GameState& gameState;
 	ui::ControlState& controlState;

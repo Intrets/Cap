@@ -46,7 +46,7 @@ void prepareRender(GLFWwindow* window, render::RenderInfo& renderInfo, PlayerInf
 	glm::vec2 viewport(ratio, 1.0f);
 	viewport *= misc::Option<misc::OPTION::CL_VIEWPORTSCALE, float>::getVal();
 	renderInfo.frameSize = { frameSizeX, frameSizeY };
-	renderInfo.cameraInfo = { frameSizeX, frameSizeY, {0, 0}, glm::vec3(viewport, 200.0f) };
+	renderInfo.cameraInfo = { frameSizeX, frameSizeY, playerInfo.pos, glm::vec3(viewport, 200.0f) };
 
 	//Locator<Timer>::ref().newTiming("Prepare Debug");
 	//renderInfo.debugRenderInfo = *Locator<DebugRenderInfo>::get();
@@ -79,7 +79,7 @@ void mainLoop(GLFWwindow* window) {
 
 	render::Renderer renderer;
 
-	PlayerInfo playerInfo{ gameState, controlState, uiState };
+	PlayerInfo playerInfo{ { 0, 0 }, gameState, controlState, uiState };
 
 	glfwSetCharCallback(window, char_callback);
 	glfwSetKeyCallback(window, key_callback);

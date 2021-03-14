@@ -17,6 +17,7 @@ set(MODULE_FILES
 	Button
 	Pad
 	Window
+	Invisible
 	"List"
 	Empty
 	ColoredBackground

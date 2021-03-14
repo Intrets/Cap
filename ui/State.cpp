@@ -7,6 +7,7 @@
 #include <misc/Option.h>
 
 #include "Constructer.h"
+#include "Invisible.h"
 #include "SizeType.h"
 
 namespace ui
@@ -354,50 +355,50 @@ namespace ui
 		//	this->addUI(UIO2::Global::pop());
 		//}
 
-		//// wasd movement in world
-		//{
-		//	UniqueReference<Base, UIOInvisible> movement = UIO2::Global::getManager().makeUniqueRef<UIOInvisible>();
+		// wasd movement in world
+		{
+			UniqueReference<Base, Invisible> movement = Global::getManager().makeUniqueRef<Invisible>();
 
-		//	movement.get()->addGlobalBind({ CONTROL::KEY::LEFT, CONTROL::STATE::PRESSED | CONTROL::STATE::DOWN }, [&](PlayerInfo& playerInfo, Base* self_) -> CallBackBindResult
-		//	{
-		//		playerInfo.getPlayer().pos.x -= 1.0f;
-		//		return BIND::RESULT::CONTINUE;
-		//	});
+			movement.get()->addGlobalBind({ CONTROL::KEY::LEFT, CONTROL::STATE::PRESSED | CONTROL::STATE::DOWN }, [&](PlayerInfo& playerInfo, Base* self_) -> CallBackBindResult
+			{
+				playerInfo.pos.x -= 1.0f;
+				return BIND::RESULT::CONTINUE;
+			});
 
-		//	movement.get()->addGlobalBind({ CONTROL::KEY::RIGHT, CONTROL::STATE::PRESSED | CONTROL::STATE::DOWN }, [&](PlayerInfo& playerInfo, Base* self_) -> CallBackBindResult
-		//	{
-		//		playerInfo.getPlayer().pos.x += 1.0f;
-		//		return BIND::RESULT::CONTINUE;
-		//	});
+			movement.get()->addGlobalBind({ CONTROL::KEY::RIGHT, CONTROL::STATE::PRESSED | CONTROL::STATE::DOWN }, [&](PlayerInfo& playerInfo, Base* self_) -> CallBackBindResult
+			{
+				playerInfo.pos.x += 1.0f;
+				return BIND::RESULT::CONTINUE;
+			});
 
-		//	movement.get()->addGlobalBind({ CONTROL::KEY::DOWN, CONTROL::STATE::PRESSED | CONTROL::STATE::DOWN }, [&](PlayerInfo& playerInfo, Base* self_) -> CallBackBindResult
-		//	{
-		//		playerInfo.getPlayer().pos.y -= 1.0f;
-		//		return BIND::RESULT::CONTINUE;
-		//	});
+			movement.get()->addGlobalBind({ CONTROL::KEY::DOWN, CONTROL::STATE::PRESSED | CONTROL::STATE::DOWN }, [&](PlayerInfo& playerInfo, Base* self_) -> CallBackBindResult
+			{
+				playerInfo.pos.y -= 1.0f;
+				return BIND::RESULT::CONTINUE;
+			});
 
-		//	movement.get()->addGlobalBind({ CONTROL::KEY::UP, CONTROL::STATE::PRESSED | CONTROL::STATE::DOWN }, [&](PlayerInfo& playerInfo, Base* self_) -> CallBackBindResult
-		//	{
-		//		playerInfo.getPlayer().pos.y += 1.0f;
-		//		return BIND::RESULT::CONTINUE;
-		//	});
+			movement.get()->addGlobalBind({ CONTROL::KEY::UP, CONTROL::STATE::PRESSED | CONTROL::STATE::DOWN }, [&](PlayerInfo& playerInfo, Base* self_) -> CallBackBindResult
+			{
+				playerInfo.pos.y += 1.0f;
+				return BIND::RESULT::CONTINUE;
+			});
 
-		//	movement.get()->addGlobalBind({ CONTROL::KEY::SCROLL_UP }, [&](PlayerInfo& playerInfo, Base* self_) -> CallBackBindResult
-		//	{
-		//		using viewport = Option<OPTION::CL_VIEWPORTSCALE, float>;
-		//		viewport::setVal(viewport::getVal() * 0.8f);
-		//		return BIND::RESULT::CONTINUE;
-		//	});
+			movement.get()->addGlobalBind({ CONTROL::KEY::SCROLL_UP }, [&](PlayerInfo& playerInfo, Base* self_) -> CallBackBindResult
+			{
+				using viewport = misc::Option<misc::OPTION::CL_VIEWPORTSCALE, float>;
+				viewport::setVal(viewport::getVal() * 0.8f);
+				return BIND::RESULT::CONTINUE;
+			});
 
-		//	movement.get()->addGlobalBind({ CONTROL::KEY::SCROLL_DOWN }, [&](PlayerInfo& playerInfo, Base* self_) -> CallBackBindResult
-		//	{
-		//		using viewport = Option<OPTION::CL_VIEWPORTSCALE, float>;
-		//		viewport::setVal(viewport::getVal() / 0.8f);
-		//		return BIND::RESULT::CONTINUE;
-		//	});
+			movement.get()->addGlobalBind({ CONTROL::KEY::SCROLL_DOWN }, [&](PlayerInfo& playerInfo, Base* self_) -> CallBackBindResult
+			{
+				using viewport = misc::Option<misc::OPTION::CL_VIEWPORTSCALE, float>;
+				viewport::setVal(viewport::getVal() / 0.8f);
+				return BIND::RESULT::CONTINUE;
+			});
 
-		//	this->UIs.push_back(std::move(movement));
-		//}
+			this->UIs.push_back(std::move(movement));
+		}
 	}
 
 	void State::clear() {
