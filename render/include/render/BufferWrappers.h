@@ -33,7 +33,9 @@ namespace render
 			GLuint ID;
 			glm::ivec2 size;
 
+			[[deprecated]]
 			Texture() = default;
+			[[deprecated]]
 			Texture(GLuint ID_) : ID(ID_) {
 			};
 			~Texture();
@@ -304,7 +306,10 @@ namespace render
 			int32_t unit;
 
 		public:
+			[[deprecated]]
 			void set(GLuint texture);
+
+			void set(Texture2DArray const& texture);
 
 			UniformTexture2DArray() = default;
 			UniformTexture2DArray(std::string name, Program const& program, int32_t unit);

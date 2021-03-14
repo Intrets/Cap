@@ -1,3 +1,7 @@
+// Obtained and slightly modified from
+// http://www.opengl-tutorial.org/download/
+// https://github.com/opengl-tutorials/ogl/tree/master/common
+
 #include "loaders/ModelLoader.h"
 
 #include <GL/glew.h>
@@ -6,7 +10,6 @@
 #include <string>
 
 #include "loaders/vboindexer.h"
-
 
 namespace render
 {

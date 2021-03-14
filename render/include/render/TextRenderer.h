@@ -4,6 +4,11 @@
 
 namespace render
 {
+	namespace bwo
+	{
+		class FrameBuffer;
+	}
+
 	struct TextRenderInfo;
 	class Fonts;
 	struct CameraInfo;
@@ -11,7 +16,10 @@ namespace render
 	class TextRenderer
 	{
 	public:
-		void render(TextRenderInfo const& textRenderInfo, Fonts const& fonts, GLuint target, CameraInfo const& camInfo);
+		void render(TextRenderInfo const& textRenderInfo,
+					Fonts const& fonts,
+					bwo::FrameBuffer& target,
+					CameraInfo const& camInfo);
 
 		TextRenderer();
 		~TextRenderer();

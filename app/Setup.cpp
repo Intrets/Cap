@@ -9,9 +9,13 @@
 #include <misc/Log.h>
 #include <misc/Option.h>
 #include <misc/PathManager.h>
+
 #include <mem/Locator.h>
+
 #include <render/Fonts.h>
 #include <render/BlitRenderer.h>
+#include <render/BlitRendererArray.h>
+#include <render/textures/BlockIDTextures.h>
 
 static void GLAPIENTRY
 MessageCallback(GLenum source,
@@ -184,13 +188,16 @@ bool initGLFW(GLFWwindow*& window, bool OPENGL_DEBUG) {
 }
 
 void initManagers(std::string const& resourceRootPath) {
-	Locator<misc::PathManager>::provide(new misc::PathManager(resourceRootPath));
-	Locator<misc::OptionManager>::provide(new misc::OptionManager());
+	Locator<misc::PathManager>::init(resourceRootPath);
+	Locator<misc::OptionManager>::init();
 
-	Locator<render::BlitRenderer>::provide(new render::BlitRenderer());
+	Locator<render::BlitRenderer>::init();
+	Locator<render::BlitRendererArrayTexture>::init();
 
-	Locator<render::Fonts>::provide(new render::Fonts());
+	Locator<render::BlockIDTextures>::init();
 
-	Locator<misc::Timer>::provide(new misc::Timer());
-	Locator<misc::Log>::provide(new misc::Log());
+	Locator<render::Fonts>::init();
+
+	Locator<misc::Timer>::init();
+	Locator<misc::Log>::init();
 }

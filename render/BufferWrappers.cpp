@@ -100,6 +100,12 @@ namespace render
 		glUniform1i(location, this->unit);
 	}
 
+	void bwo::UniformTexture2DArray::set(Texture2DArray const& texture) {
+		glActiveTexture(GL_TEXTURE0 + this->unit);
+		glBindTexture(GL_TEXTURE_2D_ARRAY, texture.ID);
+		glUniform1i(location, this->unit);
+	}
+
 	bwo::UniformTexture2DArray::UniformTexture2DArray(std::string name, Program const& program, int32_t unit_) {
 		this->unit = unit_;
 		this->location = glGetUniformLocation(program.ID, name.c_str());
@@ -170,7 +176,7 @@ namespace render
 	void bwo::FrameBuffer::draw(glm::ivec2 size_, glm::ivec4 viewport, std::function<void()> f) {
 		if (this->ID == 0) {
 			this->size = size_;
-			assert(this->size.x >= viewport[0] + viewport[2] && this->size.y >= viewport[1] + viewport[3]);
+			//assert(this->size.x >= viewport[0] + viewport[2] && this->size.y >= viewport[1] + viewport[3]);
 		}
 		else {
 			if (this->size != size_) {

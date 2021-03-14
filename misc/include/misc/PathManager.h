@@ -32,8 +32,9 @@ namespace misc
 			FONTS,
 		};
 
-		GLuint LoadFont(std::string name);
+		render::bwo::Texture2D LoadFont(std::string name);
 		GLuint LoadTextureP(std::string name);
+		render::bwo::Texture2D LoadTexture2DP(std::string name);
 
 		void LoadModelP(std::string& path, GLuint& vertexbuffer, GLuint& uvbuffer, GLuint& normalbuffer, GLuint& indexbuffer, int32_t& indexsize);
 		bool openFile(std::ifstream& file, RESOURCE_FILE t);

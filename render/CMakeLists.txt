@@ -14,17 +14,21 @@ set(MODULE_FILES
 	Renderer
 	UIBackgroundRenderer
 	TextRenderer
+	BlitRendererArray
 	GLEnabler
 	infos/RenderInfo
 	infos/TextRenderInfo
 	infos/UIRenderInfo
 	infos/CameraInfo
+	infos/TileRenderInfo
 	Fonts
+	textures/BlockIDTextures
 )
 
 set(SHADER_FILES
 	Blit
 	UIBackground
+	BlitArray
 )
 
 foreach(SHADER ${SHADER_FILES})

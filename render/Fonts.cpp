@@ -7,8 +7,8 @@
 namespace render
 {
 	FontInfo Fonts::loadMonospacedFont(std::string name, glm::ivec2 charDim, glm::ivec2 gridDim) {
-		render::bwo::Texture tex;
-		tex.ID = Locator<misc::PathManager>::ref().LoadFont(name);
+		auto tex = Locator<misc::PathManager>::ref().LoadFont(name);
+
 		std::vector<glm::vec4> uvs;
 		std::vector<glm::vec4> worlds;
 
@@ -64,9 +64,9 @@ namespace render
 		Locator<render::BlitRenderer>::ref().render(
 			uvs,
 			worlds,
-			this->buffer.ID,
+			this->buffer,
 			glm::ivec4(0, 0, this->fontAtlas.size.x, this->fontAtlas.size.y),
-			tex.ID,
+			tex,
 			std::nullopt,
 			true,
 			glm::vec2(0.0f)

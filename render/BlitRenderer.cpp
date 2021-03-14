@@ -7,7 +7,15 @@
 
 namespace render
 {
-	void BlitRenderer::render(std::vector<glm::vec4> const& uv, std::vector<glm::vec4> const& world, GLuint target, glm::ivec4 viewport, GLuint texture, std::optional<float> depth_, bool flipUVvertical, glm::vec2 offset_, std::optional<glm::vec4> maybeColor) {
+	void BlitRenderer::render(std::vector<glm::vec4> const& uv,
+							  std::vector<glm::vec4> const& world,
+							  bwo::FrameBuffer& target,
+							  glm::ivec4 viewport,
+							  bwo::Texture2D const& texture,
+							  std::optional<float> depth_,
+							  bool flipUVvertical,
+							  glm::vec2 offset_,
+							  std::optional<glm::vec4> maybeColor) {
 		if (uv.size() == 0) {
 			return;
 		}
@@ -38,8 +46,6 @@ namespace render
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-		glBindFramebuffer(GL_FRAMEBUFFER, target);
-
 		if (flipUVvertical) {
 			this->UVflip.set(-1.0f);
 		}
@@ -54,13 +60,25 @@ namespace render
 		this->UVSource.set(uv);
 		this->worldTarget.set(world);
 
-		glDrawArraysInstanced(GL_TRIANGLES, 0, 6, static_cast<GLsizei>(uv.size()));
+		target.draw(
+			{ viewport[2], viewport[3] },
+			viewport,
+			[&]()
+		{
+			glDrawArraysInstanced(GL_TRIANGLES, 0, 6, static_cast<GLsizei>(uv.size()));
+		});
 
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		this->VAO.unbind();
 	}
 
-	void BlitRenderer::render(glm::vec4 uv, glm::vec4 world, GLuint target, glm::ivec4 viewport, GLuint texture, std::optional<float> depth_, bool flipUVvertical, std::optional<glm::vec4> maybeColor) {
+	void BlitRenderer::render(glm::vec4 uv,
+							  glm::vec4 world,
+							  bwo::FrameBuffer& target,
+							  glm::ivec4 viewport,
+							  bwo::Texture2D const& texture,
+							  std::optional<float> depth_,
+							  bool flipUVvertical,
+							  std::optional<glm::vec4> maybeColor) {
 		std::vector uvv{ uv };
 		std::vector worldv{ world };
 		this->render(uvv, worldv, target, viewport, texture, depth_, flipUVvertical, glm::vec2(0.0f), maybeColor);

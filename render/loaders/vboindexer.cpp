@@ -1,3 +1,7 @@
+// Obtained and slightly modified from
+// http://www.opengl-tutorial.org/download/
+// https://github.com/opengl-tutorials/ogl/tree/master/common
+
 #include "loaders/vboindexer.h"
 
 #include <vector>

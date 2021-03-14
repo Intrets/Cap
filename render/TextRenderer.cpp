@@ -4,12 +4,16 @@
 #include <mem/Locator.h>
 
 #include "infos/TextRenderInfo.h"
+#include "BufferWrappers.h"
 #include "BlitRenderer.h"
 #include "Colors.h"
 
 namespace render
 {
-	void TextRenderer::render(TextRenderInfo const& textRenderInfo, Fonts const& fonts, GLuint target, CameraInfo const& cameraInfo) {
+	void TextRenderer::render(TextRenderInfo const& textRenderInfo,
+							  Fonts const& fonts,
+							  bwo::FrameBuffer& target,
+							  CameraInfo const& cameraInfo) {
 		for (auto& info : textRenderInfo.windowTextRenderInfos) {
 			glm::ivec2 size = glm::floor(glm::vec2(info.screenRectangle.getPixelSize()) * info.screenRectangle.getAbsSize() / 2.0f);
 
@@ -20,7 +24,7 @@ namespace render
 				info.pos,
 				target,
 				{ topLeft.x, topLeft.y - size.y, size.x, size.y },
-				fonts.fontAtlas.ID,
+				fonts.fontAtlas,
 				info.depth,
 				false,
 				info.offset,

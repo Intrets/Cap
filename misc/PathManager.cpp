@@ -10,12 +10,16 @@
 
 namespace misc
 {
-	GLuint PathManager::LoadFont(std::string name) {
-		return render::loadTexture(this->paths[RESOURCE_PATH::FONTS] + name);
+	render::bwo::Texture2D PathManager::LoadFont(std::string name) {
+		return render::load2DTexture(this->paths[RESOURCE_PATH::FONTS] + name);
 	}
 
 	GLuint PathManager::LoadTextureP(std::string name) {
 		return render::loadTexture(this->paths[RESOURCE_PATH::GRAPHICS] + name);
+	}
+
+	render::bwo::Texture2D PathManager::LoadTexture2DP(std::string name) {
+		return render::load2DTexture(this->paths[RESOURCE_PATH::GRAPHICS] + name);
 	}
 
 	void PathManager::LoadModelP(std::string& name, GLuint& vertexbuffer, GLuint& uvbuffer, GLuint& normalbuffer, GLuint& indexbuffer, int32_t& indexsize) {
