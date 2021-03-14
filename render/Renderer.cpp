@@ -24,9 +24,7 @@ namespace render
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		Locator<BlitRendererArrayTexture>::ref().render(
-			renderInfo.tileRenderInfo.pos,
-			renderInfo.tileRenderInfo.rotation,
-			renderInfo.tileRenderInfo.texture,
+			renderInfo.tileRenderInfo,
 			target,
 			{ 0, 0, renderInfo.cameraInfo.x, renderInfo.cameraInfo.y },
 			Locator<BlockIDTextures>::ref().getTextureArray(),

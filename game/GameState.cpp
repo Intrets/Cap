@@ -9,10 +9,10 @@ namespace game
 	void GameState::addRenderInfo(render::RenderInfo& renderInfo) {
 		for (size_t i = 0; i < 100; i++) {
 			for (size_t j = 0; j < 100; j++) {
-				renderInfo.tileRenderInfo.push(
-					glm::vec2(i, j),
+				renderInfo.tileRenderInfo.data.push_back({
+					glm::vec4(i, j, 1, 1),
 					0,
-					this->world[i][j] ? 0 : 1
+					this->world[i][j] ? 0 : 1 }
 				);
 			}
 		}

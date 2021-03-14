@@ -21,6 +21,8 @@ set(MODULE_FILES
 	infos/UIRenderInfo
 	infos/CameraInfo
 	infos/TileRenderInfo
+	infos/BlitArrayRenderInfo
+	infos/BlitRenderInfo
 	Fonts
 	textures/BlockIDTextures
 )

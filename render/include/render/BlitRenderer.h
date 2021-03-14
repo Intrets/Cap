@@ -4,6 +4,7 @@
 #include <optional>
 
 #include "BufferWrappers.h"
+#include "infos/BlitRenderInfo.h"
 
 namespace render
 {
@@ -14,8 +15,8 @@ namespace render
 		bwo::Program program;
 
 		bwo::ArrayBuffer<glm::vec2> quad{ bwo::BufferHint::STATIC_DRAW };
-		bwo::ArrayBuffer<glm::vec4> UVSource{ bwo::BufferHint::STREAM_DRAW };
-		bwo::ArrayBuffer<glm::vec4> worldTarget{ bwo::BufferHint::STREAM_DRAW };
+
+		bwo::ArrayBuffer<SingleBlitRenderInfo> infos{ bwo::BufferHint::STATIC_DRAW };
 
 		bwo::UniformTexture2D texture_t;
 		bwo::Uniform1f UVflip;
@@ -26,8 +27,7 @@ namespace render
 	public:
 		int32_t const MAX_BATCH_SIZE = 5000;
 
-		void render(std::vector<glm::vec4> const& uv,
-					std::vector<glm::vec4> const& world,
+		void render(BlitRenderInfo const& blitInfos,
 					bwo::FrameBuffer& target,
 					glm::ivec4 viewport,
 					bwo::Texture2D const& texture,
@@ -36,8 +36,7 @@ namespace render
 					glm::vec2 offset,
 					std::optional<glm::vec4> color = std::nullopt);
 
-		void render(glm::vec4 uv,
-					glm::vec4 world,
+		void render(SingleBlitRenderInfo const& blitInfo,
 					bwo::FrameBuffer& target,
 					glm::ivec4 viewport,
 					bwo::Texture2D const& texture,

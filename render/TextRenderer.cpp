@@ -20,8 +20,7 @@ namespace render
 			glm::vec2 topLeft = glm::floor((info.screenRectangle.getTopLeft() / 2.0f + 0.5f) * glm::vec2(info.screenRectangle.getPixelSize()));
 
 			Locator<BlitRenderer>::ref().render(
-				info.uvs,
-				info.pos,
+				info.textRenderInfo,
 				target,
 				{ topLeft.x, topLeft.y - size.y, size.x, size.y },
 				fonts.fontAtlas,

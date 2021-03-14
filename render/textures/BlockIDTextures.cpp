@@ -38,9 +38,13 @@ namespace render
 		bwo::FrameBuffer target;
 		target.bindTextureLayer(GL_COLOR_ATTACHMENT0, this->textureArray, 0, this->arrayLayers);
 
-		Locator<BlitRenderer>::ref().render(
+		SingleBlitRenderInfo info{
 			{ 0.0f, 0.0f, 1.0f, 1.0f },
 			{ -1.0f, -1.0f, 2.0f, 2.0f },
+			4 };
+
+		Locator<BlitRenderer>::ref().render(
+			info,
 			target,
 			{ 0, 0, this->textureArray.size.x, this->textureArray.size.y },
 			newTex,
@@ -52,6 +56,7 @@ namespace render
 	GLuint BlockIDTextures::getTextureArrayID() {
 		return this->textureArray.ID;
 	}
+
 	bwo::Texture2DArray const& BlockIDTextures::getTextureArray() {
 		return this->textureArray;
 	}

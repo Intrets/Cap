@@ -1,16 +1,18 @@
 #include "Fonts.h"
 
 #include <mem/Locator.h>
+
 #include <misc/PathManager.h>
+
 #include <render/BlitRenderer.h>
+#include <render/infos/BlitRenderInfo.h>
 
 namespace render
 {
 	FontInfo Fonts::loadMonospacedFont(std::string name, glm::ivec2 charDim, glm::ivec2 gridDim) {
 		auto tex = Locator<misc::PathManager>::ref().LoadFont(name);
 
-		std::vector<glm::vec4> uvs;
-		std::vector<glm::vec4> worlds;
+		render::BlitRenderInfo blitInfo;
 
 		this->laneWidth = glm::max(this->laneWidth, charDim.y / static_cast<float>(this->fontAtlas.size.y));
 
@@ -25,7 +27,11 @@ namespace render
 				glm::vec2 uvTop = glm::vec2(charDim.x * x, charDim.y * y) / glm::vec2(texSize);
 				glm::vec2 uvSize = glm::vec2(charDim) / glm::vec2(texSize);
 
-				uvs.push_back(glm::vec4(uvTop, uvSize));
+				blitInfo.data.push_back({
+					glm::vec4(uvTop, uvSize),
+					glm::vec4(),
+					4 }
+				);
 				count++;
 				if (count == 128) {
 					break;
@@ -43,7 +49,7 @@ namespace render
 			glm::vec2 worldTop = this->pos;
 			worldTop.y -= worldSize.y;
 
-			worlds.push_back(glm::vec4(worldTop, worldSize));
+			blitInfo.data[i].world = glm::vec4(worldTop, worldSize);
 
 			fontInfoResult.charSize[i] = charDim;
 			glm::vec2 uv = worldTop;
@@ -62,8 +68,7 @@ namespace render
 		}
 
 		Locator<render::BlitRenderer>::ref().render(
-			uvs,
-			worlds,
+			blitInfo,
 			this->buffer,
 			glm::ivec4(0, 0, this->fontAtlas.size.x, this->fontAtlas.size.y),
 			tex,

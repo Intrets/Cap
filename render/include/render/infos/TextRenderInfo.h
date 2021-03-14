@@ -9,6 +9,7 @@
 #include <misc/Rectangle.h>
 
 #include "../Fonts.h"
+#include "../infos/BlitRenderInfo.h"
 
 namespace render
 {
@@ -27,11 +28,8 @@ namespace render
 		// value in [0, inf)
 		glm::vec2 renderedSize{ 0.0f, 0.0f };
 
-		// in [-1, 1] in screenRectangle space
-		std::vector<glm::vec4> pos;
+		BlitRenderInfo textRenderInfo;
 
-		// UV info for atlas texture
-		std::vector<glm::vec4> uvs;
 
 		// next position for character in screenRectangle space
 		glm::vec2 nextPos = { -1.0f, 1.0f };

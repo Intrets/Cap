@@ -40,11 +40,13 @@ namespace render
 				if (it == this->lines.end()) {
 					it = this->lines.insert({ vertRange, {} }).first;
 				}
-				it->second[horRange] = static_cast<int32_t>(uvs.size());
+				it->second[horRange] = static_cast<int32_t>(this->textRenderInfo.data.size());
 			}
 
-			this->pos.push_back(glm::vec4(addPos, size));
-			this->uvs.push_back(fontInfo.charUV[static_cast<int32_t>(c)]);
+			this->textRenderInfo.data.push_back({
+				fontInfo.charUV[static_cast<int32_t>(c)],
+				glm::vec4(addPos, size),
+				4 });
 
 			this->nextPos.x += size.x;
 
@@ -95,8 +97,8 @@ namespace render
 	}
 
 	std::optional<glm::vec4> WindowTextRenderInfo::getCursorPos(int32_t index) const {
-		if (indexInVector(index, this->pos)) {
-			return this->pos[index];
+		if (indexInVector(index, this->textRenderInfo.data)) {
+			return this->textRenderInfo.data[index].world;
 		}
 		return std::nullopt;
 	}

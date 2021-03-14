@@ -7,8 +7,7 @@
 
 namespace render
 {
-	void BlitRenderer::render(std::vector<glm::vec4> const& uv,
-							  std::vector<glm::vec4> const& world,
+	void BlitRenderer::render(BlitRenderInfo const& blitInfos,
 							  bwo::FrameBuffer& target,
 							  glm::ivec4 viewport,
 							  bwo::Texture2D const& texture,
@@ -16,7 +15,7 @@ namespace render
 							  bool flipUVvertical,
 							  glm::vec2 offset_,
 							  std::optional<glm::vec4> maybeColor) {
-		if (uv.size() == 0) {
+		if (blitInfos.data.size() == 0) {
 			return;
 		}
 
@@ -57,31 +56,29 @@ namespace render
 
 		glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
 
-		this->UVSource.set(uv);
-		this->worldTarget.set(world);
+		this->infos.set(blitInfos.data);
 
 		target.draw(
 			{ viewport[2], viewport[3] },
 			viewport,
 			[&]()
 		{
-			glDrawArraysInstanced(GL_TRIANGLES, 0, 6, static_cast<GLsizei>(uv.size()));
+			glDrawArraysInstanced(GL_TRIANGLES, 0, 6, static_cast<GLsizei>(blitInfos.data.size()));
 		});
 
 		this->VAO.unbind();
 	}
 
-	void BlitRenderer::render(glm::vec4 uv,
-							  glm::vec4 world,
+	void BlitRenderer::render(SingleBlitRenderInfo const& info,
 							  bwo::FrameBuffer& target,
 							  glm::ivec4 viewport,
 							  bwo::Texture2D const& texture,
 							  std::optional<float> depth_,
 							  bool flipUVvertical,
 							  std::optional<glm::vec4> maybeColor) {
-		std::vector uvv{ uv };
-		std::vector worldv{ world };
-		this->render(uvv, worldv, target, viewport, texture, depth_, flipUVvertical, glm::vec2(0.0f), maybeColor);
+		BlitRenderInfo infos;
+		infos.data.push_back(info);
+		this->render(infos, target, viewport, texture, depth_, flipUVvertical, glm::vec2(0.0f), maybeColor);
 	}
 
 	BlitRenderer::BlitRenderer() :
@@ -113,27 +110,47 @@ namespace render
 		);
 		glVertexAttribDivisor(0, 0);
 
-		this->UVSource.bind(GL_ARRAY_BUFFER);
+		this->infos.bind(GL_ARRAY_BUFFER);
+
+		constexpr int32_t stride = sizeof(SingleBlitRenderInfo);
+		size_t offset = 0;
+
 		glVertexAttribPointer(
 			1,                                // attribute
 			4,                                // size
 			GL_FLOAT,                         // type
 			GL_FALSE,                         // normalized?
-			0,								  // stride
-			(void*) 0                         // array buffer offset
+			stride,							  // stride
+			(void*) offset                    // array buffer offset
 		);
 		glVertexAttribDivisor(1, 1);
 
-		this->worldTarget.bind(GL_ARRAY_BUFFER);
+		offset += sizeof(decltype(SingleBlitRenderInfo::quad));
+
 		glVertexAttribPointer(
 			2,                                // attribute
 			4,                                // size
 			GL_FLOAT,                         // type
 			GL_FALSE,                         // normalized?
-			0,								  // stride
-			(void*) 0                         // array buffer offset
+			stride,							  // stride
+			(void*) offset                    // array buffer offset
 		);
 		glVertexAttribDivisor(2, 1);
+
+		offset += sizeof(decltype(SingleBlitRenderInfo::world));
+
+		glVertexAttribIPointer(
+			3,                                // attribute
+			1,                                // size
+			GL_INT,                           // type
+			stride,							  // stride
+			(void*) offset                    // array buffer offset
+		);
+		glVertexAttribDivisor(3, 1);
+
+		offset += sizeof(decltype(SingleBlitRenderInfo::rotation));
+
+		assert(offset == stride);
 
 		this->VAO.unbind();
 	}

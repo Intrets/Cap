@@ -1,0 +1,1 @@
+#include "infos/BlitRenderInfo.h"

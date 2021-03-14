@@ -340,21 +340,6 @@ namespace ui
 		//	this->addUI(UIO2::Global::pop());
 		//}
 
-		//// save/load and other stuff
-		//{
-		//	UIO2::Global::push();
-
-		//	UIO2::window("Debug Info", { {-1.0f, -0.8f}, {-0.7f, 1.0f} },
-		//				 UIOWindow::TYPE::MINIMISE |
-		//				 UIOWindow::TYPE::RESIZEVERTICAL |
-		//				 UIOWindow::TYPE::RESIZEHORIZONTAL |
-		//				 UIOWindow::TYPE::RESIZE |
-		//				 UIOWindow::TYPE::MOVE);
-		//	UIO2::constructDebugInfo();
-
-		//	this->addUI(UIO2::Global::pop());
-		//}
-
 		// wasd movement in world
 		{
 			UniqueReference<Base, Invisible> movement = Global::getManager().makeUniqueRef<Invisible>();
