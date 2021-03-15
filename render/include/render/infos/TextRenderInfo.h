@@ -30,7 +30,6 @@ namespace render
 
 		BlitRenderInfo textRenderInfo;
 
-
 		// next position for character in screenRectangle space
 		glm::vec2 nextPos = { -1.0f, 1.0f };
 

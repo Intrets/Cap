@@ -30,7 +30,7 @@ namespace render
 				blitInfo.data.push_back({
 					glm::vec4(uvTop, uvSize),
 					glm::vec4(),
-					4 }
+					0 }
 				);
 				count++;
 				if (count == 128) {

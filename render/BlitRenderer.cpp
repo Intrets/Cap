@@ -54,8 +54,6 @@ namespace render
 
 		this->texture_t.set(texture);
 
-		glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
-
 		this->infos.set(blitInfos.data);
 
 		target.draw(
@@ -88,7 +86,7 @@ namespace render
 		depth("depth", this->program),
 		offset("offset", this->program),
 		color("c", this->program) {
-		this->VAO.gen(3);
+		this->VAO.gen(4);
 
 		static const GLfloat g_quad_vertex_buffer_data[] = {
 			0.0f,  0.0f,

@@ -11,17 +11,15 @@ uniform mat4 VP;
 
 out vec3 UVW;
 
-uniform mat2 rotations[5] = mat2[](
+mat2 rotations[4] = mat2[](
 	mat2(1,0,
-	     0,-1),
-	mat2(0,-1,
-	     -1,0),
-	mat2(-1,0,
 	     0,1),
 	mat2(0,1,
-	     1,0),
-	mat2(1,0,
-		 0,1)
+	     -1,0),
+	mat2(-1,0,
+	     0,-1),
+	mat2(0,-1,
+	     1,0)
 );
 
 
