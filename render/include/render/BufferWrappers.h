@@ -8,6 +8,8 @@
 
 #include <misc/Misc.h>
 
+#include <iostream>
+
 struct GLFWwindow;
 
 namespace render
@@ -26,6 +28,30 @@ namespace render
 			DYNAMIC_READ = GL_DYNAMIC_READ,
 			DYNAMIC_COPY = GL_DYNAMIC_COPY,
 		};
+
+		template<class T>
+		class ArrayBuffer
+		{
+		public:
+
+		private:
+			GLenum usageHint;
+
+		public:
+			GLuint ID;
+
+			ArrayBuffer(BufferHint hint);
+			~ArrayBuffer();
+
+			void set(std::vector<T> const& data);
+			void set(uint32_t size, std::vector<T> const& data);
+			void setRaw(uint32_t size, void const* data);
+
+			void bind(GLenum location);
+
+			//NOCOPYMOVE(ArrayBuffer);
+		};
+
 
 		class Texture
 		{
@@ -104,9 +130,142 @@ namespace render
 			Texture2DArray makeLinearFiltering(glm::ivec3 size);
 		}
 
+		namespace VAO_impl
+		{
+			static int32_t Stride = 0;
+			static int32_t Offset = 0;
+			static int32_t Attribute = 0;
+		}
+
+		template<class T, int32_t size, int32_t divisor>
+		struct TTuple2
+		{
+			static void apply();
+		};
+
+		template<int32_t size, int32_t divisor>
+		struct TTuple2<int32_t, size, divisor>
+		{
+			static void apply() {
+				std::cout << "    applying int attribute\n";
+				std::cout
+					<< "    attribute: " << VAO_impl::Attribute
+					<< " stride: " << VAO_impl::Stride
+					<< " offset: " << VAO_impl::Offset << "\n";
+				glVertexAttribIPointer(
+					VAO_impl::Attribute,
+					size,
+					GL_INT,
+					VAO_impl::Stride,
+					(void*) VAO_impl::Offset
+				);
+				glVertexAttribDivisor(VAO_impl::Attribute, divisor);
+
+				VAO_impl::Attribute++;
+				VAO_impl::Offset += sizeof(int32_t) * size;
+			};
+		};
+
+		template<int32_t size, int32_t divisor>
+		struct TTuple2<float, size, divisor>
+		{
+			static void apply() {
+				std::cout << "    applying float attribute\n";
+				std::cout
+					<< "    attribute: " << VAO_impl::Attribute
+					<< " stride: " << VAO_impl::Stride
+					<< " offset: " << VAO_impl::Offset << "\n";
+				glVertexAttribPointer(
+					VAO_impl::Attribute,
+					size,
+					GL_FLOAT,
+					GL_FALSE,
+					VAO_impl::Stride,
+					(void*) VAO_impl::Offset
+				);
+				glVertexAttribDivisor(VAO_impl::Attribute, divisor);
+
+				VAO_impl::Attribute++;
+				VAO_impl::Offset += sizeof(float) * size;
+			};
+		};
+
+		template<class T, int32_t size, int32_t divisor>
+		void TTuple2<T, size, divisor>::apply() {
+			static_assert(0);
+		};
+
+		template<class T, class ...Args>
+		struct Group
+		{
+			using GroupType = T;
+
+			static void apply(ArrayBuffer<T>& buffer) {
+				buffer.bind(GL_ARRAY_BUFFER);
+				VAO_impl::Offset = 0;
+				VAO_impl::Stride = sizeof(T);
+
+				std::cout << "applying group\n";
+				std::cout << "attribute: " << VAO_impl::Attribute;
+				std::cout << " stride: " << VAO_impl::Stride;
+				std::cout << " offset: " << VAO_impl::Offset;
+				std::cout << "\n";
+				TFor<Args...>();
+			};
+		};
+
+		template<class Arg, class ...Args>
+		void TFor() {
+			Arg::apply();
+			if constexpr (sizeof...(Args) != 0) {
+				TFor<Args...>();
+			}
+		};
+
+		template<class Arg, class ...Args>
+		void TFor4(ArrayBuffer<typename Arg::GroupType>& arg, ArrayBuffer<typename Args::GroupType>... args) {
+			Arg::apply(arg);
+			if constexpr (sizeof...(Args) != 0) {
+				TFor4<Args...>(std::forward<ArrayBuffer<typename Args::GroupType>>(args)...);
+			}
+		};
+
+		template<class ...Args>
+		class VertexArrayObject3
+		{
+		public:
+			GLuint ID;
+
+			void bind() {
+				glBindVertexArray(this->ID);
+			};
+			void unbind() {
+				glBindVertexArray(0);
+			};
+
+			VertexArrayObject3(ArrayBuffer<typename Args::GroupType>& ...args) {
+				glGenVertexArrays(1, &this->ID);
+
+				std::cout << "generating new VAO, ID: " << this->ID << "\n";
+
+				VAO_impl::Attribute = 0;
+				VAO_impl::Offset = 0;
+				VAO_impl::Stride = 0;
+
+				TFor4<Args...>(std::forward<ArrayBuffer<typename Args::GroupType>>(args)...);
+			};
+
+			VertexArrayObject3() = delete;
+			~VertexArrayObject3() {
+				glDeleteVertexArrays(1, &this->ID);
+			};
+
+			NOCOPYMOVE(VertexArrayObject3);
+		};
+
 		class VertexArrayObject
 		{
-		private:
+		public:
 			GLuint ID;
 		public:
 			void gen(int32_t count) {
@@ -145,29 +304,6 @@ namespace render
 			void draw(glm::ivec2 size_, glm::ivec4 viewport, std::function<void()> f);
 
 			NOCOPYMOVE(FrameBuffer);
-		};
-
-		template<class T>
-		class ArrayBuffer
-		{
-		public:
-
-		private:
-			GLenum usageHint;
-
-		public:
-			GLuint ID;
-
-			ArrayBuffer(BufferHint hint);
-			~ArrayBuffer();
-
-			void set(std::vector<T> const& data);
-			void set(uint32_t size, std::vector<T> const& data);
-			void setRaw(uint32_t size, void const* data);
-
-			void bind(GLenum location);
-
-			NOCOPYMOVE(ArrayBuffer);
 		};
 
 		class Program

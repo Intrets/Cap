@@ -151,6 +151,34 @@ namespace render
 		assert(offset == stride);
 
 		this->VAO.unbind();
+
+		bwo::ArrayBuffer<glm::vec2> quadBuffer{ bwo::BufferHint::STATIC_DRAW };
+		bwo::ArrayBuffer<SingleBlitRenderInfo> blitBuffer{ bwo::BufferHint::STREAM_DRAW };
+
+		bwo::VertexArrayObject3<
+			bwo::Group<
+				glm::vec2,
+				bwo::TTuple2<float, 2, 0>
+			>,
+			bwo::Group<
+				SingleBlitRenderInfo,
+				bwo::TTuple2<float, 4, 1>,
+				bwo::TTuple2<float, 4, 1>,
+				bwo::TTuple2<int32_t, 1, 1>
+			>> test3 ( quadBuffer, blitBuffer);
+
+		bwo::VertexArrayObject3<
+			bwo::Group<
+				glm::vec2,
+				bwo::TTuple2<float, 2, 0>
+			>,
+			bwo::Group<
+				SingleBlitRenderInfo,
+				bwo::TTuple2<float, 4, 1>,
+				bwo::TTuple2<float, 4, 1>,
+				bwo::TTuple2<int32_t, 1, 1>
+			>> test2 ( quadBuffer, blitBuffer);
+
 	}
 
 	BlitRenderer::~BlitRenderer() {

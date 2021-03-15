@@ -12,6 +12,7 @@ namespace render
 	{
 	private:
 		bwo::VertexArrayObject VAO;
+
 		bwo::Program program;
 
 		bwo::ArrayBuffer<glm::vec2> quad{ bwo::BufferHint::STATIC_DRAW };
