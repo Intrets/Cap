@@ -86,7 +86,6 @@ namespace render
 		depth("depth", this->program),
 		offset("offset", this->program),
 		color("c", this->program) {
-		this->VAO.gen(4);
 
 		static const GLfloat g_quad_vertex_buffer_data[] = {
 			0.0f,  0.0f,
@@ -98,87 +97,6 @@ namespace render
 		};
 
 		this->quad.setRaw(sizeof(g_quad_vertex_buffer_data), g_quad_vertex_buffer_data);
-		glVertexAttribPointer(
-			0,                  // attribute
-			2,                  // size
-			GL_FLOAT,           // type
-			GL_FALSE,           // normalized?
-			0,                  // stride
-			(void*) 0           // array buffer offset
-		);
-		glVertexAttribDivisor(0, 0);
-
-		this->infos.bind(GL_ARRAY_BUFFER);
-
-		constexpr int32_t stride = sizeof(SingleBlitRenderInfo);
-		size_t offset = 0;
-
-		glVertexAttribPointer(
-			1,                                // attribute
-			4,                                // size
-			GL_FLOAT,                         // type
-			GL_FALSE,                         // normalized?
-			stride,							  // stride
-			(void*) offset                    // array buffer offset
-		);
-		glVertexAttribDivisor(1, 1);
-
-		offset += sizeof(decltype(SingleBlitRenderInfo::quad));
-
-		glVertexAttribPointer(
-			2,                                // attribute
-			4,                                // size
-			GL_FLOAT,                         // type
-			GL_FALSE,                         // normalized?
-			stride,							  // stride
-			(void*) offset                    // array buffer offset
-		);
-		glVertexAttribDivisor(2, 1);
-
-		offset += sizeof(decltype(SingleBlitRenderInfo::world));
-
-		glVertexAttribIPointer(
-			3,                                // attribute
-			1,                                // size
-			GL_INT,                           // type
-			stride,							  // stride
-			(void*) offset                    // array buffer offset
-		);
-		glVertexAttribDivisor(3, 1);
-
-		offset += sizeof(decltype(SingleBlitRenderInfo::rotation));
-
-		assert(offset == stride);
-
-		this->VAO.unbind();
-
-		bwo::ArrayBuffer<glm::vec2> quadBuffer{ bwo::BufferHint::STATIC_DRAW };
-		bwo::ArrayBuffer<SingleBlitRenderInfo> blitBuffer{ bwo::BufferHint::STREAM_DRAW };
-
-		bwo::VertexArrayObject3<
-			bwo::Group<
-				glm::vec2,
-				bwo::TTuple2<float, 2, 0>
-			>,
-			bwo::Group<
-				SingleBlitRenderInfo,
-				bwo::TTuple2<float, 4, 1>,
-				bwo::TTuple2<float, 4, 1>,
-				bwo::TTuple2<int32_t, 1, 1>
-			>> test3 ( quadBuffer, blitBuffer);
-
-		bwo::VertexArrayObject3<
-			bwo::Group<
-				glm::vec2,
-				bwo::TTuple2<float, 2, 0>
-			>,
-			bwo::Group<
-				SingleBlitRenderInfo,
-				bwo::TTuple2<float, 4, 1>,
-				bwo::TTuple2<float, 4, 1>,
-				bwo::TTuple2<int32_t, 1, 1>
-			>> test2 ( quadBuffer, blitBuffer);
-
 	}
 
 	BlitRenderer::~BlitRenderer() {

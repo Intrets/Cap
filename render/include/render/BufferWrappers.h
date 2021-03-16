@@ -49,9 +49,8 @@ namespace render
 
 			void bind(GLenum location);
 
-			//NOCOPYMOVE(ArrayBuffer);
+			NOCOPYMOVE(ArrayBuffer);
 		};
-
 
 		class Texture
 		{
@@ -130,28 +129,31 @@ namespace render
 			Texture2DArray makeLinearFiltering(glm::ivec3 size);
 		}
 
-		namespace VAO_impl
+		struct VAO_impl
 		{
-			static int32_t Stride = 0;
-			static int32_t Offset = 0;
-			static int32_t Attribute = 0;
-		}
+			static int32_t Stride;
+			static int32_t Offset;
+			static int32_t Attribute;
+			static int32_t Divisor;
+		};
 
-		template<class T, int32_t size, int32_t divisor>
-		struct TTuple2
+		template<class T, int32_t size>
+		struct VInfo
 		{
 			static void apply();
 		};
 
-		template<int32_t size, int32_t divisor>
-		struct TTuple2<int32_t, size, divisor>
+		template<int32_t size>
+		struct VInfo<int32_t, size>
 		{
 			static void apply() {
-				std::cout << "    applying int attribute\n";
+				std::cout << "    int attribute\n";
 				std::cout
 					<< "    attribute: " << VAO_impl::Attribute
+					<< " size: " << size
 					<< " stride: " << VAO_impl::Stride
-					<< " offset: " << VAO_impl::Offset << "\n";
+					<< " offset: " << VAO_impl::Offset
+					<< " divisor: " << VAO_impl::Divisor << "\n";
 				glVertexAttribIPointer(
 					VAO_impl::Attribute,
 					size,
@@ -159,22 +161,25 @@ namespace render
 					VAO_impl::Stride,
 					(void*) VAO_impl::Offset
 				);
-				glVertexAttribDivisor(VAO_impl::Attribute, divisor);
+				glVertexAttribDivisor(VAO_impl::Attribute, VAO_impl::Divisor);
+				glEnableVertexAttribArray(VAO_impl::Attribute);
 
 				VAO_impl::Attribute++;
 				VAO_impl::Offset += sizeof(int32_t) * size;
 			};
 		};
 
-		template<int32_t size, int32_t divisor>
-		struct TTuple2<float, size, divisor>
+		template<int32_t size>
+		struct VInfo<float, size>
 		{
 			static void apply() {
-				std::cout << "    applying float attribute\n";
+				std::cout << "    float attribute\n";
 				std::cout
 					<< "    attribute: " << VAO_impl::Attribute
+					<< " size: " << size
 					<< " stride: " << VAO_impl::Stride
-					<< " offset: " << VAO_impl::Offset << "\n";
+					<< " offset: " << VAO_impl::Offset
+					<< " divisor: " << VAO_impl::Divisor << "\n";
 				glVertexAttribPointer(
 					VAO_impl::Attribute,
 					size,
@@ -183,55 +188,61 @@ namespace render
 					VAO_impl::Stride,
 					(void*) VAO_impl::Offset
 				);
-				glVertexAttribDivisor(VAO_impl::Attribute, divisor);
+				glVertexAttribDivisor(VAO_impl::Attribute, VAO_impl::Divisor);
+				glEnableVertexAttribArray(VAO_impl::Attribute);
 
 				VAO_impl::Attribute++;
 				VAO_impl::Offset += sizeof(float) * size;
 			};
 		};
 
-		template<class T, int32_t size, int32_t divisor>
-		void TTuple2<T, size, divisor>::apply() {
+		template<class T, int32_t size>
+		void VInfo<T, size>::apply() {
 			static_assert(0);
 		};
 
-		template<class T, class ...Args>
+		template<class T, int32_t divisor, class ...Args>
 		struct Group
 		{
 			using GroupType = T;
 
 			static void apply(ArrayBuffer<T>& buffer) {
 				buffer.bind(GL_ARRAY_BUFFER);
+
 				VAO_impl::Offset = 0;
 				VAO_impl::Stride = sizeof(T);
+				VAO_impl::Divisor = divisor;
 
 				std::cout << "applying group\n";
 				std::cout << "attribute: " << VAO_impl::Attribute;
 				std::cout << " stride: " << VAO_impl::Stride;
+				std::cout << " divisor: " << VAO_impl::Divisor;
 				std::cout << " offset: " << VAO_impl::Offset;
 				std::cout << "\n";
-				TFor<Args...>();
+				TFor0<Args...>();
+
+				assert(VAO_impl::Stride == VAO_impl::Offset);
 			};
 		};
 
 		template<class Arg, class ...Args>
-		void TFor() {
+		void TFor0() {
 			Arg::apply();
 			if constexpr (sizeof...(Args) != 0) {
-				TFor<Args...>();
+				TFor0<Args...>();
 			}
 		};
 
 		template<class Arg, class ...Args>
-		void TFor4(ArrayBuffer<typename Arg::GroupType>& arg, ArrayBuffer<typename Args::GroupType>... args) {
+		void TFor(ArrayBuffer<typename Arg::GroupType>& arg, ArrayBuffer<typename Args::GroupType>& ...args) {
 			Arg::apply(arg);
 			if constexpr (sizeof...(Args) != 0) {
-				TFor4<Args...>(std::forward<ArrayBuffer<typename Args::GroupType>>(args)...);
+				TFor<Args...>(std::forward<ArrayBuffer<typename Args::GroupType>>(args)...);
 			}
 		};
 
 		template<class ...Args>
-		class VertexArrayObject3
+		class VertexArrayObject
 		{
 		public:
 			GLuint ID;
@@ -243,47 +254,26 @@ namespace render
 				glBindVertexArray(0);
 			};
 
-			VertexArrayObject3(ArrayBuffer<typename Args::GroupType>& ...args) {
+			VertexArrayObject(ArrayBuffer<typename Args::GroupType>& ...args) {
 				glGenVertexArrays(1, &this->ID);
+				this->bind();
 
 				std::cout << "generating new VAO, ID: " << this->ID << "\n";
 
 				VAO_impl::Attribute = 0;
 				VAO_impl::Offset = 0;
 				VAO_impl::Stride = 0;
+				VAO_impl::Divisor = 0;
 
-				TFor4<Args...>(std::forward<ArrayBuffer<typename Args::GroupType>>(args)...);
-			};
+				TFor<Args...>(std::forward<ArrayBuffer<typename Args::GroupType>>(args)...);
 
-			VertexArrayObject3() = delete;
-			~VertexArrayObject3() {
-				glDeleteVertexArrays(1, &this->ID);
-			};
-
-			NOCOPYMOVE(VertexArrayObject3);
-		};
-
-		class VertexArrayObject
-		{
-		public:
-			GLuint ID;
-		public:
-			void gen(int32_t count) {
-				glGenVertexArrays(1, &ID);
-				bind();
-				for (int32_t i = 0; i < count; i++) {
-					glEnableVertexAttribArray(i);
-				}
-			};
-			void bind() {
-				glBindVertexArray(ID);
-			};
-			void unbind() {
 				glBindVertexArray(0);
 			};
 
-			VertexArrayObject() = default;
-			~VertexArrayObject();
+			VertexArrayObject() = delete;
+			~VertexArrayObject() {
+				glDeleteVertexArrays(1, &this->ID);
+			};
 
 			NOCOPYMOVE(VertexArrayObject);
 		};

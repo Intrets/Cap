@@ -11,13 +11,20 @@ namespace render
 	class BlitRenderer
 	{
 	private:
-		bwo::VertexArrayObject VAO;
-
 		bwo::Program program;
 
 		bwo::ArrayBuffer<glm::vec2> quad{ bwo::BufferHint::STATIC_DRAW };
+		bwo::ArrayBuffer<SingleBlitRenderInfo> infos{ bwo::BufferHint::STREAM_DRAW };
 
-		bwo::ArrayBuffer<SingleBlitRenderInfo> infos{ bwo::BufferHint::STATIC_DRAW };
+		bwo::VertexArrayObject<
+			bwo::Group<glm::vec2, 0,
+			bwo::VInfo<float, 2>>,
+
+			bwo::Group<SingleBlitRenderInfo, 1,
+			bwo::VInfo<float, 4>,
+			bwo::VInfo<float, 4>,
+			bwo::VInfo<int32_t, 1>>
+			> VAO{ quad, infos };
 
 		bwo::UniformTexture2D texture_t;
 		bwo::Uniform1f UVflip;

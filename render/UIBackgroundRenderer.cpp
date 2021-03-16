@@ -43,51 +43,7 @@ namespace render
 			1.0f,  1.0f,  0.0f,
 		};
 
-		this->VAO.gen(4);
-
 		this->quad.setRaw(sizeof(g_quad_vertex_buffer_data), g_quad_vertex_buffer_data);
-		glVertexAttribPointer(
-			0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-			3,                  // size
-			GL_FLOAT,           // type
-			GL_FALSE,           // normalized?
-			0,                  // stride
-			(void*) 0            // array buffer offset
-		);
-		glVertexAttribDivisor(0, 0);
-
-		this->positions.bind(GL_ARRAY_BUFFER);
-		glVertexAttribPointer(
-			1,                                // attribute
-			3,                                // size
-			GL_FLOAT,                         // type
-			GL_FALSE,                         // normalized?
-			0,								  // stride
-			(void*) 0                         // array buffer offset
-		);
-		glVertexAttribDivisor(1, 1);
-
-		this->scales.bind(GL_ARRAY_BUFFER);
-		glVertexAttribPointer(
-			2,                                // attribute
-			2,                                // size
-			GL_FLOAT,                         // type
-			GL_FALSE,                         // normalized?
-			0,								  // stride
-			(void*) 0                         // array buffer offset
-		);
-		glVertexAttribDivisor(2, 1);
-
-		this->colors.bind(GL_ARRAY_BUFFER);
-		glVertexAttribPointer(
-			3,                                // attribute
-			4,                                // size
-			GL_FLOAT,                         // type
-			GL_FALSE,                         // normalized?
-			0,								  // stride
-			(void*) 0                         // array buffer offset
-		);
-		glVertexAttribDivisor(3, 1);
 	}
 
 	UIBackgroundRenderer::~UIBackgroundRenderer() {

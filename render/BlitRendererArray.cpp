@@ -52,8 +52,6 @@ namespace render
 		depth("depth", this->program),
 		VP("VP", this->program) {
 
-		this->VAO.gen(4);
-
 		static const GLfloat g_quad_vertex_buffer_data[] = {
 			0.0f,  0.0f,
 			1.0f,  0.0f,
@@ -64,57 +62,5 @@ namespace render
 		};
 
 		this->quad.setRaw(sizeof(g_quad_vertex_buffer_data), g_quad_vertex_buffer_data);
-		glVertexAttribPointer(
-			0,                   // attribute
-			2,                   // size
-			GL_FLOAT,            // type
-			GL_FALSE,            // normalized?
-			0,                   // stride
-			(void*) 0            // array buffer offset
-		);
-		glVertexAttribDivisor(0, 0);
-
-		this->infos.bind(GL_ARRAY_BUFFER);
-
-		constexpr int32_t stride = sizeof(SingleBlitArrayRenderInfo);
-		size_t offset = 0;
-
-		glVertexAttribPointer(
-			1,                                // attribute
-			4,                                // size
-			GL_FLOAT,                         // type
-			GL_FALSE,                         // normalized?
-			stride,							  // stride
-			(void*) offset                    // array buffer offset
-		);
-		glVertexAttribDivisor(1, 1);
-
-		offset += sizeof(decltype(SingleBlitArrayRenderInfo::world));
-
-		glVertexAttribIPointer(
-			2,                                // attribute
-			1,                                // size
-			GL_INT,                           // type
-			stride,							  // stride
-			(void*) offset                    // array buffer offset
-		);
-		glVertexAttribDivisor(2, 1);
-
-		offset += sizeof(decltype(SingleBlitArrayRenderInfo::rotation));
-
-		glVertexAttribIPointer(
-			3,                                // attribute
-			1,                                // size
-			GL_INT,                           // type
-			stride,							  // stride
-			(void*) offset                    // array buffer offset
-		);
-		glVertexAttribDivisor(3, 1);
-
-		offset += sizeof(decltype(SingleBlitArrayRenderInfo::layer));
-
-		assert(offset == stride);
-
-		this->VAO.unbind();
 	}
 }

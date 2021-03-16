@@ -10,9 +10,10 @@ namespace render
 {
 	std::unordered_map<int32_t, bwo::Program*> bwo::Program::refs;
 
-	bwo::VertexArrayObject::~VertexArrayObject() {
-		glDeleteVertexArrays(1, &this->ID);
-	}
+	int32_t bwo::VAO_impl::Stride = 0;
+	int32_t bwo::VAO_impl::Attribute = 0;
+	int32_t bwo::VAO_impl::Divisor = 0;
+	int32_t bwo::VAO_impl::Offset = 0;
 
 	bwo::Texture::~Texture() {
 		glDeleteTextures(1, &this->ID);
@@ -44,7 +45,6 @@ namespace render
 	}
 
 	bwo::Program::Program(char const* vert_raw, char const* frag_raw, std::string const& description_) {
-		//this->ID = Locator<misc::PathManager>::ref().LoadShadersP(vert + ".vert", frag + ".frag");
 		this->ID = LoadShaders(vert_raw, frag_raw);
 		this->description = description_;
 		bwo::Program::refs[this->ID] = this;
