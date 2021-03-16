@@ -4,6 +4,9 @@
 
 #include "BufferWrappers.h"
 
+#include "../shaders/UIBackground.vert.inc"
+#include "../shaders/UIBackground.frag.inc"
+
 namespace render
 {
 	struct UIRenderInfo;
@@ -12,7 +15,7 @@ namespace render
 	class UIBackgroundRenderer
 	{
 	private:
-		bwo::Program program;
+		bwo::Program program{ UIBackground_vert, UIBackground_frag, "UIBackGroundRenderer" };
 
 		bwo::ArrayBuffer<glm::vec3> quad{ bwo::BufferHint::STATIC_DRAW };
 		bwo::ArrayBuffer<glm::vec3> positions{ bwo::BufferHint::STREAM_DRAW };

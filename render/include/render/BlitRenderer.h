@@ -6,12 +6,15 @@
 #include "BufferWrappers.h"
 #include "infos/BlitRenderInfo.h"
 
+#include "../shaders/Blit.vert.inc"
+#include "../shaders/Blit.frag.inc"
+
 namespace render
 {
 	class BlitRenderer
 	{
 	private:
-		bwo::Program program;
+		bwo::Program program{ Blit_vert, Blit_frag, "BlitRenderer" };
 
 		bwo::ArrayBuffer<glm::vec2> quad{ bwo::BufferHint::STATIC_DRAW };
 		bwo::ArrayBuffer<SingleBlitRenderInfo> infos{ bwo::BufferHint::STREAM_DRAW };
@@ -26,11 +29,11 @@ namespace render
 			bwo::VInfo<int32_t, 1>>
 			> VAO{ quad, infos };
 
-		bwo::UniformTexture2D texture_t;
-		bwo::Uniform1f UVflip;
-		bwo::Uniform1f depth;
-		bwo::Uniform2fv offset;
-		bwo::Uniform4fv color;
+		bwo::UniformTexture2D texture_t{ "texture_t", program,0 };
+		bwo::Uniform1f UVflip{ "UVflip", program };
+		bwo::Uniform1f depth{ "depth", program };
+		bwo::Uniform2fv offset{ "offset", program };
+		bwo::Uniform4fv color{ "c", program };
 
 	public:
 		int32_t const MAX_BATCH_SIZE = 5000;

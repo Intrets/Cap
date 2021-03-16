@@ -52,22 +52,6 @@ namespace render
 			NOCOPYMOVE(ArrayBuffer);
 		};
 
-		class Texture
-		{
-		public:
-			GLuint ID;
-			glm::ivec2 size;
-
-			[[deprecated]]
-			Texture() = default;
-			[[deprecated]]
-			Texture(GLuint ID_) : ID(ID_) {
-			};
-			~Texture();
-
-			NOCOPYMOVE(Texture);
-		};
-
 		class Texture2DArray
 		{
 		public:

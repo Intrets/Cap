@@ -2,9 +2,6 @@
 
 #include "GLEnabler.h"
 
-#include "shaders/BlitArray.vert.inc"
-#include "shaders/BlitArray.frag.inc"
-
 namespace render
 {
 	void BlitRendererArrayTexture::render(BlitArrayRenderInfo const& blitInfos,
@@ -46,12 +43,7 @@ namespace render
 		this->VAO.unbind();
 	}
 
-	BlitRendererArrayTexture::BlitRendererArrayTexture() :
-		program(BlitArray_vert, BlitArray_frag, "BlitRendererArrayTexture"),
-		texture_t("texture_t", this->program, 0),
-		depth("depth", this->program),
-		VP("VP", this->program) {
-
+	BlitRendererArrayTexture::BlitRendererArrayTexture() {
 		static const GLfloat g_quad_vertex_buffer_data[] = {
 			0.0f,  0.0f,
 			1.0f,  0.0f,

@@ -4,9 +4,6 @@
 #include "infos/CameraInfo.h"
 #include "GLEnabler.h"
 
-#include "../shaders/UIBackground.vert.inc"
-#include "../shaders/UIBackground.frag.inc"
-
 namespace render
 {
 	void UIBackgroundRenderer::render(UIRenderInfo const& renderInfo, GLuint target, CameraInfo const& cameraInfo) {
@@ -32,8 +29,7 @@ namespace render
 		glDrawArraysInstanced(GL_TRIANGLES, 0, 6, static_cast<int32_t>(renderInfo.scales.size()));
 	}
 
-	UIBackgroundRenderer::UIBackgroundRenderer() :
-		program(UIBackground_vert, UIBackground_frag, "UIBackgroundRenderer") {
+	UIBackgroundRenderer::UIBackgroundRenderer() {
 		static const GLfloat g_quad_vertex_buffer_data[] = {
 			0.0f,  0.0f,  0.0f,
 			1.0f,  0.0f,  0.0f,

@@ -15,10 +15,6 @@ namespace render
 	int32_t bwo::VAO_impl::Divisor = 0;
 	int32_t bwo::VAO_impl::Offset = 0;
 
-	bwo::Texture::~Texture() {
-		glDeleteTextures(1, &this->ID);
-	}
-
 	std::string bwo::Program::listAll() {
 		std::stringstream out;
 

@@ -2,9 +2,6 @@
 
 #include "GLEnabler.h"
 
-#include "../shaders/Blit.vert.inc"
-#include "../shaders/Blit.frag.inc"
-
 namespace render
 {
 	void BlitRenderer::render(BlitRenderInfo const& blitInfos,
@@ -79,14 +76,7 @@ namespace render
 		this->render(infos, target, viewport, texture, depth_, flipUVvertical, glm::vec2(0.0f), maybeColor);
 	}
 
-	BlitRenderer::BlitRenderer() :
-		program(Blit_vert, Blit_frag, "BlitRenderer"),
-		UVflip("UVflip", this->program),
-		texture_t("texture_t", this->program, 0),
-		depth("depth", this->program),
-		offset("offset", this->program),
-		color("c", this->program) {
-
+	BlitRenderer::BlitRenderer() {
 		static const GLfloat g_quad_vertex_buffer_data[] = {
 			0.0f,  0.0f,
 			1.0f,  0.0f,
