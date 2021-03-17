@@ -116,7 +116,7 @@ namespace render
 		struct VAO_impl
 		{
 			static int32_t Stride;
-			static int32_t Offset;
+			static uintptr_t Offset;
 			static int32_t Attribute;
 			static int32_t Divisor;
 		};

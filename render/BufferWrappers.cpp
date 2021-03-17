@@ -13,7 +13,7 @@ namespace render
 	int32_t bwo::VAO_impl::Stride = 0;
 	int32_t bwo::VAO_impl::Attribute = 0;
 	int32_t bwo::VAO_impl::Divisor = 0;
-	int32_t bwo::VAO_impl::Offset = 0;
+	uintptr_t bwo::VAO_impl::Offset = 0;
 
 	std::string bwo::Program::listAll() {
 		std::stringstream out;
