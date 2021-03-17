@@ -27,10 +27,10 @@ namespace render
 				glm::vec2 uvTop = glm::vec2(charDim.x * x, charDim.y * y) / glm::vec2(texSize);
 				glm::vec2 uvSize = glm::vec2(charDim) / glm::vec2(texSize);
 
-				blitInfo.data.push_back({
+				blitInfo.addBlitInfo(
 					glm::vec4(uvTop, uvSize),
 					glm::vec4(),
-					0 }
+					0
 				);
 				count++;
 				if (count == 128) {
@@ -43,13 +43,12 @@ namespace render
 		fontInfoResult.name = name;
 
 		glm::vec2 worldSize = 2.0f * glm::vec2(charDim) / glm::vec2(this->fontAtlas.size);
-		//worldSize.y *= -1.0f;
 
 		for (int32_t i = 0; i < 128; i++) {
 			glm::vec2 worldTop = this->pos;
 			worldTop.y -= worldSize.y;
 
-			blitInfo.data[i].world = glm::vec4(worldTop, worldSize);
+			blitInfo.getDataMut()[i].world = glm::vec4(worldTop, worldSize);
 
 			fontInfoResult.charSize[i] = charDim;
 			glm::vec2 uv = worldTop;

@@ -30,14 +30,14 @@ namespace render
 		this->texture_t.set(texture);
 		this->VP.set(VP_);
 
-		this->infos.set(blitInfos.data);
+		this->infos.set(blitInfos.getData());
 
 		target.draw(
 			{ viewport[2], viewport[3] },
 			viewport,
 			[&]()
 		{
-			glDrawArraysInstanced(GL_TRIANGLES, 0, 6, static_cast<GLsizei>(blitInfos.data.size()));
+			glDrawArraysInstanced(GL_TRIANGLES, 0, 6, static_cast<GLsizei>(blitInfos.getData().size()));
 		});
 
 		this->VAO.unbind();

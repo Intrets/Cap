@@ -7,7 +7,7 @@
 namespace render
 {
 	void UIBackgroundRenderer::render(UIRenderInfo const& renderInfo, GLuint target, CameraInfo const& cameraInfo) {
-		if (renderInfo.data.empty()) {
+		if (renderInfo.getData().empty()) {
 			return;
 		}
 		this->VAO.bind();
@@ -22,9 +22,9 @@ namespace render
 		glBindFramebuffer(GL_FRAMEBUFFER, target);
 		glViewport(0, 0, cameraInfo.x, cameraInfo.y);
 
-		this->infos.set(renderInfo.data);
+		this->infos.set(renderInfo.getData());
 
-		glDrawArraysInstanced(GL_TRIANGLES, 0, 6, static_cast<int32_t>(renderInfo.data.size()));
+		glDrawArraysInstanced(GL_TRIANGLES, 0, 6, static_cast<int32_t>(renderInfo.getData().size()));
 	}
 
 	UIBackgroundRenderer::UIBackgroundRenderer() {

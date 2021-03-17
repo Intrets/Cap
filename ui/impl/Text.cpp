@@ -8,8 +8,6 @@
 #include <misc/FunctionHelpers.h>
 #include <mem/Locator.h>
 
-#include "impl/Text.h"
-
 namespace ui
 {
 	namespace impl

@@ -43,7 +43,6 @@ foreach(SHADER ${SHADER_FILES})
 	file(WRITE "${FULL_PATH}.vert.inc" "static const char* ${SHADER}_vert = R\"(${VERTEX_SHADER})\";\n")
 endforeach()
 
-
 make_module(${MODULE_NAME} "${MODULE_FILES}")
 
 target_include_directories(${MODULE_NAME} PRIVATE "./shaders")

@@ -14,6 +14,12 @@ namespace render
 
 	struct BlitArrayRenderInfo
 	{
+	private:
 		std::vector<SingleBlitArrayRenderInfo> data;
+
+	public:
+		std::vector<SingleBlitArrayRenderInfo> const& getData() const;
+
+		void addBlitInfo(glm::vec4 w, int32_t r, int32_t l);
 	};
 }

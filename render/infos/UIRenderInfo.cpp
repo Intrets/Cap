@@ -5,6 +5,10 @@
 
 namespace render
 {
+	std::vector<SingleUIRenderInfo> const& UIRenderInfo::getData() const {
+		return this->data;
+	}
+
 	void UIRenderInfo::addRectangle(glm::vec2 pos1, glm::vec2 pos2, glm::vec4 color) {
 		this->data.push_back({
 			pos2 - pos1,

@@ -12,7 +12,7 @@ namespace render
 							  bool flipUVvertical,
 							  glm::vec2 offset_,
 							  std::optional<glm::vec4> maybeColor) {
-		if (blitInfos.data.size() == 0) {
+		if (blitInfos.getData().size() == 0) {
 			return;
 		}
 
@@ -51,14 +51,14 @@ namespace render
 
 		this->texture_t.set(texture);
 
-		this->infos.set(blitInfos.data);
+		this->infos.set(blitInfos.getData());
 
 		target.draw(
 			{ viewport[2], viewport[3] },
 			viewport,
 			[&]()
 		{
-			glDrawArraysInstanced(GL_TRIANGLES, 0, 6, static_cast<GLsizei>(blitInfos.data.size()));
+			glDrawArraysInstanced(GL_TRIANGLES, 0, 6, static_cast<GLsizei>(blitInfos.getData().size()));
 		});
 
 		this->VAO.unbind();
@@ -72,7 +72,7 @@ namespace render
 							  bool flipUVvertical,
 							  std::optional<glm::vec4> maybeColor) {
 		BlitRenderInfo infos;
-		infos.data.push_back(info);
+		infos.addBlitInfo(info);
 		this->render(infos, target, viewport, texture, depth_, flipUVvertical, glm::vec2(0.0f), maybeColor);
 	}
 
