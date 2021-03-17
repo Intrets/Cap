@@ -1,6 +1,6 @@
 #include "SizeType.h"
 
-#include <glm/glm.hpp>
+#include <wglm/glm.hpp>
 #include <misc/Option.h>
 
 namespace ui

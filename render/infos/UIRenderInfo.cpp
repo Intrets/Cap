@@ -1,6 +1,6 @@
 #include "infos/UIRenderInfo.h"
 
-#include <glm/glm.hpp>
+#include <wglm/glm.hpp>
 #include <misc/Rectangle.h>
 
 namespace render

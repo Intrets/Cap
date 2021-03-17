@@ -1,6 +1,6 @@
 #include "textures/BlockIDTextures.h"
 
-#include <glm/glm.hpp>
+#include <wglm/glm.hpp>
 
 #include <mem/Locator.h>
 

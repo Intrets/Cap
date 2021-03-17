@@ -46,7 +46,7 @@ namespace render
 			this->textRenderInfo.data.push_back({
 				fontInfo.charUV[static_cast<int32_t>(c)],
 				glm::vec4(addPos, size),
-				2 });
+				0 });
 
 			this->nextPos.x += size.x;
 

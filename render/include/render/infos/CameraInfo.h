@@ -1,7 +1,7 @@
 #pragma once
 
-#include <glm/glm.hpp>
-#include <glm/gtx/transform.hpp>
+#include <wglm/glm.hpp>
+#include <wglm/gtx/transform.hpp>
 
 namespace render
 {

@@ -6,6 +6,17 @@ add_executable(${PROJECT_NAME}
 	MainLoop.cpp
 )
 
+# Full path of source code file in diagnostics
+if (MSVC)
+	target_compile_options(${PROJECT_NAME} PRIVATE /FC)
+endif()
+
+if (MSVC)
+	target_compile_options(${PROJECT_NAME} PRIVATE /W4 /WX)
+else()
+	target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic -Werror)
+endif()
+
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
@@ -17,4 +28,5 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 	game
 	misc
 	render
+	GLM
 )

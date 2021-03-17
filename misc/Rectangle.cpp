@@ -1,6 +1,6 @@
 #include "Rectangle.h"
 
-#include <glm/gtc/constants.hpp>
+#include <wglm/gtc/constants.hpp>
 
 #include "NumHelpers.h"
 

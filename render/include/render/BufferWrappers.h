@@ -1,7 +1,7 @@
 #pragma once
 
 #include <GL/glew.h>
-#include <glm/glm.hpp>
+#include <wglm/glm.hpp>
 
 #include <optional>
 #include <functional>

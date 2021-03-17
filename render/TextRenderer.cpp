@@ -1,6 +1,6 @@
 #include "TextRenderer.h"
 
-#include <glm/glm.hpp>
+#include <wglm/glm.hpp>
 #include <mem/Locator.h>
 
 #include "infos/TextRenderInfo.h"

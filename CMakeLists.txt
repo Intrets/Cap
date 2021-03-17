@@ -11,26 +11,14 @@ FIND_PACKAGE(GLFW3 REQUIRED)
 FIND_PACKAGE(GLEW REQUIRED)
 FIND_PACKAGE(GLI REQUIRED)
 
-# SET(CMAKE_CXX_STANDARD 17)
-# SET(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-set(CMAKE_CXX_FLAGS_DEBUG "/Zi /FC /Ob0 /Od /RTC1" CACHE INTERNAL "")
-
 PROJECT(game_thing LANGUAGES CXX)
-
-# set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-
-# ADD_EXECUTABLE(${PROJECT_NAME} main.cpp "ui/src/UI.cpp")
 
 add_subdirectory(ui)
 add_subdirectory(mem)
 add_subdirectory(misc)
 add_subdirectory(game)
 add_subdirectory(render)
+add_subdirectory(wrapped_glm)
 
 add_subdirectory(app)
-
-# TARGET_INCLUDE_DIRECTORIES(${PROJECT_NAME} PRIVATE src)
-# TARGET_COMPILE_FEATURES(${PROJECT_NAME} PRIVATE cxx_std_17)
-# SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES CXX_EXTENSIONS OFF)
 

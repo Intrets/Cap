@@ -1,6 +1,6 @@
 #pragma once
 
-#include <glm/glm.hpp>
+#include <wglm/glm.hpp>
 #include <string>
 
 constexpr uint32_t char_to_hex(const char c) {

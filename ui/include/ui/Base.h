@@ -5,7 +5,7 @@
 #include <functional>
 #include <vector>
 
-#include <glm/glm.hpp>
+#include <wglm/glm.hpp>
 
 #include <mem/ReferenceManager.h>
 #include <misc/Rectangle.h>

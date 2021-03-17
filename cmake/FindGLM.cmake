@@ -23,5 +23,5 @@ else()
 	message(FATAL_ERROR "GLM not found.")
 endif()
 
-add_library(GLM INTERFACE)
-target_include_directories(GLM INTERFACE ${GLM_INCLUDE_DIR})
+add_library(GLM_DO_NOT_USE INTERFACE)
+target_include_directories(GLM_DO_NOT_USE INTERFACE ${GLM_INCLUDE_DIR})

@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include <list>
 
-#include <glm/glm.hpp>
+#include <wglm/glm.hpp>
 
 #include <game/player/PlayerInfo.h>
 #include <mem/ReferenceManager.h>

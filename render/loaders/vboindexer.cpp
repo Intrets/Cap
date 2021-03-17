@@ -7,7 +7,7 @@
 #include <vector>
 #include <map>
 
-#include <glm/glm.hpp>
+#include <wglm/glm.hpp>
 
 #include <string.h> // for memcmp
 

@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include <glm/glm.hpp>
+#include <wglm/glm.hpp>
 
 namespace render
 {
