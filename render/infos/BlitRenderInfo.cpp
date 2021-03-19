@@ -11,7 +11,7 @@ namespace render
 	}
 
 	void BlitRenderInfo::addBlitInfo(glm::vec4 q, glm::vec4 w, int32_t r) {
-		this->data.push_back({ q,w,r });
+		this->data.push_back({ q, w, r });
 	}
 
 	void BlitRenderInfo::addBlitInfo(SingleBlitRenderInfo const& info) {

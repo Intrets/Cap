@@ -22,10 +22,8 @@ mat2 rotations[4] = mat2[](
 	     1,0)
 );
 
-
 void main(){
 	gl_Position = VP * vec4(vertex * position.zw + position.xy, depth, 1);
 
 	UVW = vec3(vertex * rotations[texture_rotation], float(layer));
 }
-

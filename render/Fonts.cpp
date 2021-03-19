@@ -24,7 +24,8 @@ namespace render
 		int count = 0;
 		for (int32_t y = 0; y < gridDim.y; y++) {
 			for (int32_t x = 0; x < gridDim.x; x++) {
-				glm::vec2 uvTop = glm::vec2(charDim.x * x, charDim.y * y) / glm::vec2(texSize);
+				glm::vec2 uvTop = glm::vec2(charDim.x * x, charDim.y * (y + 1)) / glm::vec2(texSize);
+				uvTop.y = 1.0f - uvTop.y;
 				glm::vec2 uvSize = glm::vec2(charDim) / glm::vec2(texSize);
 
 				blitInfo.addBlitInfo(
@@ -52,7 +53,6 @@ namespace render
 
 			fontInfoResult.charSize[i] = charDim;
 			glm::vec2 uv = worldTop;
-			uv.y -= worldSize.y;
 			fontInfoResult.charUV[i] = glm::vec4((uv + 1.0f) / 2.0f, worldSize / 2.0f);
 
 			this->pos.x += worldSize.x;

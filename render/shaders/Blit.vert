@@ -31,7 +31,7 @@ void main(){
 
 	gl_Position = vec4(vertex * worldTarget.zw + worldTarget.xy + offset, depth, 1);
 
-	UV = (v * vec2(1, UVflip[0])) + vec2(0, 1);
-	UV = (UV * UVSource.zw) + UVSource.xy;
+	UV = (v * UVSource.zw) + UVSource.xy;
+	UV.y = UV.y * UVflip.x + UVflip.y;
 }
 
