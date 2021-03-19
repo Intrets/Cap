@@ -5,10 +5,10 @@
 namespace ogs
 {
 	State::State() {
-		this->setBlend(BLEND::DISABLED);
+		this->setBlend(BLEND::ENABLED);
 		this->setBlendFunc(BLEND_FUNC::SRC_ALPHA__ONE_MINUS_SRC_ALPHA);
+		this->setDepthTest(DEPTH_TEST::ENABLED);
 		this->setDepthFunc(DEPTH_FUNC::LESS);
-		this->setDepthTest(DEPTH_TEST::DISABLED);
 		this->setPolygonMode(POLYGON_MODE::FILL);
 
 		glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, &this->MAX_COLOR_ATTACHMENTS);
@@ -118,7 +118,7 @@ namespace ogs
 		return {
 			BLEND::ENABLED,
 			BLEND_FUNC::SRC_ALPHA__ONE_MINUS_SRC_ALPHA,
-			DEPTH_TEST::DISABLED,
+			DEPTH_TEST::ENABLED,
 			DEPTH_FUNC::LESS,
 			POLYGON_MODE::FILL
 		};
@@ -127,10 +127,51 @@ namespace ogs
 	Configuration UIBackground() {
 		return {
 			BLEND::DISABLED,
-			BLEND_FUNC::SRC_ONE__ONE_MINUS_SRC_ALPHA,
+			BLEND_FUNC::UNSET,
 			DEPTH_TEST::ENABLED,
 			DEPTH_FUNC::LESS,
 			POLYGON_MODE::FILL
 		};
+	}
+
+	Configuration FontAtlasConfiguration() {
+		return {
+			BLEND::DISABLED,
+			BLEND_FUNC::UNSET,
+			DEPTH_TEST::DISABLED,
+			DEPTH_FUNC::UNSET,
+			POLYGON_MODE::FILL
+		};
+	}
+
+	Configuration WorldTileConfiguration() {
+		return {
+			BLEND::DISABLED,
+			BLEND_FUNC::UNSET,
+			DEPTH_TEST::DISABLED,
+			DEPTH_FUNC::UNSET,
+			POLYGON_MODE::FILL
+		};
+	}
+
+	Configuration BlockIDConfiguration() {
+		return {
+			BLEND::DISABLED,
+			BLEND_FUNC::UNSET,
+			DEPTH_TEST::DISABLED,
+			DEPTH_FUNC::UNSET,
+			POLYGON_MODE::FILL
+		};
+	}
+
+	Configuration::Configuration(BLEND blend_, BLEND_FUNC blendFunc_, DEPTH_TEST depthTest_, DEPTH_FUNC depthFunc_, POLYGON_MODE polygonMode_) :
+		blend(blend_),
+		blendFunc(blendFunc_),
+		depthTest(depthTest_),
+		depthFunc(depthFunc_),
+		polygonMode(polygonMode_) {
+	}
+
+	Configuration::Configuration() {
 	}
 }

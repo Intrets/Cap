@@ -22,13 +22,7 @@ namespace render
 
 		target.clear({ 0.5f, 0.5f, 0.5f, 1.0f }, true);
 
-		ogs::Configuration config{
-			BLEND::DISABLED,
-			BLEND_FUNC::SRC_ONE__ONE_MINUS_SRC_ALPHA,
-			DEPTH_TEST::DISABLED,
-			DEPTH_FUNC::LESS,
-			POLYGON_MODE::FILL
-		};
+		auto config = ogs::WorldTileConfiguration();
 
 		Locator<BlitRendererArrayTexture>::ref().render(
 			config,

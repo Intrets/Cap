@@ -5,6 +5,7 @@
 
 enum class BLEND
 {
+	UNSET,
 	ENABLED,
 	DISABLED,
 	MAX,
@@ -12,6 +13,7 @@ enum class BLEND
 
 enum class BLEND_FUNC
 {
+	UNSET,
 	SRC_ALPHA__ONE_MINUS_SRC_ALPHA,
 	SRC_ONE__ONE_MINUS_SRC_ALPHA,
 	MAX,
@@ -19,6 +21,7 @@ enum class BLEND_FUNC
 
 enum class DEPTH_TEST
 {
+	UNSET,
 	ENABLED,
 	DISABLED,
 	MAX,
@@ -26,12 +29,14 @@ enum class DEPTH_TEST
 
 enum class DEPTH_FUNC
 {
+	UNSET,
 	LESS,
 	MAX,
 };
 
 enum class POLYGON_MODE
 {
+	UNSET,
 	FILL,
 	LINE,
 	POINT,
@@ -40,17 +45,36 @@ enum class POLYGON_MODE
 
 namespace ogs
 {
+	struct State;
+
 	struct Configuration
 	{
+	public:
 		BLEND blend;
 		BLEND_FUNC blendFunc;
 		DEPTH_TEST depthTest;
 		DEPTH_FUNC depthFunc;
 		POLYGON_MODE polygonMode;
+
+		Configuration(
+			BLEND blend,
+			BLEND_FUNC blendFunc,
+			DEPTH_TEST depthTest,
+			DEPTH_FUNC depthFunc,
+			POLYGON_MODE polygonMode
+		);
+
+	private:
+		Configuration();
+
+		friend struct State;
 	};
 
 	Configuration TextConfiguration();
 	Configuration UIBackground();
+	Configuration FontAtlasConfiguration();
+	Configuration WorldTileConfiguration();
+	Configuration BlockIDConfiguration();
 
 	struct State
 	{

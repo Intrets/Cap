@@ -66,13 +66,7 @@ namespace render
 			}
 		}
 
-		ogs::Configuration config{
-			BLEND::DISABLED,
-			BLEND_FUNC::SRC_ONE__ONE_MINUS_SRC_ALPHA,
-			DEPTH_TEST::DISABLED,
-			DEPTH_FUNC::LESS,
-			POLYGON_MODE::FILL
-		};
+		auto config = ogs::FontAtlasConfiguration();
 
 		Locator<render::BlitRenderer>::ref().render(
 			config,
