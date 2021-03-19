@@ -6,7 +6,6 @@
 
 #include <misc/PathManager.h>
 
-#include "GLEnabler.h"
 #include "BlitRenderer.h"
 
 namespace render
@@ -32,18 +31,24 @@ namespace render
 			printf("Failed to load texture: %s\n\n", name.c_str());
 		}
 
-		GLEnabler glEnabler;
-		glEnabler.disable(GL_BLEND);
-
 		bwo::FrameBuffer target;
-		target.bindTextureLayer(GL_COLOR_ATTACHMENT0, this->textureArray, 0, this->arrayLayers);
+		target.bindTextureColorLayer(0, this->textureArray, 0, this->arrayLayers);
 
 		SingleBlitRenderInfo info{
 			{ 0.0f, 0.0f, 1.0f, 1.0f },
 			{ -1.0f, -1.0f, 2.0f, 2.0f },
 			0 };
 
+		ogs::Configuration config{
+			BLEND::DISABLED,
+			BLEND_FUNC::SRC_ALPHA__ONE_MINUS_SRC_ALPHA,
+			DEPTH_TEST::DISABLED,
+			DEPTH_FUNC::LESS,
+			POLYGON_MODE::FILL
+		};
+
 		Locator<BlitRenderer>::ref().render(
+			config,
 			info,
 			target,
 			{ 0, 0, this->textureArray.size.x, this->textureArray.size.y },

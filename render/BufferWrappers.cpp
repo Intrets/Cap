@@ -6,6 +6,8 @@
 #include <misc/PathManager.h>
 #include <render/loaders/ShaderLoader.h>
 
+#include "GLStateWrapper.h"
+
 namespace render
 {
 	std::unordered_map<int32_t, bwo::Program*> bwo::Program::refs;
@@ -156,35 +158,80 @@ namespace render
 		glDeleteFramebuffers(1, &this->ID);
 	}
 
-	void bwo::FrameBuffer::bindTexture(GLenum attachment, bwo::Texture2D const& texture, GLint mipmap) {
+	static auto getAttachmentEnum(int32_t number) {
+		assert(Locator<ogs::State>::ref().MAX_COLOR_ATTACHMENTS > number);
+
+		GLenum attachment = GL_COLOR_ATTACHMENT0;
+		switch (number) {
+			case 0:
+				attachment = GL_COLOR_ATTACHMENT0;
+				break;
+			case 1:
+				attachment = GL_COLOR_ATTACHMENT1;
+				break;
+			case 2:
+				attachment = GL_COLOR_ATTACHMENT2;
+				break;
+			case 3:
+				attachment = GL_COLOR_ATTACHMENT3;
+				break;
+			case 4:
+				attachment = GL_COLOR_ATTACHMENT4;
+				break;
+			case 5:
+				attachment = GL_COLOR_ATTACHMENT5;
+				break;
+			case 6:
+				attachment = GL_COLOR_ATTACHMENT6;
+				break;
+			case 7:
+				attachment = GL_COLOR_ATTACHMENT7;
+				break;
+			default:
+				assert(0);
+				break;
+		}
+		return attachment;
+	}
+
+	void bwo::FrameBuffer::bindTextureColor(int32_t attachmentNumber, bwo::Texture2D const& texture, GLint mipmap) {
+		assert(Locator<ogs::State>::ref().MAX_COLOR_ATTACHMENTS > attachmentNumber);
+
 		this->size = texture.size;
 		glBindFramebuffer(GL_FRAMEBUFFER, this->ID);
-		glFramebufferTexture(GL_FRAMEBUFFER, attachment, texture.ID, mipmap);
+		glFramebufferTexture(GL_FRAMEBUFFER, getAttachmentEnum(attachmentNumber), texture.ID, mipmap);
 	}
 
-	void bwo::FrameBuffer::bindTextureLayer(GLenum attachment, bwo::Texture2DArray const& texture, int32_t mipmap, int32_t layer) {
+	void bwo::FrameBuffer::bindTextureColorLayer(int32_t attachmentNumber, bwo::Texture2DArray const& texture, int32_t mipmap, int32_t layer) {
 		this->size.x = texture.size.x;
 		this->size.y = texture.size.y;
+
 		glBindFramebuffer(GL_FRAMEBUFFER, this->ID);
-		glFramebufferTextureLayer(GL_FRAMEBUFFER, attachment, texture.ID, mipmap, layer);
+		glFramebufferTextureLayer(GL_FRAMEBUFFER, getAttachmentEnum(attachmentNumber), texture.ID, mipmap, layer);
 	}
 
-	void bwo::FrameBuffer::draw(glm::ivec2 size_, glm::ivec4 viewport, std::function<void()> f) {
-		if (this->ID == 0) {
-			this->size = size_;
-			//assert(this->size.x >= viewport[0] + viewport[2] && this->size.y >= viewport[1] + viewport[3]);
-		}
-		else {
-			if (this->size != size_) {
-
-			}
-		}
-
+	void bwo::FrameBuffer::draw(glm::ivec4 viewport, std::function<void()> f) {
 		glBindFramebuffer(GL_FRAMEBUFFER, this->ID);
 		glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
 
 		f();
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
+
+	void bwo::FrameBuffer::clear(glm::vec4 color, bool depth) {
+		glBindFramebuffer(GL_FRAMEBUFFER, this->ID);
+		glClearColor(color.r, color.g, color.b, color.a);
+		if (depth) {
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		}
+		else {
+			glClear(GL_COLOR_BUFFER_BIT);
+		}
+	}
+
+	void bwo::FrameBuffer::clearDepth() {
+		glBindFramebuffer(GL_FRAMEBUFFER, this->ID);
+		glClear(GL_DEPTH_BUFFER_BIT);
 	}
 
 	bwo::Texture2D::Texture2D(GLuint handle) {

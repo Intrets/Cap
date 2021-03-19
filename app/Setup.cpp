@@ -16,6 +16,7 @@
 #include <render/BlitRenderer.h>
 #include <render/BlitRendererArray.h>
 #include <render/textures/BlockIDTextures.h>
+#include <render/GLStateWrapper.h>
 
 static void GLAPIENTRY
 MessageCallback(GLenum source,
@@ -161,9 +162,6 @@ bool initGLFW(GLFWwindow*& window, bool OPENGL_DEBUG) {
 
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
-
 	glfwSwapInterval(1);
 
 	if (OPENGL_DEBUG && (GLEW_ARB_debug_output || GLEW_KHR_debug)) {
@@ -188,6 +186,8 @@ bool initGLFW(GLFWwindow*& window, bool OPENGL_DEBUG) {
 }
 
 void initManagers(std::string const& resourceRootPath) {
+	Locator<ogs::State>::init();
+
 	Locator<misc::PathManager>::init(resourceRootPath);
 	Locator<misc::OptionManager>::init();
 

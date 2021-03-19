@@ -1,10 +1,11 @@
 #include "BlitRenderer.h"
 
-#include "GLEnabler.h"
+#include <mem/Locator.h>
 
 namespace render
 {
-	void BlitRenderer::render(BlitRenderInfo const& blitInfos,
+	void BlitRenderer::render(ogs::Configuration const& config,
+							  BlitRenderInfo const& blitInfos,
 							  bwo::FrameBuffer& target,
 							  glm::ivec4 viewport,
 							  bwo::Texture2D const& texture,
@@ -16,11 +17,10 @@ namespace render
 			return;
 		}
 
+		Locator<ogs::State>::ref().setState(config);
+
 		this->VAO.bind();
 		this->program.use();
-
-		GLEnabler glEnabler;
-		glEnabler.enable(GL_BLEND);
 
 		this->offset.set(offset_);
 
@@ -32,21 +32,17 @@ namespace render
 		}
 
 		if (depth_.has_value()) {
-			glEnabler.enable(GL_DEPTH_TEST);
 			this->depth.set(depth_.value());
 		}
 		else {
-			glEnabler.disable(GL_DEPTH_TEST);
 			this->depth.set(0.0f);
 		}
 
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
 		if (flipUVvertical) {
-			this->UVflip.set(-1.0f);
+			this->UVflip.set({ -1.0f, 1.0f });
 		}
 		else {
-			this->UVflip.set(1.0f);
+			this->UVflip.set({ 1.0f, 0.0f });
 		}
 
 		this->texture_t.set(texture);
@@ -54,7 +50,6 @@ namespace render
 		this->infos.set(blitInfos.getData());
 
 		target.draw(
-			{ viewport[2], viewport[3] },
 			viewport,
 			[&]()
 		{
@@ -64,7 +59,8 @@ namespace render
 		this->VAO.unbind();
 	}
 
-	void BlitRenderer::render(SingleBlitRenderInfo const& info,
+	void BlitRenderer::render(ogs::Configuration const& config,
+							  SingleBlitRenderInfo const& info,
 							  bwo::FrameBuffer& target,
 							  glm::ivec4 viewport,
 							  bwo::Texture2D const& texture,
@@ -73,7 +69,7 @@ namespace render
 							  std::optional<glm::vec4> maybeColor) {
 		BlitRenderInfo infos;
 		infos.addBlitInfo(info);
-		this->render(infos, target, viewport, texture, depth_, flipUVvertical, glm::vec2(0.0f), maybeColor);
+		this->render(config, infos, target, viewport, texture, depth_, flipUVvertical, glm::vec2(0.0f), maybeColor);
 	}
 
 	BlitRenderer::BlitRenderer() {

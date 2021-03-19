@@ -272,10 +272,13 @@ namespace render
 			FrameBuffer();
 			~FrameBuffer();
 
-			void bindTexture(GLenum attachment, bwo::Texture2D const& texture, GLint mipmap);
-			void bindTextureLayer(GLenum attachment, bwo::Texture2DArray const& texture, int32_t mipmap, int32_t layer);
+			void bindTextureColor(int32_t attachmentNumber, bwo::Texture2D const& texture, GLint mipmap);
+			void bindTextureColorLayer(int32_t attachmentNumber, bwo::Texture2DArray const& texture, int32_t mipmap, int32_t layer);
 
-			void draw(glm::ivec2 size_, glm::ivec4 viewport, std::function<void()> f);
+			void draw(glm::ivec4 viewport, std::function<void()> f);
+
+			void clear(glm::vec4 color, bool depth);
+			void clearDepth();
 
 			NOCOPYMOVE(FrameBuffer);
 		};

@@ -1,10 +1,9 @@
 #include "BlitRendererArray.h"
 
-#include "GLEnabler.h"
-
 namespace render
 {
-	void BlitRendererArrayTexture::render(BlitArrayRenderInfo const& blitInfos,
+	void BlitRendererArrayTexture::render(ogs::Configuration const& config,
+										  BlitArrayRenderInfo const& blitInfos,
 										  bwo::FrameBuffer& target,
 										  glm::ivec4 viewport,
 										  bwo::Texture2DArray const& texture,
@@ -13,19 +12,12 @@ namespace render
 		this->VAO.bind();
 		this->program.use();
 
-		GLEnabler glEnabler;
-		glEnabler.enable(GL_BLEND);
-
 		if (depth_.has_value()) {
-			glEnabler.enable(GL_DEPTH_TEST);
 			this->depth.set(depth_.value());
 		}
 		else {
-			glEnabler.disable(GL_DEPTH_TEST);
 			this->depth.set(0.0f);
 		}
-
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 		this->texture_t.set(texture);
 		this->VP.set(VP_);
@@ -33,7 +25,6 @@ namespace render
 		this->infos.set(blitInfos.getData());
 
 		target.draw(
-			{ viewport[2], viewport[3] },
 			viewport,
 			[&]()
 		{

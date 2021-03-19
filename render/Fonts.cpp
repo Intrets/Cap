@@ -66,7 +66,16 @@ namespace render
 			}
 		}
 
+		ogs::Configuration config{
+			BLEND::DISABLED,
+			BLEND_FUNC::SRC_ONE__ONE_MINUS_SRC_ALPHA,
+			DEPTH_TEST::DISABLED,
+			DEPTH_FUNC::LESS,
+			POLYGON_MODE::FILL
+		};
+
 		Locator<render::BlitRenderer>::ref().render(
+			config,
 			blitInfo,
 			this->buffer,
 			glm::ivec4(0, 0, this->fontAtlas.size.x, this->fontAtlas.size.y),
@@ -86,7 +95,7 @@ namespace render
 	Fonts::Fonts() :
 		fontAtlas(render::bwo::Texture2DHelper::makeNoFiltering(glm::ivec2(256))) {
 
-		this->buffer.bindTexture(GL_COLOR_ATTACHMENT0, this->fontAtlas, 0);
+		this->buffer.bindTextureColor(0, this->fontAtlas, 0);
 
 		this->pos = glm::vec2(-1.0f, 1.0f);
 

@@ -11,6 +11,7 @@
 #include "infos/RenderInfo.h"
 #include "BlitRendererArray.h"
 #include "textures/BlockIDTextures.h"
+#include "GLStateWrapper.h"
 
 namespace render
 {
@@ -19,11 +20,18 @@ namespace render
 
 		Locator<misc::Timer>::ref().newTiming("Render");
 
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		target.clear({ 0.5f, 0.5f, 0.5f, 1.0f }, true);
+
+		ogs::Configuration config{
+			BLEND::DISABLED,
+			BLEND_FUNC::SRC_ONE__ONE_MINUS_SRC_ALPHA,
+			DEPTH_TEST::DISABLED,
+			DEPTH_FUNC::LESS,
+			POLYGON_MODE::FILL
+		};
 
 		Locator<BlitRendererArrayTexture>::ref().render(
+			config,
 			renderInfo.tileRenderInfo,
 			target,
 			{ 0, 0, renderInfo.cameraInfo.x, renderInfo.cameraInfo.y },
@@ -32,15 +40,13 @@ namespace render
 			renderInfo.cameraInfo.VP
 		);
 
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glClear(GL_DEPTH_BUFFER_BIT);
+		target.clearDepth();
 
 		this->uiBackgroundRenderer.render(renderInfo.uiRenderInfo, 0, renderInfo.cameraInfo);
 
 		this->textRenderer.render(renderInfo.textRenderInfo,
 								  Locator<Fonts>::ref(),
-								  target,
-								  renderInfo.cameraInfo);
+								  target);
 
 		if (misc::Option<misc::OPTION::GR_DEBUG, bool>::getVal()) {
 			//this->debugRenderer.render(0, renderInfo);

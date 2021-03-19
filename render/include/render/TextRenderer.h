@@ -18,8 +18,7 @@ namespace render
 	public:
 		void render(TextRenderInfo const& textRenderInfo,
 					Fonts const& fonts,
-					bwo::FrameBuffer& target,
-					CameraInfo const& camInfo);
+					bwo::FrameBuffer& target);
 
 		TextRenderer();
 		~TextRenderer();

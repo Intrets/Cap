@@ -301,7 +301,7 @@ namespace ui
 			constrainHeight({ SIZETYPE::FH, 1.2f });
 			textButton("test button");
 
-			this->addUI(Global::pop());
+			this->UIs.push_back(Global::pop());
 		}
 
 		//// Inventory
@@ -384,6 +384,7 @@ namespace ui
 
 			this->UIs.push_back(std::move(movement));
 		}
+
 	}
 
 	void State::clear() {

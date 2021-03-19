@@ -9,6 +9,11 @@
 #include "../shaders/BlitArray.vert.inc"
 #include "../shaders/BlitArray.frag.inc"
 
+namespace ogs
+{
+	struct Configuration;
+}
+
 namespace render
 {
 	class BlitRendererArrayTexture
@@ -34,7 +39,8 @@ namespace render
 		bwo::UniformMatrix4fv VP{ "VP", program };
 
 	public:
-		void render(BlitArrayRenderInfo const& blitInfos,
+		void render(ogs::Configuration const& config,
+					BlitArrayRenderInfo const& blitInfos,
 					bwo::FrameBuffer& target,
 					glm::ivec4 viewport,
 					bwo::Texture2DArray const& texture,

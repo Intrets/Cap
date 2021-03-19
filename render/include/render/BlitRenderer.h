@@ -5,6 +5,7 @@
 
 #include "BufferWrappers.h"
 #include "infos/BlitRenderInfo.h"
+#include "GLStateWrapper.h"
 
 #include "../shaders/Blit.vert.inc"
 #include "../shaders/Blit.frag.inc"
@@ -30,7 +31,7 @@ namespace render
 			> VAO{ quad, infos };
 
 		bwo::UniformTexture2D texture_t{ "texture_t", program,0 };
-		bwo::Uniform1f UVflip{ "UVflip", program };
+		bwo::Uniform2fv UVflip{ "UVflip", program };
 		bwo::Uniform1f depth{ "depth", program };
 		bwo::Uniform2fv offset{ "offset", program };
 		bwo::Uniform4fv color{ "c", program };
@@ -38,7 +39,8 @@ namespace render
 	public:
 		int32_t const MAX_BATCH_SIZE = 5000;
 
-		void render(BlitRenderInfo const& blitInfos,
+		void render(ogs::Configuration const& config,
+					BlitRenderInfo const& blitInfos,
 					bwo::FrameBuffer& target,
 					glm::ivec4 viewport,
 					bwo::Texture2D const& texture,
@@ -47,7 +49,8 @@ namespace render
 					glm::vec2 offset,
 					std::optional<glm::vec4> color = std::nullopt);
 
-		void render(SingleBlitRenderInfo const& blitInfo,
+		void render(ogs::Configuration const&,
+					SingleBlitRenderInfo const& blitInfo,
 					bwo::FrameBuffer& target,
 					glm::ivec4 viewport,
 					bwo::Texture2D const& texture,

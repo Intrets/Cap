@@ -15,7 +15,6 @@ set(MODULE_FILES
 	UIBackgroundRenderer
 	TextRenderer
 	BlitRendererArray
-	GLEnabler
 	infos/RenderInfo
 	infos/TextRenderInfo
 	infos/UIRenderInfo
@@ -25,6 +24,7 @@ set(MODULE_FILES
 	infos/BlitRenderInfo
 	Fonts
 	textures/BlockIDTextures
+	GLStateWrapper
 )
 
 set(SHADER_FILES

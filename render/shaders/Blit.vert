@@ -17,7 +17,7 @@ mat2 rotations[4] = mat2[](
 	     1,0)
 );
 
-uniform float UVflip;
+uniform vec2 UVflip;
 uniform float depth;
 uniform vec2 offset;
 
@@ -31,7 +31,7 @@ void main(){
 
 	gl_Position = vec4(vertex * worldTarget.zw + worldTarget.xy + offset, depth, 1);
 
-	UV = v * vec2(1, UVflip) + vec2(0,1);
+	UV = (v * vec2(1, UVflip[0])) + vec2(0, 1);
 	UV = (UV * UVSource.zw) + UVSource.xy;
 }
 

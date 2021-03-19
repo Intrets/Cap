@@ -74,7 +74,7 @@ void mainLoop(GLFWwindow* window) {
 				   ui::WINDOW::TYPE::MOVE);
 		game::constructDebugUI();
 
-		uiState.addUI(ui::Global::pop());
+		uiState.UIs.push_back(ui::Global::pop());
 	}
 
 	render::Renderer renderer;

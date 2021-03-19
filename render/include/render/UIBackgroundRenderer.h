@@ -4,6 +4,7 @@
 
 #include "infos/UIRenderInfo.h"
 #include "BufferWrappers.h"
+#include "GLStateWrapper.h"
 
 #include "../shaders/UIBackground.vert.inc"
 #include "../shaders/UIBackground.frag.inc"
@@ -33,7 +34,10 @@ namespace render
 			> VAO{ quad, infos };
 
 	public:
-		void render(UIRenderInfo const& renderInfo, GLuint target, CameraInfo const& camInfo);
+		void render(UIRenderInfo const& renderInfo,
+					GLuint target,
+					CameraInfo const& camInfo
+		);
 
 		UIBackgroundRenderer();
 		~UIBackgroundRenderer();
