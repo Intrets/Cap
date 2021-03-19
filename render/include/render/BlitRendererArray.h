@@ -11,7 +11,7 @@
 
 namespace ogs
 {
-	struct Configuration;
+	class Configuration;
 }
 
 namespace render

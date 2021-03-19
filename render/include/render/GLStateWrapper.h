@@ -45,16 +45,16 @@ enum class POLYGON_MODE
 
 namespace ogs
 {
-	struct State;
+	class State;
 
-	struct Configuration
+	class Configuration
 	{
 	public:
-		BLEND blend;
-		BLEND_FUNC blendFunc;
-		DEPTH_TEST depthTest;
-		DEPTH_FUNC depthFunc;
-		POLYGON_MODE polygonMode;
+		BLEND blend = BLEND::UNSET;
+		BLEND_FUNC blendFunc = BLEND_FUNC::UNSET;
+		DEPTH_TEST depthTest = DEPTH_TEST::UNSET;
+		DEPTH_FUNC depthFunc = DEPTH_FUNC::UNSET;
+		POLYGON_MODE polygonMode = POLYGON_MODE::UNSET;
 
 		Configuration(
 			BLEND blend,
@@ -65,9 +65,9 @@ namespace ogs
 		);
 
 	private:
-		Configuration();
+		Configuration() = default;
 
-		friend struct State;
+		friend class State;
 	};
 
 	Configuration TextConfiguration();
@@ -76,8 +76,9 @@ namespace ogs
 	Configuration WorldTileConfiguration();
 	Configuration BlockIDConfiguration();
 
-	struct State
+	class State
 	{
+	public:
 		Configuration configuration;
 
 		int32_t MAX_COLOR_ATTACHMENTS;

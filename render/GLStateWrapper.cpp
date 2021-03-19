@@ -171,7 +171,4 @@ namespace ogs
 		depthFunc(depthFunc_),
 		polygonMode(polygonMode_) {
 	}
-
-	Configuration::Configuration() {
-	}
 }
