@@ -419,9 +419,6 @@ namespace render
 			int32_t unit;
 
 		public:
-			[[deprecated]]
-			void set(GLuint texture);
-
 			void set(Texture2DArray const& texture);
 
 			UniformTexture2DArray() = default;
@@ -460,6 +457,7 @@ namespace render
 
 		template<class T>
 		inline void ArrayBuffer<T>::set(uint32_t size, std::vector<T> const& data) {
+			assert(size <= data.size());
 			this->setRaw(static_cast<uint32_t>(sizeof(T) * size), &data[0]);
 		}
 

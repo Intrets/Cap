@@ -348,3 +348,4 @@ resources/saves/*
 !resources/saves/README
 resources/config/*
 !resources/config/README
+out

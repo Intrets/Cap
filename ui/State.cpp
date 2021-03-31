@@ -346,39 +346,39 @@ namespace ui
 
 			movement.get()->addGlobalBind({ CONTROL::KEY::LEFT, CONTROL::STATE::PRESSED | CONTROL::STATE::DOWN }, [&](PlayerInfo& playerInfo, Base* self_) -> CallBackBindResult
 			{
-				playerInfo.pos.x -= 1.0f;
+				playerInfo.pos.x -= 0.2f;
 				return BIND::RESULT::CONTINUE;
 			});
 
 			movement.get()->addGlobalBind({ CONTROL::KEY::RIGHT, CONTROL::STATE::PRESSED | CONTROL::STATE::DOWN }, [&](PlayerInfo& playerInfo, Base* self_) -> CallBackBindResult
 			{
-				playerInfo.pos.x += 1.0f;
+				playerInfo.pos.x += 0.2f;
 				return BIND::RESULT::CONTINUE;
 			});
 
 			movement.get()->addGlobalBind({ CONTROL::KEY::DOWN, CONTROL::STATE::PRESSED | CONTROL::STATE::DOWN }, [&](PlayerInfo& playerInfo, Base* self_) -> CallBackBindResult
 			{
-				playerInfo.pos.y -= 1.0f;
+				playerInfo.pos.y -= 0.2f;
 				return BIND::RESULT::CONTINUE;
 			});
 
 			movement.get()->addGlobalBind({ CONTROL::KEY::UP, CONTROL::STATE::PRESSED | CONTROL::STATE::DOWN }, [&](PlayerInfo& playerInfo, Base* self_) -> CallBackBindResult
 			{
-				playerInfo.pos.y += 1.0f;
+				playerInfo.pos.y += 0.2f;
 				return BIND::RESULT::CONTINUE;
 			});
 
 			movement.get()->addGlobalBind({ CONTROL::KEY::SCROLL_UP }, [&](PlayerInfo& playerInfo, Base* self_) -> CallBackBindResult
 			{
 				using viewport = misc::Option<misc::OPTION::CL_VIEWPORTSCALE, float>;
-				viewport::setVal(viewport::getVal() * 0.8f);
+				viewport::setVal(viewport::getVal() / 1.1f);
 				return BIND::RESULT::CONTINUE;
 			});
 
 			movement.get()->addGlobalBind({ CONTROL::KEY::SCROLL_DOWN }, [&](PlayerInfo& playerInfo, Base* self_) -> CallBackBindResult
 			{
 				using viewport = misc::Option<misc::OPTION::CL_VIEWPORTSCALE, float>;
-				viewport::setVal(viewport::getVal() / 0.8f);
+				viewport::setVal(viewport::getVal() * 1.1f);
 				return BIND::RESULT::CONTINUE;
 			});
 

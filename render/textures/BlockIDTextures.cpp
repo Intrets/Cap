@@ -39,7 +39,7 @@ namespace render
 			{ -1.0f, -1.0f, 2.0f, 2.0f },
 			0 };
 
-		auto config = ogs::BlockIDConfiguration();
+		auto  config = ogs::BlockIDConfiguration();
 
 		Locator<BlitRenderer>::ref().render(
 			config,
@@ -52,17 +52,17 @@ namespace render
 		);
 	}
 
-	GLuint BlockIDTextures::getTextureArrayID() {
-		return this->textureArray.ID;
-	}
-
 	bwo::Texture2DArray const& BlockIDTextures::getTextureArray() {
 		return this->textureArray;
 	}
 
 	BlockIDTextures::BlockIDTextures() :
 		textureArray(bwo::Texture2DArrayHelper::makeLinearFiltering({ 128, 128, 1024 })) {
-		const std::string textures_raw[] = { "weird_ground.dds", "weird_moss.dds" };
+		const std::string textures_raw[] = {
+			"weird_ground.dds",
+			"weird_moss.dds",
+			"gnome.dds",
+		};
 
 		for (auto& s : textures_raw) {
 			this->loadBlockTexture(s);

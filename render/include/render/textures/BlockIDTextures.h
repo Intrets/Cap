@@ -16,7 +16,6 @@ namespace render
 	public:
 		int32_t getBlockTextureID(std::string);
 		void loadBlockTexture(std::string);
-		GLuint getTextureArrayID();
 		bwo::Texture2DArray const& getTextureArray();
 
 		NOCOPYMOVE(BlockIDTextures);

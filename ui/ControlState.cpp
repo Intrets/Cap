@@ -4,8 +4,7 @@
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-
-#include <wglm/detail/func_common.hpp>
+#include <wglm/common.hpp>
 
 namespace ui
 {

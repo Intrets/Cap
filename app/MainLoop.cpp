@@ -35,7 +35,6 @@ void scroll_callback(GLFWwindow* w, double xoffset, double yoffset) {
 	controlState.scroll_callback(w, xoffset, yoffset);
 }
 
-
 void prepareRender(GLFWwindow* window, render::RenderInfo& renderInfo, PlayerInfo& playerInfo) {
 	auto& gameState = playerInfo.gameState;
 	auto& uiState = playerInfo.uiState;
@@ -79,7 +78,7 @@ void mainLoop(GLFWwindow* window) {
 
 	render::Renderer renderer;
 
-	PlayerInfo playerInfo{ { 0, 0 }, gameState, controlState, uiState };
+	PlayerInfo playerInfo{ { 15, 15 }, gameState, controlState, uiState };
 
 	glfwSetCharCallback(window, char_callback);
 	glfwSetKeyCallback(window, key_callback);
@@ -87,6 +86,10 @@ void mainLoop(GLFWwindow* window) {
 	glfwSetScrollCallback(window, scroll_callback);
 
 	for (;;) {
+		Locator<misc::Timer>::ref().newTiming("game logic");
+		gameState.runTick();
+		Locator<misc::Timer>::ref().endTiming("game logic");
+
 		uiState.updateSize(window);
 
 		render::RenderInfo renderInfo;

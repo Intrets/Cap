@@ -18,9 +18,28 @@ int main(int argc, char* argv[]) {
 		resourcesPath = std::filesystem::path(argv[1]);
 	}
 	else {
-		std::cout << "No custom path specified, assuming current dir has the resources folder.\n";
-		std::cout << "Can take a single nameless argument to set resources folder.";
-		resourcesPath = std::filesystem::current_path().append("resources");
+		std::cout << "No custom path specified, walking up current dir and looking for a resources folder.\n";
+		std::cout << "Can take a single nameless argument to set resources folder.\n";
+
+		resourcesPath = std::filesystem::current_path();
+		auto rootPath = resourcesPath.root_path();
+
+		// Limit the search in case something goes wrong somehow
+		constexpr size_t max_search = 100;
+		size_t i = 0;
+		for (; i < max_search; i++) {
+			if (std::filesystem::exists(resourcesPath / "resources")) {
+				resourcesPath /= "resources";
+				std::cout << "Found Resources path.\n";
+				break;
+			}
+
+			resourcesPath = resourcesPath.parent_path();
+		}
+		if (i == max_search) {
+			std::cerr << "Fatal error: could not find Resources folder.";
+			return 0;
+		}
 	}
 
 	std::cout << "Resources path: " << std::filesystem::absolute(resourcesPath) << "\n";

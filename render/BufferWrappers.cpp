@@ -92,12 +92,6 @@ namespace render
 		this->location = glGetUniformLocation(program.ID, name.c_str());
 	}
 
-	void bwo::UniformTexture2DArray::set(GLuint texture) {
-		glActiveTexture(GL_TEXTURE0 + this->unit);
-		glBindTexture(GL_TEXTURE_2D_ARRAY, texture);
-		glUniform1i(location, this->unit);
-	}
-
 	void bwo::UniformTexture2DArray::set(Texture2DArray const& texture) {
 		glActiveTexture(GL_TEXTURE0 + this->unit);
 		glBindTexture(GL_TEXTURE_2D_ARRAY, texture.ID);

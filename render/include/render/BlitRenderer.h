@@ -30,7 +30,7 @@ namespace render
 			bwo::VInfo<int32_t, 1>>
 			> VAO{ quad, infos };
 
-		bwo::UniformTexture2D texture_t{ "texture_t", program,0 };
+		bwo::UniformTexture2D texture_t{ "texture_t", program, 0 };
 		bwo::Uniform2fv UVflip{ "UVflip", program };
 		bwo::Uniform1f depth{ "depth", program };
 		bwo::Uniform2fv offset{ "offset", program };
