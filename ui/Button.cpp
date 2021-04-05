@@ -31,7 +31,7 @@ namespace ui
 		this->down = false;
 	}
 
-	glm::vec2 const& Button::getMousePressOffset() const {
+	glm::ivec2 const& Button::getMousePressOffset() const {
 		return this->mousePressOffset;
 	}
 
@@ -68,7 +68,7 @@ namespace ui
 		{
 			auto self = static_cast<Button*>(self_);
 			self->down = true;
-			self->mousePressOffset = playerInfo.uiState.getCursorPositionScreen() - self->getScreenRectangle().getTopLeft();
+			self->mousePressOffset = playerInfo.uiState.getCursor() - self->getScreenRectangle().getTopLeft();
 			return self->onPress(playerInfo, self_) | BIND::RESULT::FOCUS | BIND::RESULT::CONSUME;
 		});
 
@@ -109,7 +109,13 @@ namespace ui
 		}
 
 		depth = this->main.get()->addRenderInfo(gameState, renderInfo, depth + 1);
-		renderInfo.uiRenderInfo.addRectangle(this->screenRectangle.getBottomLeft(), this->screenRectangle.getTopRight(), c, depth++);
+		renderInfo.uiRenderInfo.addPixelRectangle(
+			this->screenRectangle.getPixelSize(),
+			this->screenRectangle.getBottomLeft(),
+			this->screenRectangle.getTopRight(),
+			c,
+			depth++
+		);
 		return depth;
 	}
 }

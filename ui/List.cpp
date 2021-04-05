@@ -34,7 +34,7 @@ namespace ui
 					ScreenRectangle newRec = element.get()->updateSize(rec);
 					glm::vec2 p = rec.getBottomLeft() - newRec.getBottomLeft();
 					element.get()->translate(p);
-					rec.translateBottom(newRec.getHeight());
+					rec.translateBot(newRec.getHeight());
 				}
 				newScreenRectangle.setTopRight(rec.getBottomRight());
 				break;
@@ -84,7 +84,7 @@ namespace ui
 					ScreenRectangle newRec = element.get()->updateSize(rec);
 					glm::vec2 p = rec.getBottomLeft() - newRec.getBottomLeft();
 					element.get()->translate(p);
-					rec.translateBottom(newRec.getHeight());
+					rec.translateBot(newRec.getHeight());
 				}
 				newScreenRectangle.setTopRight(rec.getBottomRight());
 				break;

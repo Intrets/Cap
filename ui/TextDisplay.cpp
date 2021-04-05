@@ -132,7 +132,7 @@ namespace ui
 	}
 
 	ScreenRectangle TextDisplay::updateSize(ScreenRectangle newScreenRectangle) {
-		if (!newScreenRectangle.equals(this->screenRectangle)) {
+		if (newScreenRectangle != this->screenRectangle) {
 			this->text.invalidateCache();
 		}
 		if (this->shrinkToFit) {
@@ -141,9 +141,10 @@ namespace ui
 				this->text.makeRenderInfo(newScreenRectangle, render::FONT::ROBOTO_12, this->lineWrap, this->clickSupport);
 			}
 
+			// TODO: text rendering with pixels
 			auto& renderInfo = this->text.cachedRenderInfo.value();
 			glm::vec2 screenSize = renderInfo.getRenderedScreenSize();
-			screenSize = glm::min(newScreenRectangle.getAbsSize(), screenSize);
+			//screenSize = glm::min(newScreenRectangle.getAbsSize(), screenSize);
 			newScreenRectangle.setWidth(screenSize.x);
 			newScreenRectangle.setHeight(screenSize.y);
 			this->screenRectangle = newScreenRectangle;
@@ -181,7 +182,13 @@ namespace ui
 		depth = this->text.addRenderInfo(this->screenRectangle, renderInfo, render::FONT::ROBOTO_12, depth, this->lineWrap, ticks, this->active, this->clickSupport, cursorType);
 
 		if (this->active) {
-			renderInfo.uiRenderInfo.addRectangle(this->screenRectangle.getBottomLeft(), this->screenRectangle.getTopRight(), COLORS::UI::FOCUSSED, depth++);
+			renderInfo.uiRenderInfo.addPixelRectangle(
+				this->screenRectangle.getPixelSize(),
+				this->screenRectangle.getBottomLeft(),
+				this->screenRectangle.getTopRight(),
+				COLORS::UI::FOCUSSED,
+				depth++
+			);
 
 			this->ticksSelected++;
 		}

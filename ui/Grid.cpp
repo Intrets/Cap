@@ -13,8 +13,8 @@ namespace ui
 		this->screenRectangle = newScreenRectangle;
 
 		//glm::vec2 pos = newScreenRectangle.getTopLeft();
-		glm::vec2 pos = glm::vec2(0.0f, 0.0f);
-		glm::vec2 gridSize = newScreenRectangle.getAbsSize() / glm::vec2(size);
+		glm::ivec2 pos = glm::ivec2(0, 0);
+		glm::ivec2 gridSize = newScreenRectangle.getSize() / glm::ivec2(size);
 
 		ScreenRectangle rec = newScreenRectangle;
 		rec.setWidth(gridSize.x);
@@ -34,7 +34,7 @@ namespace ui
 				pos.x += gridSize.x;
 				i++;
 			}
-			pos.x = 0.0f;
+			pos.x = 0;
 			pos.y -= gridSize.y;
 		}
 		return newScreenRectangle;

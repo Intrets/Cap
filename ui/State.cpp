@@ -54,6 +54,14 @@ namespace ui
 		return glm::clamp(this->getCursorPositionScreen(), -c, c);
 	}
 
+	glm::ivec2 State::getCursor() const {
+		return this->cursor;
+	}
+
+	glm::ivec2 State::getWindowSize() const {
+		return this->windowSize;
+	}
+
 	void State::runUIBinds(PlayerInfo& playerInfo) {
 		auto front = this->runFrontBinds(playerInfo);
 
@@ -156,9 +164,7 @@ namespace ui
 			return false;
 		}
 
-		ScreenRectangle r;
-		r.setPixelSize(glm::ivec2(x, y));
-		r.set({ -1,-1 }, { 1,1 });
+		ScreenRectangle r{ glm::ivec2(x, y) };
 		for (auto& UI : this->UIs) {
 			UI.get()->updateSize(r);
 		}
@@ -172,6 +178,10 @@ namespace ui
 
 		int32_t frameSizeX, frameSizeY;
 		glfwGetFramebufferSize(window, &frameSizeX, &frameSizeY);
+
+		this->windowSize = glm::ivec2(frameSizeX, frameSizeY);
+		this->cursor = glm::ivec2(x, frameSizeY - y);
+
 		x = x / frameSizeX;
 		y = y / frameSizeY;
 		y = 1 - y;
@@ -292,7 +302,14 @@ namespace ui
 			Global::push();
 
 			hideable();
-			window("Inventory", { {0.5f - 0.04f, -0.1f - 0.04f}, {1.0f - 0.04f, 1.0f - 0.04f} },
+			ScreenRectangle rec;
+			rec.setWidth(400);
+			rec.setHeight(500);
+			rec.translate({ 0,1000 });
+
+
+			window("Inventory",
+				   rec,
 				   WINDOW::TYPE::MINIMISE |
 				   WINDOW::TYPE::MOVE |
 				   WINDOW::TYPE::RESIZE |

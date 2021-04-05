@@ -65,7 +65,7 @@ namespace ui
 
 	WeakReference<Base, TextDisplay> text(std::string const& t, bool shrinkToFit = true);
 	WeakReference<Base, Button> button(bool shrinkToFit = false);
-	WeakReference<Base, Window> window(std::string const& title, Rect size, int32_t types);
+	WeakReference<Base, Window> window(std::string const& title, ScreenRectangle size, int32_t types);
 	WeakReference<Base, Hideable> hideable();
 
 	WeakReference<Base, ColoredBackground> background(glm::vec4 color);

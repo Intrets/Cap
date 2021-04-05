@@ -156,7 +156,7 @@ namespace ui
 		return res;
 	}
 
-	WeakReference<Base, Window> window(std::string const& title, Rect size, int32_t types) {
+	WeakReference<Base, Window> window(std::string const& title, ScreenRectangle size, int32_t types) {
 		const int32_t resizeSliverSize = 7;
 
 		auto mainPad = Global::getManager().makeUniqueRef<Pad>();
@@ -185,7 +185,7 @@ namespace ui
 		windowPtr.get()->addElement(std::move(mainPad));
 		BASE::focusable(windowPtr.get());
 		BASE::blockWorldBinds(windowPtr.get());
-		windowPtr.get()->screenRectangle.set(size);
+		windowPtr.get()->screenRectangle.setSize(size);
 
 		UniqueReference<Base, Base> windowRef = Global::pop();
 
@@ -219,7 +219,8 @@ namespace ui
 			{
 				auto self = static_cast<Button*>(self_);
 				if (self->isDown()) {
-					windowPtr->moveTopLeftTo(playerInfo.uiState.getCursorPositionScreenClamped(0.99f) - self->getMousePressOffset());
+					auto newPos = playerInfo.uiState.getCursor() - self->getMousePressOffset();
+					windowPtr->screenRectangle.translate(newPos - windowPtr->screenRectangle.getTopLeft());
 				}
 				return BIND::RESULT::CONTINUE;
 			});
@@ -295,14 +296,12 @@ namespace ui
 			{
 				auto self = static_cast<Button*>(self_);
 				if (self->isDown()) {
-					auto bottomRight = windowPtr->screenRectangle.getBottomRight();
-					bottomRight.y =
-						playerInfo.uiState.getCursorPositionScreenClamped(0.99f).y
-						- self->getMousePressOffset().y - self->screenRectangle.getAbsSize().y;
-					if (windowPtr->screenRectangle.getTop() - bottomRight.y < 0.2f) {
-						bottomRight.y = windowPtr->screenRectangle.getTop() - 0.2f;
+					int32_t bottom = playerInfo.uiState.getCursor().y - self->getMousePressOffset().y - self->screenRectangle.size().y;
+
+					if (windowPtr->screenRectangle.getTop() - bottom < 30) {
+						bottom = windowPtr->screenRectangle.getTop() - 30;
 					}
-					windowPtr->screenRectangle.setBottomRight(bottomRight);
+					windowPtr->screenRectangle.setBot(bottom);
 					windowPtr->updateSize(windowPtr->screenRectangle);
 				}
 				return BIND::RESULT::CONTINUE;
@@ -328,14 +327,12 @@ namespace ui
 			{
 				auto self = static_cast<Button*>(self_);
 				if (self->isDown()) {
-					auto bottomRight = windowPtr->screenRectangle.getBottomRight();
-					bottomRight.x =
-						playerInfo.uiState.getCursorPositionScreenClamped(0.99f).x
-						- self->getMousePressOffset().x + self->screenRectangle.getAbsSize().x;
-					if (bottomRight.x - windowPtr->screenRectangle.getLeft() < 0.2f) {
-						bottomRight.x = windowPtr->screenRectangle.getLeft() + 0.2f;
+					int32_t right = playerInfo.uiState.getCursor().x - self->getMousePressOffset().x + self->screenRectangle.size().x;
+
+					if (right - windowPtr->screenRectangle.getLeft() < 30) {
+						right = windowPtr->screenRectangle.getLeft() + 30;
 					}
-					windowPtr->screenRectangle.setBottomRight(bottomRight);
+					windowPtr->screenRectangle.setRight(right);
 					windowPtr->updateSize(windowPtr->screenRectangle);
 				}
 				return BIND::RESULT::CONTINUE;
@@ -359,9 +356,8 @@ namespace ui
 			{
 				auto self = static_cast<Button*>(self_);
 				if (self->isDown()) {
-					auto bottomRight =
-						playerInfo.uiState.getCursorPositionScreenClamped(0.99f)
-						- self->getMousePressOffset() + glm::vec2(1.0f, -1.0f) * self->screenRectangle.getAbsSize();
+					glm::ivec2 bottomRight = playerInfo.uiState.getCursor() - self->getMousePressOffset() + glm::ivec2(1,-1) * self->screenRectangle.size();
+
 					if (bottomRight.x - windowPtr->screenRectangle.getLeft() < 0.2f) {
 						bottomRight.x = windowPtr->screenRectangle.getLeft() + 0.2f;
 					}

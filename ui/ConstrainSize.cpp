@@ -36,7 +36,7 @@ namespace ui
 
 		newScreenRectangle = this->main.get()->updateSize(newScreenRectangle);
 
-		glm::vec2 p{};
+		glm::ivec2 p = { 0,0 };
 		switch (this->alignment) {
 			case ALIGNMENT::TOP:
 				p.x += this->screenRectangle.getWidth() / 2 - newScreenRectangle.getWidth() / 2;

@@ -60,10 +60,6 @@ namespace ui
 		return this->screenRectangle;
 	}
 
-	void Base::moveTopLeftTo(glm::vec2 p) {
-		translate(p - this->screenRectangle.getTopLeft());
-	}
-
 	bool Base::contains(glm::vec2 p) const {
 		return this->screenRectangle.contains(p);
 	}
@@ -245,7 +241,7 @@ namespace ui
 
 	CallBackBindResult BaseMulti::runOnHoverBinds(PlayerInfo& playerInfo) {
 		CallBackBindResult sumResult = 0;
-		if (!this->screenRectangle.contains(playerInfo.uiState.getCursorPositionScreen())) {
+		if (!this->screenRectangle.contains(playerInfo.uiState.getCursor())) {
 			return sumResult;
 		}
 
@@ -338,7 +334,7 @@ namespace ui
 
 	CallBackBindResult BaseSingle::runOnHoverBinds(PlayerInfo& playerInfo) {
 		CallBackBindResult sumResult = 0;
-		if (!this->screenRectangle.contains(playerInfo.uiState.getCursorPositionScreen())) {
+		if (!this->screenRectangle.contains(playerInfo.uiState.getCursor())) {
 			return sumResult;
 		}
 

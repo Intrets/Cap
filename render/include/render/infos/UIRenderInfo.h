@@ -25,5 +25,6 @@ namespace render
 		void addRectangle(glm::vec2 pos1, glm::vec2 pos2, glm::vec4 color);
 		void addRectangle(glm::vec2 pos1, glm::vec2 pos2, glm::vec4 color, int32_t depth_);
 		void addRectangle(Rect& rec, glm::vec4 color);
+		void addPixelRectangle(glm::ivec2 size, glm::ivec2 pos1, glm::ivec2 pos2, glm::vec4 color, int32_t depth);
 	};
 }

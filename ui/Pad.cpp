@@ -19,7 +19,7 @@ namespace ui
 			newScreenRectangle.translateLeft(this->left.getSizeType().getWidth(newScreenRectangle));
 		}
 		if (this->bottom.type == PAD::TYPE::SIZETYPE) {
-			newScreenRectangle.translateBottom(this->bottom.getSizeType().getHeight(newScreenRectangle));
+			newScreenRectangle.translateBot(this->bottom.getSizeType().getHeight(newScreenRectangle));
 		}
 
 		newScreenRectangle = main.get()->updateSize(newScreenRectangle);

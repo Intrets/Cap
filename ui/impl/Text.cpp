@@ -85,8 +85,9 @@ namespace ui
 			glm::vec2 a = (glm::vec2(cursorShape[0], cursorShape[1]) - this->getView()) / 2.0f + 0.5f;
 			glm::vec2 b = glm::vec2(cursorShape[2], cursorShape[3]) / 2.0f;
 
-			a *= this->lastScreenRectangle.getAbsSize();
-			b *= this->lastScreenRectangle.getAbsSize();
+			// TODO: pixels
+			//a *= this->lastScreenRectangle.getAbsSize();
+			//b *= this->lastScreenRectangle.getAbsSize();
 
 			a += this->lastScreenRectangle.getBottomLeft();
 			b += a;
@@ -146,8 +147,8 @@ namespace ui
 							break;
 					}
 
-					glm::vec2 bottomLeft = glm::max(screenRectangle.getBottomLeft(), glm::min(screenRectangle.getTopRight(), quad.getBottomLeft()));
-					glm::vec2 topRight = glm::max(screenRectangle.getBottomLeft(), glm::min(screenRectangle.getTopRight(), quad.getTopRight()));
+					glm::vec2 bottomLeft = glm::max(screenRectangle.getBottomLeftScreen(), glm::min(screenRectangle.getTopRightScreen(), quad.getBottomLeft()));
+					glm::vec2 topRight = glm::max(screenRectangle.getBottomLeftScreen(), glm::min(screenRectangle.getTopRightScreen(), quad.getTopRight()));
 
 
 					renderInfo.uiRenderInfo.addRectangle(bottomLeft, topRight, COLORS::UI::CURSOR, depth++);

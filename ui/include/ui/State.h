@@ -32,6 +32,9 @@ namespace ui
 		glm::vec2 cursorScreen;
 		glm::vec2 cursorWorld;
 
+		glm::ivec2 cursor;
+		glm::ivec2 windowSize;
+
 		CallBackBindResult runFrontBinds(PlayerInfo& playerInfo);
 
 		std::unordered_map<std::string, ManagedReference<Base, Base>> namedUIs;
@@ -47,6 +50,8 @@ namespace ui
 		glm::vec2 getCursorPositionWorld();
 		glm::vec2 getCursorPositionScreen();
 		glm::vec2 getCursorPositionScreenClamped(float c);
+		glm::ivec2 getCursor() const;
+		glm::ivec2 getWindowSize() const;
 
 		void runUIBinds(PlayerInfo& playerInfo);
 		void run(PlayerInfo& playerInfo);

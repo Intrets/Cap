@@ -32,4 +32,7 @@ namespace render
 			color }
 		);
 	}
+	void UIRenderInfo::addPixelRectangle(glm::ivec2 size, glm::ivec2 pos1, glm::ivec2 pos2, glm::vec4 color, int32_t depth) {
+		this->addRectangle(pixelToScreen(pos1, size), pixelToScreen(pos2, size), color, depth);
+	}
 }

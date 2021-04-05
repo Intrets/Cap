@@ -15,7 +15,7 @@ namespace ui
 		glm::vec4 color = COLORS::UI::BACKGROUND;
 
 		bool down = false;
-		glm::vec2 mousePressOffset;
+		glm::ivec2 mousePressOffset;
 
 	private:
 		friend class Hotbar;
@@ -33,7 +33,7 @@ namespace ui
 		bool isDown();
 		void dePress();
 
-		glm::vec2 const& getMousePressOffset() const;
+		glm::ivec2 const& getMousePressOffset() const;
 
 		Button(Handle self);
 		virtual ~Button() = default;

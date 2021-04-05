@@ -10,15 +10,27 @@ namespace ui
 	}
 
 	int32_t Window::addRenderInfo(game::GameState& gameState, render::RenderInfo& renderInfo, int32_t depth) {
-		glm::vec2 px = glm::vec2(1.0f) / glm::vec2(this->screenRectangle.getPixelSize());
+		int32_t border = 1;
 		if (this->minimized) {
 			depth = this->topBar.get()->addRenderInfo(gameState, renderInfo, depth++);
-			renderInfo.uiRenderInfo.addRectangle(this->topBar.get()->getScreenRectangle().getBottomLeft() - px, this->topBar.get()->getScreenRectangle().getTopRight() + 2.0f * px, COLORS::UI::WINDOWBACKGROUND, depth++);
+			renderInfo.uiRenderInfo.addPixelRectangle(
+				this->topBar.get()->getScreenRectangle().getPixelSize(),
+				this->topBar.get()->getScreenRectangle().getBottomLeft() - border,
+				this->topBar.get()->getScreenRectangle().getTopRight() + border,
+				COLORS::UI::WINDOWBACKGROUND,
+				depth++
+			);
 			return depth;
 		}
 		else {
 			depth = this->BaseMulti::addRenderInfo(gameState, renderInfo, depth++);
-			renderInfo.uiRenderInfo.addRectangle(this->screenRectangle.getBottomLeft() - px, this->screenRectangle.getTopRight() + 2.0f * px, COLORS::UI::WINDOWBACKGROUND, depth++);
+			renderInfo.uiRenderInfo.addPixelRectangle(
+				this->screenRectangle.getPixelSize(),
+				this->screenRectangle.getBottomLeft() - border,
+				this->screenRectangle.getTopRight() + border,
+				COLORS::UI::WINDOWBACKGROUND,
+				depth++
+			);
 			return depth;
 		}
 	}

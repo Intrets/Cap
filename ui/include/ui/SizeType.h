@@ -23,7 +23,7 @@ namespace ui
 		SizeType(SIZETYPE t, int32_t val);
 		SizeType(SIZETYPE t, float val);
 
-		float getWidth(ScreenRectangle screenRectangle) const;
-		float getHeight(ScreenRectangle screenRectangle) const;
+		int32_t getWidth(ScreenRectangle screenRectangle) const;
+		int32_t getHeight(ScreenRectangle screenRectangle) const;
 	};
  }

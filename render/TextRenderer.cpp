@@ -14,9 +14,9 @@ namespace render
 							  Fonts const& fonts,
 							  bwo::FrameBuffer& target) {
 		for (auto& info : textRenderInfo.windowTextRenderInfos) {
-			glm::ivec2 size = glm::floor(glm::vec2(info.screenRectangle.getPixelSize()) * info.screenRectangle.getAbsSize() / 2.0f);
+			glm::ivec2 size = info.screenRectangle.getSize();
 
-			glm::vec2 topLeft = glm::floor((info.screenRectangle.getTopLeft() / 2.0f + 0.5f) * glm::vec2(info.screenRectangle.getPixelSize()));
+			glm::ivec2 bottomLeft = info.screenRectangle.getBottomLeft();
 
 			ogs::Configuration config = ogs::TextConfiguration();
 
@@ -24,7 +24,7 @@ namespace render
 				config,
 				info.textRenderInfo,
 				target,
-				{ topLeft.x, topLeft.y - size.y, size.x, size.y },
+				{ bottomLeft.x, bottomLeft.y, size.x, size.y },
 				fonts.fontAtlas,
 				info.depth,
 				false,

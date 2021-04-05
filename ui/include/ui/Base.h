@@ -80,8 +80,6 @@ namespace ui
 		void activate();
 		void deactivate();
 
-		void moveTopLeftTo(glm::vec2 p);
-
 		void addGlobalBind(BindControl bindControl, CallBack callBack);
 		void addFocussedBind(BindControl bindControl, CallBack callBack);
 		void addOnHoverBind(BindControl bindControl, CallBack callBack);

@@ -16,7 +16,7 @@ namespace render
 	void WindowTextRenderInfo::addString(FONT font, std::string text) {
 		FontInfo& fontInfo = Locator<Fonts>::ref().getFont(font);
 
-		glm::ivec2 sizei = glm::floor(glm::vec2(this->screenRectangle.getPixelSize()) * this->screenRectangle.getAbsSize() / 2.0f);
+		glm::ivec2 sizei = this->screenRectangle.getSize();
 
 		for (char c : text) {
 			glm::vec2 size = glm::vec2(fontInfo.charSize[static_cast<int32_t>(c)]) / glm::vec2(sizei) * 2.0f;
@@ -75,7 +75,8 @@ namespace render
 	}
 
 	glm::vec2 WindowTextRenderInfo::getRenderedScreenSize() {
-		return this->screenRectangle.getAbsSize() * this->renderedSize / 2.0f;
+		return glm::vec2();
+		//return this->screenRectangle.getAbsSize() * this->renderedSize / 2.0f;
 	}
 
 	std::optional<int32_t> WindowTextRenderInfo::getIndex(glm::vec2 p) {

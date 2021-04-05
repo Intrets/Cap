@@ -18,7 +18,7 @@ namespace ui
 		void activatable(Base* ptr) {
 			ptr->addGlobalBind({ CONTROL::KEY::ACTION0, CONTROL::STATE::PRESSED }, [ptr](PlayerInfo& playerInfo, Base* self_) -> CallBackBindResult
 			{
-				if (!ptr->getScreenRectangle().contains(playerInfo.uiState.getCursorPositionScreen())) {
+				if (!ptr->getScreenRectangle().contains(playerInfo.uiState.getCursor())) {
 					ptr->deactivate();
 					return BIND::RESULT::CONTINUE;
 				}
@@ -56,13 +56,13 @@ namespace ui
 			{
 				auto ptr = static_cast<TextDisplay*>(self_);
 
-				glm::vec2 click = playerInfo.uiState.getCursorPositionScreen() - ptr->getScreenRectangle().getBottomLeft();
-				click /= ptr->getScreenRectangle().getAbsSize();
-				click = click * 2.0f - 1.0f;
-				click += ptr->text.getView();
+				glm::ivec2 click = playerInfo.uiState.getCursor() - ptr->getScreenRectangle().getBottomLeft();
+
+				auto screenClick = pixelToScreen(click, ptr->getScreenRectangle().getPixelSize());
+				screenClick += ptr->text.getView();
 
 				if (ptr->text.cachedRenderInfo.has_value()) {
-					auto maybeIndex = ptr->text.cachedRenderInfo.value().getIndex(click);
+					auto maybeIndex = ptr->text.cachedRenderInfo.value().getIndex(screenClick);
 					if (maybeIndex.has_value()) {
 						ptr->text.selectIndex(maybeIndex.value());
 						Locator<misc::Log>::ref().putStreamLine(std::stringstream() << maybeIndex.value());

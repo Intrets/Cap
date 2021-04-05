@@ -9,6 +9,6 @@ out vec4 c;
 
 void main(){
 	c = color;
-	gl_Position = vec4(vertexPosition_modelspace*vec3(scale,1) + position, 1);
+	gl_Position = vec4(vertexPosition_modelspace * vec3(scale, 1) + position, 1);
 }
 
