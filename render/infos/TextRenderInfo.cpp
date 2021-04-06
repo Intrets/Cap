@@ -10,7 +10,8 @@ namespace render
 	WindowTextRenderInfo::WindowTextRenderInfo(ScreenRectangle rect, bool lineWrap_, bool clickSupport_) :
 		screenRectangle(rect),
 		lineWrap(lineWrap_),
-		clickSelect(clickSupport_) {
+		clickSelect(clickSupport_),
+		nextPos(0, rect.getSize().y) {
 	}
 
 	void WindowTextRenderInfo::addString(FONT font, std::string text) {
@@ -19,11 +20,11 @@ namespace render
 		glm::ivec2 sizei = this->screenRectangle.getSize();
 
 		for (char c : text) {
-			glm::vec2 size = glm::vec2(fontInfo.charSize[static_cast<int32_t>(c)]) / glm::vec2(sizei) * 2.0f;
+			glm::ivec2 size = fontInfo.charSize[static_cast<int32_t>(c)];
 
-			glm::vec2 addPos;
+			glm::ivec2 addPos;
 
-			if (this->lineWrap && this->nextPos.x + size.x > 1.0f && c != '\n') {
+			if (this->lineWrap && this->nextPos.x + size.x > sizei.x && c != '\n') {
 				this->newLine();
 			}
 
@@ -45,7 +46,7 @@ namespace render
 
 			this->textRenderInfo.addBlitInfo(
 				fontInfo.charUV[static_cast<int32_t>(c)],
-				glm::vec4(addPos, size),
+				glm::vec4(pixelToScreen(addPos, sizei), 2.0f * pixelToNormal(size, sizei)),
 				0);
 
 			this->nextPos.x += size.x;
@@ -54,15 +55,15 @@ namespace render
 				this->newLine();
 			}
 
-			glm::vec2 addBot = addPos;
+			glm::ivec2 addBot = addPos;
 			addBot.x += size.x;
-			glm::vec2 curSize = glm::abs(addBot - glm::vec2(-1.0f, 1.0f));
+			glm::ivec2 curSize = glm::abs(addBot - glm::ivec2(0, sizei.y));
 			this->renderedSize = glm::max(this->renderedSize, curSize);
 		}
 	}
 
 	void WindowTextRenderInfo::newLine() {
-		this->nextPos.x = -1.0f;
+		this->nextPos.x = 0;
 		this->nextPos.y -= this->laneHeight;
 	}
 
@@ -74,9 +75,8 @@ namespace render
 		this->depth = depth_;
 	}
 
-	glm::vec2 WindowTextRenderInfo::getRenderedScreenSize() {
-		return glm::vec2();
-		//return this->screenRectangle.getAbsSize() * this->renderedSize / 2.0f;
+	glm::ivec2 WindowTextRenderInfo::getRenderedScreenSize() {
+		return this->renderedSize;
 	}
 
 	std::optional<int32_t> WindowTextRenderInfo::getIndex(glm::vec2 p) {

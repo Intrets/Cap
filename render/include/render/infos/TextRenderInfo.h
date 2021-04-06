@@ -26,15 +26,16 @@ namespace render
 
 		// total size of entire text in [-1, 1] in screenRectangle space
 		// value in [0, inf)
-		glm::vec2 renderedSize{ 0.0f, 0.0f };
+		glm::ivec2 renderedSize{ 0, 0 };
 
 		BlitRenderInfo textRenderInfo;
 
 		// next position for character in screenRectangle space
-		glm::vec2 nextPos = { -1.0f, 1.0f };
+		//glm::vec2 nextPos = { -1.0f, 1.0f };
+		glm::ivec2 nextPos = { 0,0 };
 
 		// current line width
-		float laneHeight = 0.0f;
+		int32_t laneHeight = 0;
 
 		// render with linewrap
 		bool lineWrap;
@@ -59,7 +60,7 @@ namespace render
 		void setDepth(int32_t layer);
 		void setDepth(float depth_);
 
-		glm::vec2 getRenderedScreenSize();
+		glm::ivec2 getRenderedScreenSize();
 
 		std::optional<int32_t> getIndex(glm::vec2 p);
 

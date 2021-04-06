@@ -143,8 +143,8 @@ namespace ui
 
 			// TODO: text rendering with pixels
 			auto& renderInfo = this->text.cachedRenderInfo.value();
-			glm::vec2 screenSize = renderInfo.getRenderedScreenSize();
-			//screenSize = glm::min(newScreenRectangle.getAbsSize(), screenSize);
+			glm::ivec2 screenSize = renderInfo.getRenderedScreenSize();
+			screenSize = glm::min(newScreenRectangle.getSize(), screenSize);
 			newScreenRectangle.setWidth(screenSize.x);
 			newScreenRectangle.setHeight(screenSize.y);
 			this->screenRectangle = newScreenRectangle;
