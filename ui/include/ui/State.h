@@ -29,7 +29,6 @@ namespace ui
 	private:
 		bool shouldReset_ = false;
 
-		glm::vec2 cursorScreen;
 		glm::vec2 cursorWorld;
 
 		glm::ivec2 cursor;
@@ -48,8 +47,6 @@ namespace ui
 		std::vector<UniqueReference<Base, Base>> closedBuffer;
 
 		glm::vec2 getCursorPositionWorld();
-		glm::vec2 getCursorPositionScreen();
-		glm::vec2 getCursorPositionScreenClamped(float c);
 		glm::ivec2 getCursor() const;
 		glm::ivec2 getWindowSize() const;
 

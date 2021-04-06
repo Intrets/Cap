@@ -30,7 +30,7 @@ namespace ui
 		auto ptr = makeEnd(std::move(ref));
 		ptr.get()->addGlobalBind({ CONTROL::KEY::ACTION0 }, [](PlayerInfo& playerInfo, Base* self_) -> CallBackBindResult
 		{
-			if (!self_->getScreenRectangle().contains(playerInfo.uiState.getCursorPositionScreen())) {
+			if (!self_->getScreenRectangle().contains(playerInfo.uiState.getCursor())) {
 				return BIND::RESULT::CLOSE;
 			}
 			else {
@@ -49,7 +49,7 @@ namespace ui
 	ScreenRectangle AnchoredProxy::updateSize(ScreenRectangle newScreenRectangle) {
 		this->screenRectangle = newScreenRectangle;
 		if (auto proxyBaseRef = this->proxyBase.getRef()) {
-			const float scale = 10.0f;
+			const int32_t scale = 5000;
 			switch (this->alignment) {
 				case ALIGNMENT::TOP:
 					newScreenRectangle.setBot(-scale);

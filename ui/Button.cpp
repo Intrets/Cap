@@ -57,7 +57,7 @@ namespace ui
 
 		this->addGlobalBind({ CONTROL::KEY::MOUSE_POS_CHANGED, CONTROL::STATE::PRESSED }, [](PlayerInfo& playerInfo, Base* self_) -> CallBackBindResult
 		{
-			if (!self_->getScreenRectangle().contains(playerInfo.uiState.getCursorPositionScreen()) ||
+			if (!self_->getScreenRectangle().contains(playerInfo.uiState.getCursor()) ||
 				!playerInfo.controlState.activated({ CONTROL::KEY::MOUSE_POS_CHANGED_TOPLEVEL })) {
 				self_->deactivate();
 			}
@@ -77,7 +77,7 @@ namespace ui
 			if (this->down) {
 				this->down = false;
 
-				if (self_->getScreenRectangle().contains(playerInfo.uiState.getCursorPositionScreen())) {
+				if (self_->getScreenRectangle().contains(playerInfo.uiState.getCursor())) {
 					return this->onRelease(playerInfo, self_) | BIND::RESULT::CONTINUE;
 				}
 				else {

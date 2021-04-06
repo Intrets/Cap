@@ -43,15 +43,8 @@ namespace ui
 	}
 
 	glm::vec2 State::getCursorPositionWorld() {
+		assert(0);
 		return this->cursorWorld;
-	}
-
-	glm::vec2 State::getCursorPositionScreen() {
-		return this->cursorScreen;
-	}
-
-	glm::vec2 State::getCursorPositionScreenClamped(float c) {
-		return glm::clamp(this->getCursorPositionScreen(), -c, c);
 	}
 
 	glm::ivec2 State::getCursor() const {
@@ -192,9 +185,6 @@ namespace ui
 		glm::vec2 viewport(ratio, 1.0f);
 
 		viewport *= misc::Option<misc::OPTION::CL_VIEWPORTSCALE, float>::getVal();
-
-		this->cursorScreen = glm::clamp(glm::vec2(x, y), -1.0f, 1.0f);
-		this->cursorWorld = cam + this->cursorScreen * viewport;
 	}
 
 	void State::appendRenderInfo(game::GameState& gameState, render::RenderInfo& renderInfo) {
