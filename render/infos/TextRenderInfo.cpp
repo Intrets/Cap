@@ -34,8 +34,8 @@ namespace render
 			this->laneHeight = glm::max(this->laneHeight, size.y);
 
 			if (this->clickSelect) {
-				glm::vec2 vertRange = glm::vec2(addPos.y, addPos.y + size.y);
-				glm::vec2 horRange = glm::vec2(addPos.x, addPos.x + size.x);
+				glm::ivec2 vertRange = glm::ivec2(addPos.y, addPos.y + size.y);
+				glm::ivec2 horRange = glm::ivec2(addPos.x, addPos.x + size.x);
 
 				auto it = this->lines.find(vertRange);
 				if (it == this->lines.end()) {
@@ -79,12 +79,12 @@ namespace render
 		return this->renderedSize;
 	}
 
-	std::optional<int32_t> WindowTextRenderInfo::getIndex(glm::vec2 p) {
-		auto line = this->lines.find(glm::vec2(p.y));
+	std::optional<int32_t> WindowTextRenderInfo::getIndex(glm::ivec2 p) {
+		auto line = this->lines.find(glm::ivec2(p.y));
 		if (line == this->lines.end()) {
 			return std::nullopt;
 		}
-		auto index = line->second.find(glm::vec2(p.x));
+		auto index = line->second.find(glm::ivec2(p.x));
 		if (index == line->second.end()) {
 			if (line->second.size() == 0) {
 				return std::nullopt;

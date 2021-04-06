@@ -74,6 +74,7 @@ public:
 	ScreenRectangle(glm::ivec2 size);
 
 	glm::ivec2 size() const;
+	glm::vec2 sizeScreen() const;
 
 	bool operator==(ScreenRectangle const& other) const;
 	bool operator!=(ScreenRectangle const& other) const;

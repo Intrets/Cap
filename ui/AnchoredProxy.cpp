@@ -49,31 +49,31 @@ namespace ui
 	ScreenRectangle AnchoredProxy::updateSize(ScreenRectangle newScreenRectangle) {
 		this->screenRectangle = newScreenRectangle;
 		if (auto proxyBaseRef = this->proxyBase.getRef()) {
-			const int32_t scale = 5000;
+			const int32_t inf = 5000;
 			switch (this->alignment) {
 				case ALIGNMENT::TOP:
-					newScreenRectangle.setBot(-scale);
+					newScreenRectangle.setBot(-inf);
 					break;
 				case ALIGNMENT::BOTTOM:
-					newScreenRectangle.setTop(scale);
+					newScreenRectangle.setTop(inf);
 					break;
 				case ALIGNMENT::LEFT:
-					newScreenRectangle.setRight(scale);
+					newScreenRectangle.setRight(inf);
 					break;
 				case ALIGNMENT::RIGHT:
-					newScreenRectangle.setLeft(-scale);
+					newScreenRectangle.setLeft(-inf);
 					break;
 				case ALIGNMENT::TOPRIGHT:
-					newScreenRectangle.setBottomLeft({ -scale, -scale });
+					newScreenRectangle.setBottomLeft({ -inf, -inf });
 					break;
 				case ALIGNMENT::TOPLEFT:
-					newScreenRectangle.setBottomRight({ scale, -scale });
+					newScreenRectangle.setBottomRight({ inf, -inf });
 					break;
 				case ALIGNMENT::BOTTOMLEFT:
-					newScreenRectangle.setTopRight({ scale, scale });
+					newScreenRectangle.setTopRight({ inf, inf });
 					break;
 				case ALIGNMENT::BOTTOMRIGHT:
-					newScreenRectangle.setTopLeft({ -scale,scale });
+					newScreenRectangle.setTopLeft({ -inf, inf });
 					break;
 				default:
 					break;

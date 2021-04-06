@@ -12,8 +12,7 @@ namespace ui
 	ScreenRectangle Grid::updateSize(ScreenRectangle newScreenRectangle) {
 		this->screenRectangle = newScreenRectangle;
 
-		//glm::vec2 pos = newScreenRectangle.getTopLeft();
-		glm::ivec2 pos = glm::ivec2(0, 0);
+		glm::ivec2 pos = newScreenRectangle.getTopLeft();
 		glm::ivec2 gridSize = newScreenRectangle.getSize() / glm::ivec2(size);
 
 		ScreenRectangle rec = newScreenRectangle;

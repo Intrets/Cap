@@ -134,6 +134,8 @@ namespace game
 			}
 
 		}
+
+		this->tick++;
 	}
 
 	GameState::GameState() {

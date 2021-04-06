@@ -136,6 +136,10 @@ glm::ivec2 ScreenRectangle::size() const {
 	return this->top - this->bot;
 }
 
+glm::vec2 ScreenRectangle::sizeScreen() const {
+	return 2.0f * pixelToNormal(this->size(), this->getPixelSize());
+}
+
 bool ScreenRectangle::operator==(ScreenRectangle const& other) const {
 	return this->bot == other.bot && this->top == other.top;
 }
@@ -181,19 +185,19 @@ glm::ivec2 ScreenRectangle::getSize() const {
 }
 
 glm::vec2 ScreenRectangle::getTopLeftScreen() const {
-	return glm::vec2(this->getTopLeft()) / glm::vec2(this->screenPixels);
+	return pixelToScreen(this->getTopLeft(), this->getPixelSize());
 }
 
 glm::vec2 ScreenRectangle::getBottomRightScreen() const {
-	return glm::vec2(this->getBottomRight()) / glm::vec2(this->screenPixels);
+	return pixelToScreen(this->getBottomRight(), this->getPixelSize());
 }
 
 glm::vec2 ScreenRectangle::getTopRightScreen() const {
-	return glm::vec2(this->getTopRight()) / glm::vec2(this->screenPixels);
+	return pixelToScreen(this->getTopRight(), this->getPixelSize());
 }
 
 glm::vec2 ScreenRectangle::getBottomLeftScreen() const {
-	return glm::vec2(this->getBottomLeft()) / glm::vec2(this->screenPixels);
+	return pixelToScreen(this->getBottomLeft(), this->getPixelSize());
 }
 
 void ScreenRectangle::setLeft(int32_t i) {

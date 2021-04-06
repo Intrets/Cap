@@ -24,25 +24,19 @@ namespace render
 		// view offset for render info
 		glm::vec2 offset;
 
-		// total size of entire text in [-1, 1] in screenRectangle space
-		// value in [0, inf)
 		glm::ivec2 renderedSize{ 0, 0 };
 
 		BlitRenderInfo textRenderInfo;
 
-		// next position for character in screenRectangle space
-		//glm::vec2 nextPos = { -1.0f, 1.0f };
 		glm::ivec2 nextPos = { 0,0 };
 
-		// current line width
 		int32_t laneHeight = 0;
 
-		// render with linewrap
 		bool lineWrap;
 
 		struct cmp
 		{
-			bool operator()(const glm::vec2& a, const glm::vec2& b) const {
+			bool operator()(const glm::ivec2& a, const glm::ivec2& b) const {
 				return (a[0] < b[0]) && (a[1] < b[1]);
 			}
 		};
@@ -51,7 +45,7 @@ namespace render
 		bool clickSelect;
 
 		// lines for click cursor selecting
-		std::map<glm::vec2, std::map<glm::vec2, int32_t, cmp>, cmp> lines;
+		std::map<glm::ivec2, std::map<glm::ivec2, int32_t, cmp>, cmp> lines;
 
 		WindowTextRenderInfo(ScreenRectangle rect, bool lineWrap = false, bool clickSupport_ = false);
 
@@ -62,7 +56,7 @@ namespace render
 
 		glm::ivec2 getRenderedScreenSize();
 
-		std::optional<int32_t> getIndex(glm::vec2 p);
+		std::optional<int32_t> getIndex(glm::ivec2 p);
 
 		// first 2 Coordinates in [-1, 1] this->screenRectangle space.
 		// second 2 size in same space.

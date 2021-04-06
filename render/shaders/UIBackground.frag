@@ -9,5 +9,4 @@ in vec4 c;
 
 void main(){
 	color = c;
-	//color = ivec4(1,1,0,0);
 }

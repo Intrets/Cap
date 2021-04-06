@@ -76,7 +76,9 @@ namespace ui
 			if (!this->cachedRenderInfo.has_value()) {
 				return std::nullopt;
 			}
+
 			auto const& maybeCursorShape = this->cachedRenderInfo.value().getCursorPos(this->cursorIndex);
+
 			if (!maybeCursorShape.has_value()) {
 				return std::nullopt;
 			}
@@ -85,11 +87,10 @@ namespace ui
 			glm::vec2 a = (glm::vec2(cursorShape[0], cursorShape[1]) - this->getView()) / 2.0f + 0.5f;
 			glm::vec2 b = glm::vec2(cursorShape[2], cursorShape[3]) / 2.0f;
 
-			// TODO: pixels
-			//a *= this->lastScreenRectangle.getAbsSize();
-			//b *= this->lastScreenRectangle.getAbsSize();
+			a *= this->lastScreenRectangle.sizeScreen();
+			b *= this->lastScreenRectangle.sizeScreen();
 
-			a += this->lastScreenRectangle.getBottomLeft();
+			a += this->lastScreenRectangle.getBottomLeftScreen();
 			b += a;
 
 			return Rect{ a, b };

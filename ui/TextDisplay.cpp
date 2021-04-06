@@ -141,7 +141,6 @@ namespace ui
 				this->text.makeRenderInfo(newScreenRectangle, render::FONT::ROBOTO_12, this->lineWrap, this->clickSupport);
 			}
 
-			// TODO: text rendering with pixels
 			auto& renderInfo = this->text.cachedRenderInfo.value();
 			glm::ivec2 screenSize = renderInfo.getRenderedScreenSize();
 			screenSize = glm::min(newScreenRectangle.getSize(), screenSize);
