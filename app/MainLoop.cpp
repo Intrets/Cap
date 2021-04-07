@@ -65,12 +65,8 @@ void mainLoop(GLFWwindow* window) {
 
 	{
 		ui::Global::push();
-		ScreenRectangle rec;
-		rec.setWidth(400);
-		rec.setHeight(1000);
-		rec.translate({ 0,400 });
 		ui::window("Debug Info",
-				   rec,
+				   { 0.0f, 0.0f, 0.15f, 1.0f },
 				   ui::WINDOW::TYPE::MINIMISE |
 				   ui::WINDOW::TYPE::RESIZEVERTICAL |
 				   ui::WINDOW::TYPE::RESIZEHORIZONTAL |

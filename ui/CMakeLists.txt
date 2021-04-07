@@ -26,6 +26,7 @@ set(MODULE_FILES
 	Hideable
 	Grid
 	FreeSize
+	InitialSize
 )
 
 make_module(${MODULE_NAME} "${MODULE_FILES}")

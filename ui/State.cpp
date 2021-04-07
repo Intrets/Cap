@@ -292,14 +292,8 @@ namespace ui
 			Global::push();
 
 			hideable();
-			ScreenRectangle rec;
-			rec.setWidth(400);
-			rec.setHeight(500);
-			rec.translate({ 0,1000 });
-
-
 			window("Inventory",
-				   rec,
+				   {0.7f, 0.7f, 1.0f, 1.0f},
 				   WINDOW::TYPE::MINIMISE |
 				   WINDOW::TYPE::MOVE |
 				   WINDOW::TYPE::RESIZE |

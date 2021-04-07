@@ -132,6 +132,12 @@ ScreenRectangle::ScreenRectangle(glm::ivec2 size) :
 	screenPixels(size) {
 }
 
+ScreenRectangle::ScreenRectangle(glm::ivec2 bot_, glm::ivec2 size_, glm::ivec2 screenPixels_) :
+	bot(bot_),
+	top(bot_ + size_),
+	screenPixels(screenPixels_) {
+}
+
 glm::ivec2 ScreenRectangle::size() const {
 	return this->top - this->bot;
 }

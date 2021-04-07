@@ -22,6 +22,7 @@
 #include "Hideable.h"
 #include "Grid.h"
 #include "FreeSize.h"
+#include "InitialSize.h"
 
 namespace ui
 {
@@ -156,7 +157,7 @@ namespace ui
 		return res;
 	}
 
-	WeakReference<Base, Window> window(std::string const& title, ScreenRectangle size, int32_t types) {
+	WeakReference<Base, Window> window(std::string const& title, Rect size, int32_t types) {
 		const int32_t resizeSliverSize = 7;
 
 		auto mainPad = Global::getManager().makeUniqueRef<Pad>();
@@ -180,12 +181,11 @@ namespace ui
 
 		Global::push();
 
-		free();
+		initial(size);
 		auto windowPtr = makeEnd<Window>();
 		windowPtr.get()->addElement(std::move(mainPad));
 		BASE::focusable(windowPtr.get());
 		BASE::blockWorldBinds(windowPtr.get());
-		windowPtr.get()->screenRectangle.setSize(size);
 
 		UniqueReference<Base, Base> windowRef = Global::pop();
 
@@ -438,6 +438,15 @@ namespace ui
 	WeakReference<Base, FreeSize> free() {
 		auto ref = Global::getManager().makeUniqueRef<FreeSize>();
 		auto res = ref.as<FreeSize>();
+
+		Global::getState()->addSingle(std::move(ref));
+
+		return res;
+	}
+
+	WeakReference<Base, InitialSize> initial(Rect rect) {
+		auto ref = Global::getManager().makeUniqueRef<InitialSize>(rect);
+		auto res = ref.as<InitialSize>();
 
 		Global::getState()->addSingle(std::move(ref));
 

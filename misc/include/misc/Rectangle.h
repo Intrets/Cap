@@ -72,6 +72,7 @@ private:
 public:
 	ScreenRectangle() = default;
 	ScreenRectangle(glm::ivec2 size);
+	ScreenRectangle(glm::ivec2 bot_, glm::ivec2 size_, glm::ivec2 screenPixels_);
 
 	glm::ivec2 size() const;
 	glm::vec2 sizeScreen() const;
