@@ -26,6 +26,17 @@ ScreenRectangle ui::InitialSize::updateSize(ScreenRectangle newScreenRectangle) 
 
 	ScreenRectangle r = this->main.get()->getScreenRectangle();
 
+	if (r.getPixelSize().x != 0 && r.getPixelSize().y != 0) {
+		glm::vec2 bot = pixelToNormal(r.getBottomLeft(), r.getPixelSize());
+		glm::vec2 top = pixelToNormal(r.getTopRight(), r.getPixelSize());
+
+		glm::ivec2 newBot = normalToPixel(bot, newScreenRectangle.getPixelSize());
+		glm::ivec2 newTop = normalToPixel(top, newScreenRectangle.getPixelSize());
+
+		r.setBottomLeft(newBot);
+		r.setTopRight(newTop);
+	}
+
 	r.setPixelSize(newScreenRectangle.getPixelSize());
 	this->main.get()->updateSize(r);
 
