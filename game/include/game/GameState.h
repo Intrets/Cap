@@ -76,6 +76,7 @@ namespace game
 	class Signature;
 	struct Possession;
 	struct Vicinity;
+	struct ActionResult;
 
 	class Action
 	{
@@ -83,10 +84,18 @@ namespace game
 		std::vector<Signature> requirements{};
 		std::vector<Signature> results{};
 
-		std::function<std::tuple<bool, Possession, Vicinity, Action>(Object* obj)> runFunction;
+		std::function<ActionResult(Object* obj)> runFunction;
 
 		// obj should be the object which has access to the requirements in its possession
-		std::tuple<bool, Possession, Vicinity, Action> run(Object* obj);
+		ActionResult run(Object* obj);
+	};
+
+	struct ActionResult
+	{
+		bool success = false;
+
+		std::vector<Possession> possessions{};
+		std::vector<Action> actions{};
 	};
 
 	enum COMPONENT
@@ -119,6 +128,10 @@ namespace game
 		std::optional<Action> currentAction;
 
 		std::vector<Action> memory;
+
+		Action const& findAction(std::vector<Signature> const& requirements);
+
+		void merge(std::vector<Action>& other);
 	};
 
 	struct Possession

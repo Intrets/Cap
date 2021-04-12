@@ -100,17 +100,15 @@ namespace game
 
 
 						Action testAction;
-						testAction.runFunction = [target = target](Object* obj)->std::tuple<bool, Possession, Vicinity, Action>
+						testAction.runFunction = [target = target](Object* obj) -> ActionResult
 						{
-							Vicinity vicinity;
-							Possession possession;
-							Action action;
+							ActionResult result{};
 
 							auto d = target - obj->gamePosition().pos;
 
 							if (d.x == 0 && d.y == 0) {
 								obj->brain().energy = 200;
-								return std::make_tuple(true, std::move(possession), std::move(vicinity), std::move(action));
+								result.success = true;
 							}
 							else {
 								int32_t maxD = glm::max(glm::abs(d.x), glm::abs(d.y));
@@ -119,15 +117,15 @@ namespace game
 								std::cout << mov.x << " " << mov.y << "\n";
 
 								obj->gamePosition().pos += mov;
-								return std::make_tuple(false, std::move(possession), std::move(vicinity), std::move(action));
 							}
+							return result;
 						};
 
 						obj.get()->brain().currentAction = testAction;
 					}
 				}
 				else {
-					if (std::get<0>(brain.currentAction.value().run(obj.get()))) {
+					if (brain.currentAction.value().run(obj.get()).success) {
 						brain.currentAction = std::nullopt;
 					}
 				}
@@ -186,13 +184,11 @@ namespace game
 			Signature foodSignature;
 			foodSignature.set(COMPONENT::NUTRITION).set(COMPONENT::GAME_POSITION);
 			recallFood.results = { foodSignature };
-			recallFood.runFunction = [](Object* obj) -> std::tuple<bool, Possession, Vicinity, Action>
+			recallFood.runFunction = [](Object* obj) -> ActionResult
 			{
-				Vicinity vicinity;
-				Possession possession;
-				Action action;
+				ActionResult result{};
 
-				return std::make_tuple(false, std::move(possession), std::move(vicinity), std::move(action));
+				return result;
 			};
 
 			ptr->brain().memory.push_back(recallFood);
@@ -277,7 +273,7 @@ namespace game
 		}
 	}
 
-	std::tuple<bool, Possession, Vicinity, Action> Action::run(Object* obj) {
+	ActionResult Action::run(Object* obj) {
 		return this->runFunction(obj);
 	}
 
@@ -311,5 +307,26 @@ namespace game
 
 	bool Signature::contains(Signature const& other) const {
 		return (this->data & other.data) == other.data;
+	}
+
+	Action const& Brain::findAction(std::vector<Signature> const& requirements) {
+		for (auto const& action : this->memory) {
+			for (auto const& otherReq : requirements) {
+				for (auto const& memoryReq : action.requirements) {
+					if (!memoryReq.contains(otherReq)) {
+
+					}
+				}
+			}
+		}
+		return Action();
+	}
+
+	void Brain::merge(std::vector<Action>& other) {
+		this->memory.insert(
+			this->memory.end(),
+			std::make_move_iterator(other.begin()),
+			std::make_move_iterator(other.end())
+		);
 	}
 }

@@ -66,7 +66,7 @@ void mainLoop(GLFWwindow* window) {
 	{
 		ui::Global::push();
 		ui::window("Debug Info",
-				   { 0.0f, 0.0f, 0.15f, 1.0f },
+				   { 0.0f, 0.0f, 0.13f, 1.0f },
 				   ui::WINDOW::TYPE::MINIMISE |
 				   ui::WINDOW::TYPE::RESIZEVERTICAL |
 				   ui::WINDOW::TYPE::RESIZEHORIZONTAL |
