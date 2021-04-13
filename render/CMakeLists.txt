@@ -25,12 +25,14 @@ set(MODULE_FILES
 	Fonts
 	textures/BlockIDTextures
 	GLStateWrapper
+	PixelRenderer
 )
 
 set(SHADER_FILES
 	Blit
 	UIBackground
 	BlitArray
+	Pixel
 )
 
 foreach(SHADER ${SHADER_FILES})

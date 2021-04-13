@@ -17,6 +17,7 @@
 #include <render/BlitRendererArray.h>
 #include <render/textures/BlockIDTextures.h>
 #include <render/GLStateWrapper.h>
+#include <render/PixelRenderer.h>
 
 static void GLAPIENTRY
 MessageCallback(GLenum source,
@@ -192,6 +193,7 @@ void initManagers(std::string const& resourceRootPath) {
 	Locator<misc::OptionManager>::init();
 
 	Locator<render::BlitRenderer>::init();
+	Locator<render::PixelRenderer>::init();
 	Locator<render::BlitRendererArrayTexture>::init();
 
 	Locator<render::BlockIDTextures>::init();
