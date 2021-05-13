@@ -50,7 +50,7 @@ namespace game
 	// };
 	// example:
 	// Location location {x,y};
-	// Signature food;
+	// Signature_ food;
 	// food.set(COMPONENT::NUTRITION)
 	// !!!! how to give it a rating of how good? (how much food, is it a friendly? useful for anything apart eating?)
 	// actionList = {
@@ -73,7 +73,7 @@ namespace game
 	// };
 
 	class Object;
-	class Signature;
+	class Signature_;
 	struct Possession;
 	struct Vicinity;
 	struct ActionResult;
@@ -81,8 +81,8 @@ namespace game
 	class Action
 	{
 	public:
-		std::vector<Signature> requirements{};
-		std::vector<Signature> results{};
+		std::vector<Signature_> requirements{};
+		std::vector<Signature_> results{};
 
 		std::function<ActionResult(Object* obj)> runFunction;
 
@@ -129,7 +129,7 @@ namespace game
 
 		std::vector<Action> memory;
 
-		Action const& findAction(std::vector<Signature> const& requirements);
+		Action const& findAction(std::vector<Signature_> const& requirements);
 
 		void merge(std::vector<Action>& other);
 	};
@@ -164,19 +164,19 @@ namespace game
 
 	// ---------------------------------------------------
 
-	class Signature
+	class Signature_
 	{
 	private:
 		std::bitset<COMPONENT::MAX> data;
 
-		friend class Signature;
+		friend class Signature_;
 
 	public:
-		Signature& set(COMPONENT component);
+		Signature_& set(COMPONENT component);
 		void set(std::initializer_list<COMPONENT> components);
 		bool test(COMPONENT component);
 
-		bool contains(Signature const& other) const;
+		bool contains(Signature_ const& other) const;
 	};
 
 	struct Concept
@@ -184,15 +184,48 @@ namespace game
 		struct Essence
 		{
 			float value;
-			Signature signature;
+			Signature_ signature;
 		};
 
 		std::vector<Essence> essences{};
 
-		float value(Signature const& signature);
+		float value(Signature_ const& signature);
 	};
 
 	// ---------------------------------------------------
+
+	// Object - SoA or AoS
+	// Member_1
+	// Member_2
+	// |
+	// |
+	// |
+	// Member_n
+
+	// class Everything {
+	//     std::array<Object> stuff;
+	//
+	//     Member_1& member_1(size_t i) {
+	//	       return stuff[i].member_1;
+	//     };
+	//     Member_2& member_2(size_t i);
+	// };
+
+	// class Everything {
+	//     std::array<member_1> member_1s
+	//     std::array<member_2> member_2s
+	//     |
+	//     |
+	//     |
+	//     std::array<member_n> member_ns
+	//
+	//     Member_1& member_1(size_t i) {
+	//         return member_1s[i]; 
+	//     };
+	//     Member_2& member_2(size_t i);
+	// };
+
+
 
 	class Object
 	{
@@ -208,7 +241,7 @@ namespace game
 	public:
 		Handle selfHandle;
 
-		Signature signature;
+		Signature_ signature;
 
 		inline GamePosition& gamePosition();
 		inline Brain& brain();

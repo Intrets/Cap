@@ -10,7 +10,7 @@
 namespace game
 {
 	void GameState::addRenderInfo(render::RenderInfo& renderInfo) {
-		Signature renderSignature;
+		Signature_ renderSignature;
 		renderSignature.set(COMPONENT::GAME_POSITION);
 		renderSignature.set(COMPONENT::GRAPHIS_TILE);
 
@@ -26,21 +26,21 @@ namespace game
 	}
 
 	void GameState::runTick() {
-		Signature conciousSignature;
+		Signature_ conciousSignature;
 		conciousSignature.set(COMPONENT::BRAIN);
 		conciousSignature.set(COMPONENT::POSSESSION);
 		conciousSignature.set(COMPONENT::VICINITY);
 
-		Signature foodSignature;
+		Signature_ foodSignature;
 		foodSignature.set(COMPONENT::NUTRITION);
 
-		Signature friendlySignature;
+		Signature_ friendlySignature;
 		friendlySignature.set(COMPONENT::BRAIN);
 
-		Signature brainSignature;
+		Signature_ brainSignature;
 		brainSignature.set(COMPONENT::BRAIN);
 
-		Signature locomotionSignature;
+		Signature_ locomotionSignature;
 		locomotionSignature.set(COMPONENT::LOCOMOTION);
 		locomotionSignature.set(COMPONENT::GAME_POSITION);
 
@@ -181,7 +181,7 @@ namespace game
 
 			Action recallFood;
 			recallFood.requirements = {};
-			Signature foodSignature;
+			Signature_ foodSignature;
 			foodSignature.set(COMPONENT::NUTRITION).set(COMPONENT::GAME_POSITION);
 			recallFood.results = { foodSignature };
 			recallFood.runFunction = [](Object* obj) -> ActionResult
@@ -277,7 +277,7 @@ namespace game
 		return this->runFunction(obj);
 	}
 
-	float Concept::value(Signature const& signature) {
+	float Concept::value(Signature_ const& signature) {
 		float result = 0.0f;
 
 		for (auto const& essence : this->essences) {
@@ -290,26 +290,26 @@ namespace game
 		return result;
 	}
 
-	Signature& Signature::set(COMPONENT component) {
+	Signature_& Signature_::set(COMPONENT component) {
 		this->data.set(component);
 		return *this;
 	}
 
-	void Signature::set(std::initializer_list<COMPONENT> components) {
+	void Signature_::set(std::initializer_list<COMPONENT> components) {
 		for (auto comp : components) {
 			this->data.set(comp);
 		}
 	}
 
-	bool Signature::test(COMPONENT component) {
+	bool Signature_::test(COMPONENT component) {
 		return this->data.test(component);
 	}
 
-	bool Signature::contains(Signature const& other) const {
+	bool Signature_::contains(Signature_ const& other) const {
 		return (this->data & other.data) == other.data;
 	}
 
-	Action const& Brain::findAction(std::vector<Signature> const& requirements) {
+	Action const& Brain::findAction(std::vector<Signature_> const& requirements) {
 		for (auto const& action : this->memory) {
 			for (auto const& otherReq : requirements) {
 				for (auto const& memoryReq : action.requirements) {
