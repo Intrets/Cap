@@ -6,11 +6,12 @@ set(MODULE_FILES
 	GameState
 	player/PlayerInfo
 	ui/ConstructDebugUI
-	Test
+	GameObject
+	Signature
 )
 
 set(GENERATE_STRUCTS
-	Test
+	GameObject
 )
 
 foreach(GEN ${GENERATE_STRUCTS})

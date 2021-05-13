@@ -35,6 +35,9 @@ def print_generated_structure(s):
     structure_type = s.structure_type
     component_enum = f'{name.upper()}_COMPONENT'
 
+    def enum_name(n):
+        return n.upper()
+
     res = []
     output_line = res.append
 
@@ -44,7 +47,7 @@ def print_generated_structure(s):
     output_line(f'enum {component_enum}')
     output_line('{')
     for member in members:
-        output_line(f'\t{member[1].upper()},')
+        output_line(f'\t{enum_name(member[1])},')
     output_line('\tMAX')
     output_line('};\n')
 
@@ -58,10 +61,21 @@ def print_generated_structure(s):
 
     output_line('};\n')
 
+    # proxy
+    output_line('struct Everything;')
+    output_line(f'struct {name}Proxy')
+    output_line('{')
+    output_line('\tsize_t i;')
+    output_line(f'\t{everything_name}& proxy;')
+    for member in members:
+        output_line(f'\tinline {member[0]}& {member[1]}();')
+    output_line('};')
+
     # everything
     output_line(f'struct {everything_name}')
     output_line('{')
 
+    output_line('\tsize_t count;')
     if structure_type == 'AoS':
         if array_type[0] == 'Array':
             output_line(f'\tstd::array<{name}, {array_type[1]}> data;\n')
@@ -71,12 +85,60 @@ def print_generated_structure(s):
             for member in members:
                 output_line(f'\tstd::array<{member[0]}, {array_type[1]}> {member[1]}s;')
 
-    output_line(f'\tinline {name}Proxy get(size_t i) {{')
-    output_line('\t\treturn {i, *this};')
+    output_line(f'\tinline void add({name}&& obj) {{')
+    output_line(f'\t\tassert(count < {array_type[1]});')
+    if structure_type == 'AoS':
+        output_line(f'\t\tif constexpr (std::is_trivially_copyable_v<{name}>) {{')
+        output_line(f'\t\t\tdata[count] = obj;')
+        output_line(f'\t\t}}')
+        output_line(f'\t\telse {{')
+        output_line(f'\t\t\tdata[count] = std::move(obj);')
+        output_line(f'\t\t}}')
+    else:
+        for member in members:
+            output_line(f'\t\tif constexpr (std::is_trivially_copyable_v<{member[0]}>) {{')
+            output_line(f'\t\t\t{member[1]}(count) = obj.{member[1]};')
+            output_line(f'\t\t}}')
+            output_line(f'\t\telse {{')
+            output_line(f'\t\t\t{member[1]}(count) = std::move(obj.{member[1]});')
+            output_line(f'\t\t}}')
+
+    output_line(f'\t\tcount++;')
     output_line('\t};')
+
+    output_line(f'\tinline void add({name} const& obj) {{')
+    output_line(f'\t\tassert(count < {array_type[1]});')
+    if structure_type == 'AoS':
+        output_line(f'\t\tdata[count] = obj;')
+    else:
+        for member in members:
+            output_line(f'\t\t{member[1]}(count) = obj.{member[1]};')
+    output_line(f'\t\tcount++;')
+    output_line('\t};')
+
+    output_line('\tinline void remove(size_t i) {')
+    output_line(f'\t\tassert(i < count);')
+    if structure_type == 'AoS':
+        output_line(f'\t\tdata[i] = data[count - 1];')
+    else:
+        for member in members:
+            output_line(f'\t\t{member[1]}(i) = {member[1]}(count - 1);')
+    output_line('\t};')
+
+    output_line(f'\tinline {name}Proxy get(size_t i) {{')
+    output_line('\t\treturn { i, *this };')
+    output_line('\t};')
+
+    output_line(f'\tinline Signature<{component_enum}>& signature(size_t i) {{')
+    if structure_type == 'AoS':
+        output_line(f'\t\treturn data[i].signature;')
+    else:
+        output_line(f'\t\treturn signatures[i];')
+    output_line(f'\t}};')
 
     for member in members:
         output_line(f'\tinline {member[0]}& {member[1]}(size_t i) {{')
+        output_line(f'\t\tassert(signature(i).test({component_enum}::{enum_name(member[1])}));')
         if structure_type == 'AoS':
             output_line(f'\t\treturn data[i].{member[1]};')
         else:
@@ -84,15 +146,10 @@ def print_generated_structure(s):
         output_line(f'\t}};')
     output_line(f'}};\n')
 
-    output_line(f'struct {name}Proxy')
-    output_line('{')
-    output_line('\tsize_t i;')
-    output_line(f'\t{everything_name}& proxy;')
     for member in members:
-        output_line(f'\tinline {member[0]}& {member[1]}() {{')
-        output_line(f'\t\treturn proxy.{member[1]}(i);')
-        output_line('\t};')
-    output_line('};')
+        output_line(f'inline {member[0]}& {name}Proxy::{member[1]}() {{')
+        output_line(f'\treturn proxy.{member[1]}(i);')
+        output_line('};')
 
     output_line(f'//# End {name}')
 
