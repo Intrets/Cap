@@ -14,7 +14,7 @@ private:
 public:
 	Signature<T>& set(T component);
 	void set(std::initializer_list<T> components);
-	bool test(T component);
+	bool test(T component) const;
 
 	bool contains(Signature const& other) const;
 };
@@ -33,7 +33,7 @@ inline void Signature<T>::set(std::initializer_list<T> components) {
 }
 
 template<class T>
-inline bool Signature<T>::test(T component) {
+inline bool Signature<T>::test(T component) const {
 	return this->data.test(component);
 }
 

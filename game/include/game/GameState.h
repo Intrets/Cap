@@ -11,7 +11,9 @@
 #include <functional>
 #include <tuple>
 
-#define WORLD_SIZE 20000
+#include "GameObject.h"
+
+#define WORLD_SIZE 200
 
 namespace render
 {

@@ -1,6 +1,8 @@
 import argparse
 import re
 
+import meta_impl
+
 
 def print_structure(s):
     name = s.name
@@ -75,20 +77,23 @@ def print_generated_structure(s):
     output_line(f'struct {everything_name}')
     output_line('{')
 
-    output_line('\tsize_t count;')
+    output_line('\tsize_t count = 0;')
     if structure_type == 'AoS':
         if array_type[0] == 'Array':
             output_line(f'\tstd::array<{name}, {array_type[1]}> data;\n')
+        elif array_type[0] == 'Vector':
+            output_line(f'\tstd::vector<{name}> data{{ {array_type[1]} }};\n')
     elif structure_type == 'SoA':
         if array_type[0] == 'Array':
             output_line(f'\tstd::array<Signature<{component_enum}>, {array_type[1]}> signatures;')
             for member in members:
                 output_line(f'\tstd::array<{member[0]}, {array_type[1]}> {member[1]}s;')
 
+    output_line(f'\ttemplate<int t = 0>')
     output_line(f'\tinline void add({name}&& obj) {{')
     output_line(f'\t\tassert(count < {array_type[1]});')
     if structure_type == 'AoS':
-        output_line(f'\t\tif constexpr (std::is_trivially_copyable_v<{name}>) {{')
+        output_line(f'\t\tif constexpr (std::is_copyable_v<{name}>) {{')
         output_line(f'\t\t\tdata[count] = obj;')
         output_line(f'\t\t}}')
         output_line(f'\t\telse {{')
@@ -96,7 +101,7 @@ def print_generated_structure(s):
         output_line(f'\t\t}}')
     else:
         for member in members:
-            output_line(f'\t\tif constexpr (std::is_trivially_copyable_v<{member[0]}>) {{')
+            output_line(f'\t\tif constexpr (std::is_copyable_v<{member[0]}>) {{')
             output_line(f'\t\t\t{member[1]}(count) = obj.{member[1]};')
             output_line(f'\t\t}}')
             output_line(f'\t\telse {{')
@@ -106,6 +111,7 @@ def print_generated_structure(s):
     output_line(f'\t\tcount++;')
     output_line('\t};')
 
+    output_line(f'\ttemplate<int t = 0>')
     output_line(f'\tinline void add({name} const& obj) {{')
     output_line(f'\t\tassert(count < {array_type[1]});')
     if structure_type == 'AoS':
@@ -116,6 +122,7 @@ def print_generated_structure(s):
     output_line(f'\t\tcount++;')
     output_line('\t};')
 
+    output_line(f'\ttemplate<int t=0>')
     output_line('\tinline void remove(size_t i) {')
     output_line(f'\t\tassert(i < count);')
     if structure_type == 'AoS':

@@ -17,11 +17,13 @@ struct ActionResult;
 struct GameObject;
 struct Possession;
 
+enum GAMEOBJECT_COMPONENT;
+
 class Action
 {
 public:
-	std::vector<Signature<GameObject>> requirements{};
-	std::vector<Signature<GameObject>> results{};
+	std::vector<Signature<GAMEOBJECT_COMPONENT>> requirements{};
+	std::vector<Signature<GAMEOBJECT_COMPONENT>> results{};
 
 	std::function<ActionResult(GameObject* obj)> runFunction;
 
@@ -74,6 +76,7 @@ struct Possession
 struct Vicinity
 {
 	//std::vector<WeakReference<Object, Object>> vicinity;
+	//std::unique_ptr<GameObject> test;
 };
 
 struct Nutrition
@@ -91,25 +94,40 @@ struct Locomotion
 
 /*#
 Everything AoS
-Array 1000
+Vector 100
 GameObject
-int brain
-int locomotion
+GamePosition
+GraphicsTile
+Brain
+Nutrition
+Locomotion
+Possession
+Vicinity
 #*/
 
 //# Start GameObject
 enum GAMEOBJECT_COMPONENT
 {
+	GAMEPOSITION,
+	GRAPHICSTILE,
 	BRAIN,
+	NUTRITION,
 	LOCOMOTION,
+	POSSESSION,
+	VICINITY,
 	MAX
 };
 
 struct GameObject
 {
 	Signature<GAMEOBJECT_COMPONENT> signature;
-	int brain;
-	int locomotion;
+	GamePosition gameposition;
+	GraphicsTile graphicstile;
+	Brain brain;
+	Nutrition nutrition;
+	Locomotion locomotion;
+	Possession possession;
+	Vicinity vicinity;
 };
 
 struct Everything;
@@ -117,17 +135,23 @@ struct GameObjectProxy
 {
 	size_t i;
 	Everything& proxy;
-	inline int& brain();
-	inline int& locomotion();
+	inline GamePosition& gameposition();
+	inline GraphicsTile& graphicstile();
+	inline Brain& brain();
+	inline Nutrition& nutrition();
+	inline Locomotion& locomotion();
+	inline Possession& possession();
+	inline Vicinity& vicinity();
 };
 struct Everything
 {
-	size_t count;
-	std::array<GameObject, 1000> data;
+	size_t count = 0;
+	std::vector<GameObject> data{ 100 };
 
+	template<int t = 0>
 	inline void add(GameObject&& obj) {
-		assert(count < 1000);
-		if constexpr (std::is_trivially_copyable_v<GameObject>) {
+		assert(count < 100);
+		if constexpr (std::is_copyable_v<GameObject>) {
 			data[count] = obj;
 		}
 		else {
@@ -135,11 +159,13 @@ struct Everything
 		}
 		count++;
 	};
+	template<int t = 0>
 	inline void add(GameObject const& obj) {
-		assert(count < 1000);
+		assert(count < 100);
 		data[count] = obj;
 		count++;
 	};
+	template<int t=0>
 	inline void remove(size_t i) {
 		assert(i < count);
 		data[i] = data[count - 1];
@@ -150,20 +176,55 @@ struct Everything
 	inline Signature<GAMEOBJECT_COMPONENT>& signature(size_t i) {
 		return data[i].signature;
 	};
-	inline int& brain(size_t i) {
+	inline GamePosition& gameposition(size_t i) {
+		assert(signature(i).test(GAMEOBJECT_COMPONENT::GAMEPOSITION));
+		return data[i].gameposition;
+	};
+	inline GraphicsTile& graphicstile(size_t i) {
+		assert(signature(i).test(GAMEOBJECT_COMPONENT::GRAPHICSTILE));
+		return data[i].graphicstile;
+	};
+	inline Brain& brain(size_t i) {
 		assert(signature(i).test(GAMEOBJECT_COMPONENT::BRAIN));
 		return data[i].brain;
 	};
-	inline int& locomotion(size_t i) {
+	inline Nutrition& nutrition(size_t i) {
+		assert(signature(i).test(GAMEOBJECT_COMPONENT::NUTRITION));
+		return data[i].nutrition;
+	};
+	inline Locomotion& locomotion(size_t i) {
 		assert(signature(i).test(GAMEOBJECT_COMPONENT::LOCOMOTION));
 		return data[i].locomotion;
 	};
+	inline Possession& possession(size_t i) {
+		assert(signature(i).test(GAMEOBJECT_COMPONENT::POSSESSION));
+		return data[i].possession;
+	};
+	inline Vicinity& vicinity(size_t i) {
+		assert(signature(i).test(GAMEOBJECT_COMPONENT::VICINITY));
+		return data[i].vicinity;
+	};
 };
 
-inline int& GameObjectProxy::brain() {
+inline GamePosition& GameObjectProxy::gameposition() {
+	return proxy.gameposition(i);
+};
+inline GraphicsTile& GameObjectProxy::graphicstile() {
+	return proxy.graphicstile(i);
+};
+inline Brain& GameObjectProxy::brain() {
 	return proxy.brain(i);
 };
-inline int& GameObjectProxy::locomotion() {
+inline Nutrition& GameObjectProxy::nutrition() {
+	return proxy.nutrition(i);
+};
+inline Locomotion& GameObjectProxy::locomotion() {
 	return proxy.locomotion(i);
+};
+inline Possession& GameObjectProxy::possession() {
+	return proxy.possession(i);
+};
+inline Vicinity& GameObjectProxy::vicinity() {
+	return proxy.vicinity(i);
 };
 //# End GameObject

@@ -26,6 +26,7 @@ namespace game
 	}
 
 	void GameState::runTick() {
+
 		Signature_ conciousSignature;
 		conciousSignature.set(COMPONENT::BRAIN);
 		conciousSignature.set(COMPONENT::POSSESSION);
@@ -137,6 +138,8 @@ namespace game
 	}
 
 	GameState::GameState() {
+		Everything test;
+
 		{
 			//for (size_t j = 1; j < 100; j++) {
 			//	for (size_t i = 1; i < WORLD_SIZE - 2; i++) {
