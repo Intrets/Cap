@@ -12,6 +12,21 @@
 #include <misc/Misc.h>
 
 #include "Signature.h"
+/*#
+everything_name: Everything
+structure: sSoA
+indirection_type: pointers
+type: Vector
+size: 100
+component[]: GamePosition
+component[]: GraphicsTile
+component[]: Brain
+component[]: Nutrition
+component[]: Locomotion
+component[]: Possession
+component[]: Vicinity
+object_name: GameObject
+#*/
 
 struct ActionResult;
 struct GameObject;
@@ -91,25 +106,12 @@ struct Locomotion
 
 	std::optional<glm::ivec2> target;
 };
-/*#
-Everything SoA
-Vector 100
-GameObject
-GamePosition
-GraphicsTile
-Brain
-Nutrition
-Locomotion
-Possession
-Vicinity
-#*/
-
 //# forward
+using SizeAlias = size_t;
 struct Everything;
 struct GameObject;
 enum GAMEOBJECT_COMPONENT
 {
-	None,
 	GAMEPOSITION,
 	GRAPHICSTILE,
 	BRAIN,
@@ -117,13 +119,15 @@ enum GAMEOBJECT_COMPONENT
 	LOCOMOTION,
 	POSSESSION,
 	VICINITY,
+	None,
 	MAX
 };
+struct GameObjectProxy;
 //# end
 //# declaration
 struct Everything
 {
-	std::vector<Signature<GAMEOBJECT_COMPONENT>> signatures{ 100 };
+	std::vector<GameObjectProxy> indirectionMap{ 100 };
 	std::vector<GamePosition> gamepositions{ 100 };
 	std::vector<GraphicsTile> graphicstiles{ 100 };
 	std::vector<Brain> brains{ 100 };
@@ -131,18 +135,18 @@ struct Everything
 	std::vector<Locomotion> locomotions{ 100 };
 	std::vector<Possession> possessions{ 100 };
 	std::vector<Vicinity> vicinitys{ 100 };
-	inline Signature<GAMEOBJECT_COMPONENT>& signature(size_t i);
-	inline GamePosition& gameposition(size_t i);
-	inline GraphicsTile& graphicstile(size_t i);
-	inline Brain& brain(size_t i);
-	inline Nutrition& nutrition(size_t i);
-	inline Locomotion& locomotion(size_t i);
-	inline Possession& possession(size_t i);
-	inline Vicinity& vicinity(size_t i);
+	std::vector<Signature<GAMEOBJECT_COMPONENT>> signatures{ 100 };
+	inline GamePosition& gameposition(SizeAlias i);
+	inline GraphicsTile& graphicstile(SizeAlias i);
+	inline Brain& brain(SizeAlias i);
+	inline Nutrition& nutrition(SizeAlias i);
+	inline Locomotion& locomotion(SizeAlias i);
+	inline Possession& possession(SizeAlias i);
+	inline Vicinity& vicinity(SizeAlias i);
+	inline Signature<GAMEOBJECT_COMPONENT>& signature(SizeAlias i);
 };
 struct GameObject
 {
-	Signature<GAMEOBJECT_COMPONENT> signature{};
 	GamePosition gameposition{};
 	GraphicsTile graphicstile{};
 	Brain brain{};
@@ -150,46 +154,70 @@ struct GameObject
 	Locomotion locomotion{};
 	Possession possession{};
 	Vicinity vicinity{};
+	Signature<GAMEOBJECT_COMPONENT> signature{};
+};
+struct GameObjectProxy
+{
+	GamePosition* gameposition_;
+	GraphicsTile* graphicstile_;
+	Brain* brain_;
+	Nutrition* nutrition_;
+	Locomotion* locomotion_;
+	Possession* possession_;
+	Vicinity* vicinity_;
+	inline GamePosition& gameposition();
+	inline GraphicsTile& graphicstile();
+	inline Brain& brain();
+	inline Nutrition& nutrition();
+	inline Locomotion& locomotion();
+	inline Possession& possession();
+	inline Vicinity& vicinity();
 };
 //# end
 //# implementation
-inline Signature<GAMEOBJECT_COMPONENT>& Everything::signature(size_t i) {
-	assert(i < 100);
+inline GamePosition& Everything::gameposition(SizeAlias i) {
+	return indirectionMap[i].gameposition();
+};
+inline GraphicsTile& Everything::graphicstile(SizeAlias i) {
+	return indirectionMap[i].graphicstile();
+};
+inline Brain& Everything::brain(SizeAlias i) {
+	return indirectionMap[i].brain();
+};
+inline Nutrition& Everything::nutrition(SizeAlias i) {
+	return indirectionMap[i].nutrition();
+};
+inline Locomotion& Everything::locomotion(SizeAlias i) {
+	return indirectionMap[i].locomotion();
+};
+inline Possession& Everything::possession(SizeAlias i) {
+	return indirectionMap[i].possession();
+};
+inline Vicinity& Everything::vicinity(SizeAlias i) {
+	return indirectionMap[i].vicinity();
+};
+inline Signature<GAMEOBJECT_COMPONENT>& Everything::signature(SizeAlias i) {
 	return signatures[i];
 };
-inline GamePosition& Everything::gameposition(size_t i) {
-	assert(i < 100);
-	assert(signature(i).test(GAMEOBJECT_COMPONENT::GAMEPOSITION));
-	return gamepositions[i];
+inline GamePosition& GameObjectProxy::gameposition() {
+	return *gameposition_;
 };
-inline GraphicsTile& Everything::graphicstile(size_t i) {
-	assert(i < 100);
-	assert(signature(i).test(GAMEOBJECT_COMPONENT::GRAPHICSTILE));
-	return graphicstiles[i];
+inline GraphicsTile& GameObjectProxy::graphicstile() {
+	return *graphicstile_;
 };
-inline Brain& Everything::brain(size_t i) {
-	assert(i < 100);
-	assert(signature(i).test(GAMEOBJECT_COMPONENT::BRAIN));
-	return brains[i];
+inline Brain& GameObjectProxy::brain() {
+	return *brain_;
 };
-inline Nutrition& Everything::nutrition(size_t i) {
-	assert(i < 100);
-	assert(signature(i).test(GAMEOBJECT_COMPONENT::NUTRITION));
-	return nutritions[i];
+inline Nutrition& GameObjectProxy::nutrition() {
+	return *nutrition_;
 };
-inline Locomotion& Everything::locomotion(size_t i) {
-	assert(i < 100);
-	assert(signature(i).test(GAMEOBJECT_COMPONENT::LOCOMOTION));
-	return locomotions[i];
+inline Locomotion& GameObjectProxy::locomotion() {
+	return *locomotion_;
 };
-inline Possession& Everything::possession(size_t i) {
-	assert(i < 100);
-	assert(signature(i).test(GAMEOBJECT_COMPONENT::POSSESSION));
-	return possessions[i];
+inline Possession& GameObjectProxy::possession() {
+	return *possession_;
 };
-inline Vicinity& Everything::vicinity(size_t i) {
-	assert(i < 100);
-	assert(signature(i).test(GAMEOBJECT_COMPONENT::VICINITY));
-	return vicinitys[i];
+inline Vicinity& GameObjectProxy::vicinity() {
+	return *vicinity_;
 };
 //# end

@@ -34,7 +34,7 @@ class Writer:
 
 class List:
     def __init__(self, *data):
-        self.data = list(data)
+        self.data = list(filter(lambda x: x is not None,data))
 
     def forward_declaration(self, writer: Writer):
         for data in self.data:
