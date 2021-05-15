@@ -91,9 +91,8 @@ struct Locomotion
 
 	std::optional<glm::ivec2> target;
 };
-
 /*#
-Everything AoS
+Everything SoA
 Vector 100
 GameObject
 GamePosition
@@ -105,9 +104,12 @@ Possession
 Vicinity
 #*/
 
-//# Start GameObject
+//# forward
+struct Everything;
+struct GameObject;
 enum GAMEOBJECT_COMPONENT
 {
+	None,
 	GAMEPOSITION,
 	GRAPHICSTILE,
 	BRAIN,
@@ -117,114 +119,77 @@ enum GAMEOBJECT_COMPONENT
 	VICINITY,
 	MAX
 };
-
-struct GameObject
-{
-	Signature<GAMEOBJECT_COMPONENT> signature;
-	GamePosition gameposition;
-	GraphicsTile graphicstile;
-	Brain brain;
-	Nutrition nutrition;
-	Locomotion locomotion;
-	Possession possession;
-	Vicinity vicinity;
-};
-
-struct Everything;
-struct GameObjectProxy
-{
-	size_t i;
-	Everything& proxy;
-	inline GamePosition& gameposition();
-	inline GraphicsTile& graphicstile();
-	inline Brain& brain();
-	inline Nutrition& nutrition();
-	inline Locomotion& locomotion();
-	inline Possession& possession();
-	inline Vicinity& vicinity();
-};
+//# end
+//# declaration
 struct Everything
 {
-	size_t count = 0;
-	std::vector<GameObject> data{ 100 };
-
-	template<int t = 0>
-	inline void add(GameObject&& obj) {
-		assert(count < 100);
-		if constexpr (std::is_copyable_v<GameObject>) {
-			data[count] = obj;
-		}
-		else {
-			data[count] = std::move(obj);
-		}
-		count++;
-	};
-	template<int t = 0>
-	inline void add(GameObject const& obj) {
-		assert(count < 100);
-		data[count] = obj;
-		count++;
-	};
-	template<int t=0>
-	inline void remove(size_t i) {
-		assert(i < count);
-		data[i] = data[count - 1];
-	};
-	inline GameObjectProxy get(size_t i) {
-		return { i, *this };
-	};
-	inline Signature<GAMEOBJECT_COMPONENT>& signature(size_t i) {
-		return data[i].signature;
-	};
-	inline GamePosition& gameposition(size_t i) {
-		assert(signature(i).test(GAMEOBJECT_COMPONENT::GAMEPOSITION));
-		return data[i].gameposition;
-	};
-	inline GraphicsTile& graphicstile(size_t i) {
-		assert(signature(i).test(GAMEOBJECT_COMPONENT::GRAPHICSTILE));
-		return data[i].graphicstile;
-	};
-	inline Brain& brain(size_t i) {
-		assert(signature(i).test(GAMEOBJECT_COMPONENT::BRAIN));
-		return data[i].brain;
-	};
-	inline Nutrition& nutrition(size_t i) {
-		assert(signature(i).test(GAMEOBJECT_COMPONENT::NUTRITION));
-		return data[i].nutrition;
-	};
-	inline Locomotion& locomotion(size_t i) {
-		assert(signature(i).test(GAMEOBJECT_COMPONENT::LOCOMOTION));
-		return data[i].locomotion;
-	};
-	inline Possession& possession(size_t i) {
-		assert(signature(i).test(GAMEOBJECT_COMPONENT::POSSESSION));
-		return data[i].possession;
-	};
-	inline Vicinity& vicinity(size_t i) {
-		assert(signature(i).test(GAMEOBJECT_COMPONENT::VICINITY));
-		return data[i].vicinity;
-	};
+	std::vector<Signature<GAMEOBJECT_COMPONENT>> signatures{ 100 };
+	std::vector<GamePosition> gamepositions{ 100 };
+	std::vector<GraphicsTile> graphicstiles{ 100 };
+	std::vector<Brain> brains{ 100 };
+	std::vector<Nutrition> nutritions{ 100 };
+	std::vector<Locomotion> locomotions{ 100 };
+	std::vector<Possession> possessions{ 100 };
+	std::vector<Vicinity> vicinitys{ 100 };
+	inline Signature<GAMEOBJECT_COMPONENT>& signature(size_t i);
+	inline GamePosition& gameposition(size_t i);
+	inline GraphicsTile& graphicstile(size_t i);
+	inline Brain& brain(size_t i);
+	inline Nutrition& nutrition(size_t i);
+	inline Locomotion& locomotion(size_t i);
+	inline Possession& possession(size_t i);
+	inline Vicinity& vicinity(size_t i);
 };
-
-inline GamePosition& GameObjectProxy::gameposition() {
-	return proxy.gameposition(i);
+struct GameObject
+{
+	Signature<GAMEOBJECT_COMPONENT> signature{};
+	GamePosition gameposition{};
+	GraphicsTile graphicstile{};
+	Brain brain{};
+	Nutrition nutrition{};
+	Locomotion locomotion{};
+	Possession possession{};
+	Vicinity vicinity{};
 };
-inline GraphicsTile& GameObjectProxy::graphicstile() {
-	return proxy.graphicstile(i);
+//# end
+//# implementation
+inline Signature<GAMEOBJECT_COMPONENT>& Everything::signature(size_t i) {
+	assert(i < 100);
+	return signatures[i];
 };
-inline Brain& GameObjectProxy::brain() {
-	return proxy.brain(i);
+inline GamePosition& Everything::gameposition(size_t i) {
+	assert(i < 100);
+	assert(signature(i).test(GAMEOBJECT_COMPONENT::GAMEPOSITION));
+	return gamepositions[i];
 };
-inline Nutrition& GameObjectProxy::nutrition() {
-	return proxy.nutrition(i);
+inline GraphicsTile& Everything::graphicstile(size_t i) {
+	assert(i < 100);
+	assert(signature(i).test(GAMEOBJECT_COMPONENT::GRAPHICSTILE));
+	return graphicstiles[i];
 };
-inline Locomotion& GameObjectProxy::locomotion() {
-	return proxy.locomotion(i);
+inline Brain& Everything::brain(size_t i) {
+	assert(i < 100);
+	assert(signature(i).test(GAMEOBJECT_COMPONENT::BRAIN));
+	return brains[i];
 };
-inline Possession& GameObjectProxy::possession() {
-	return proxy.possession(i);
+inline Nutrition& Everything::nutrition(size_t i) {
+	assert(i < 100);
+	assert(signature(i).test(GAMEOBJECT_COMPONENT::NUTRITION));
+	return nutritions[i];
 };
-inline Vicinity& GameObjectProxy::vicinity() {
-	return proxy.vicinity(i);
+inline Locomotion& Everything::locomotion(size_t i) {
+	assert(i < 100);
+	assert(signature(i).test(GAMEOBJECT_COMPONENT::LOCOMOTION));
+	return locomotions[i];
 };
-//# End GameObject
+inline Possession& Everything::possession(size_t i) {
+	assert(i < 100);
+	assert(signature(i).test(GAMEOBJECT_COMPONENT::POSSESSION));
+	return possessions[i];
+};
+inline Vicinity& Everything::vicinity(size_t i) {
+	assert(i < 100);
+	assert(signature(i).test(GAMEOBJECT_COMPONENT::VICINITY));
+	return vicinitys[i];
+};
+//# end
