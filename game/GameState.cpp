@@ -139,6 +139,7 @@ namespace game
 
 	GameState::GameState() {
 		Everything test;
+		test.brain(1);
 
 		{
 			//for (size_t j = 1; j < 100; j++) {

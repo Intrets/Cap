@@ -34,7 +34,7 @@ class Writer:
 
 class List:
     def __init__(self, *data):
-        self.data = list(filter(lambda x: x is not None,data))
+        self.data = list(filter(lambda x: x is not None, data))
 
     def forward_declaration(self, writer: Writer):
         for data in self.data:
@@ -75,16 +75,18 @@ class Enum:
 
 
 class Struct:
-    def __init__(self, name, member_variables=None, member_functions=None):
+    def __init__(self, name, member_variables=None, member_functions=None, bases=None):
         self.name = name
         self.member_variables: list[VariableDeclaration] = maybe(member_variables, [])
         self.member_functions: list[MemberFunction] = maybe(member_functions, [])
+        self.bases: list[str] = maybe(bases, [])
 
     def forward_declaration(self, writer: Writer):
         writer.writeln(f'struct {self.name};')
 
     def declaration(self, writer: Writer):
-        writer.writeln(f'struct {self.name}')
+        bases = '' if not self.bases else ' : ' + ', '.join(self.bases)
+        writer.writeln(f'struct {self.name}{bases}')
         writer.writeln('{')
         writer.indent()
         for member_variable in self.member_variables:
@@ -104,24 +106,30 @@ class Struct:
             if type(member_function.implementation) == str:
                 for line in member_function.implementation.split('\n'):
                     writer.writeln(line)
+            else:
+                exit('Implementation not a string')
             writer.unindent()
             writer.writeln('};')
         pass
 
 
 class MemberFunction:
-    def __init__(self, name, return_type, implementation, arguments=None, inline=True):
+    def __init__(self, name, implementation, return_type=None, arguments=None, inline=True, virtual=False,
+                 default=False):
         self.name = name
         self.return_type = return_type
         self.arguments: list[VariableDeclaration] = arguments
         self.inline = inline
         self.implementation = implementation
+        self.virtual = virtual
+        self.default = default
 
     def signature(self, writer: Writer, namespace=None):
         if self.inline:
             writer.write('inline ')
         namespace = f'{namespace}::' if namespace else ''
-        writer.write(f'{self.return_type} {namespace}{self.name}(')
+        return_ = '' if self.return_type is None else f'{self.return_type} '
+        writer.write(f'{return_}{namespace}{self.name}(')
         if self.arguments:
             self.arguments[0].write(writer, initialize=False)
             for argument in self.arguments[1:]:

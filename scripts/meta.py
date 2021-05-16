@@ -5,6 +5,21 @@ from collections import namedtuple
 from meta_impl import *
 
 
+class Void:
+    def __getattr__(self, item):
+        return self
+
+    def __call__(self, *args, **kwargs):
+        return self
+
+    def __bool__(self):
+        return False
+
+
+def void(q):
+    return Void() if q is None else q
+
+
 def print_structure(writer: Writer, s):
     writer.writeln('/*#')
     for k, v in s.raw.items():
@@ -31,6 +46,7 @@ class Structure:
         )
         self.structure_type = structure_type
         self.index_type = 'size_t'
+        self.enum_name = f'{name.upper()}_COMPONENT'
 
 
 class Code:
@@ -38,11 +54,190 @@ class Code:
         self.code = code
 
 
-def make_struct(structure: Structure):
+def make_unique_ref(structure: Structure):
+    unique_ref_struct = Struct(name=f'Unique{structure.name}')
+
+    unique_ref_struct.member_variables.append(VariableDeclaration(
+        name='index',
+        mtype=structure.index_type,
+        val='0'
+    ))
+
+    unique_ref_struct.member_variables.append(VariableDeclaration(
+        name='proxy',
+        mtype=f'{structure.everything_name}*',
+        val='nullptr'
+    ))
+
+    for member in structure.members:
+        unique_ref_struct.member_functions.append(MemberFunction(
+            name=member.name,
+            return_type=f'{member.type}&',
+            implementation=f'return proxy->{member.name}(index);'
+        ))
+
+    unique_ref_struct.member_functions.append(MemberFunction(
+        name=f'~Unique{structure.name}',
+        implementation=f'// TODO'
+    ))
+
+    return unique_ref_struct
+
+
+def make_weak_ref(structure: Structure):
+    weak_ref_struct = Struct(name=f'Weak{structure.name}')
+
+    weak_ref_struct.member_variables.append(VariableDeclaration(
+        name='index',
+        mtype=structure.index_type,
+        val='0'
+    ))
+
+    weak_ref_struct.member_variables.append(VariableDeclaration(
+        name='proxy',
+        mtype=f'{structure.everything_name}*',
+        val='nullptr'
+    ))
+
+    for member in structure.members:
+        weak_ref_struct.member_functions.append(MemberFunction(
+            name=member.name,
+            return_type=f'{member.type}&',
+            implementation=f'return proxy->{member.name}(index);'
+        ))
+
+    return weak_ref_struct
+
+
+def make_everything_struct(structure: Structure):
     everything_struct = Struct(name=structure.everything_name)
-    object_struct = Struct(name=structure.name)
+
+    implementation = []
+
+    if structure.structure_type == 'sSoA':
+        for member in structure.members:
+            implementation.append(f'if (has{member.name}(i)) {{')
+            implementation.append(
+                f'\t{member.name}s[indirectionMap[i].{member.name}_] = std::move({member.name}s[indirectionMap[{member.name}last].{member.name}_]);')
+            implementation.append('}')
+
+    everything_struct.member_functions.append(MemberFunction(
+        name='remove',
+        return_type='void',
+        arguments=[VariableDeclaration(name='i', mtype='SizeAlias')],
+        implementation='\n'.join(implementation),
+        inline=False
+    ))
+
+    if structure.array_type[0] == 'Vector':
+        def data_type(s):
+            return f'std::vector<{s}>'
+
+        val = structure.array_type[1]
+    else:
+        exit(f'Invalid data type: {structure.array_type[0]}')
+
+    if structure.structure_type == 'sSoA':
+        everything_struct.member_variables.append(VariableDeclaration(
+            name=f'indirectionMap',
+            mtype=f'std::vector<{structure.name}Proxy>',
+            val=val
+        ))
+
+    if structure.structure_type == 'SoA' or structure.structure_type == 'sSoA':
+        for member in structure.members + [structure.signature_member]:
+            everything_struct.member_variables.append(VariableDeclaration(
+                name=f'{member.name}s',
+                mtype=data_type(member.type),
+                val=val
+            ))
+    elif structure.structure_type == 'AoS':
+        everything_struct.member_variables.append(VariableDeclaration(
+            name='data',
+            mtype=data_type(structure.name),
+            val=val
+        ))
+    else:
+        exit(f'Invalid structure type: {structure.structure_type}')
+
+    if structure.structure_type == 'SoA':
+        def get_implementation(member):
+            if member.simple is not None:
+                sig_assert = f'assert(signature(i).test({structure.enum_name}::{member.name.upper()}));\n'
+            else:
+                sig_assert = ''
+            return f'assert(i < {structure.array_type[1]});\n{sig_assert}return {member.name}s[i];'
+    elif structure.structure_type == 'AoS':
+        def get_implementation(member):
+            if member.simple is not None:
+                sig_assert = f'assert(signature(i).test({structure.enum_name}::{member.name.upper()}));\n'
+            else:
+                sig_assert = ''
+            return f'assert(i < {structure.array_type[1]});\n{sig_assert}return data[i].{member};'
+    elif structure.structure_type == 'sSoA':
+        if structure.raw['indirection_type'] == 'integers':
+            def get_implementation(member):
+                return f'return {member.name}s[indirectionMap[i].{member.name}_];'
+        else:
+            def get_implementation(member):
+                return f'return indirectionMap[i].{member.name}();'
+    else:
+        exit(f'Invalid structure type: {structure.structure_type}')
+
+    for member in structure.members:
+        everything_struct.member_functions.append(MemberFunction(
+            name=member.name,
+            return_type=f'{member.type}&',
+            implementation=get_implementation(member),
+            arguments=[VariableDeclaration(name='i', mtype='SizeAlias')]
+        ))
+
+    if structure.structure_type == 'sSoA':
+        def get_implementation(member):
+            return f'return indirectionMap[i].{member.name}_ != 0;';
+    else:
+        def get_implementation(member):
+            return f'return signature(i).test({structure.enum_name}::{member.name.upper()});'
+
+    for member in structure.members:
+        everything_struct.member_functions.append(MemberFunction(
+            name=f'has{member.name}',
+            return_type=f'bool',
+            implementation=get_implementation(member),
+            arguments=[VariableDeclaration(name='i', mtype='SizeAlias')]
+        ))
+
+    everything_struct.member_functions.append(MemberFunction(
+        name=structure.signature_member.name,
+        return_type=f'{structure.signature_member.type}&',
+        implementation=f'return {structure.signature_member.name}s[i];',
+        arguments=[VariableDeclaration(name='i', mtype='SizeAlias')]
+    ))
+
+    if structure.structure_type == 'sSoA':
+        for member in structure.members:
+            everything_struct.member_variables.append(VariableDeclaration(
+                name=f'{member.name}last',
+                mtype='SizeAlias',
+                val=0
+            ))
+            pass
+    elif structure.structure_type == 'SoA' or structure.structure_type == 'AoS':
+        everything_struct.member_variables.append(VariableDeclaration(
+            name='last',
+            mtype=f'{structure.index_type}',
+            val=0
+        ))
+    else:
+        exit(f'Invalid structure type: {structure.structure_type}')
+
+    return everything_struct
+
+
+def make_struct(structure: Structure):
+    object_struct = Struct(name=structure.name) if structure.structure_type == 'AoS' else Void()
     object_proxy = Struct(name=f'{structure.name}Proxy') if structure.structure_type == 'sSoA' else None
-    enum = Enum(name=f'{structure.name.upper()}_COMPONENT')
+    enum = Enum(name=structure.enum_name)
 
     for member in structure.members + [structure.signature_member]:
         enum.vals.append(member[2])
@@ -62,12 +257,6 @@ def make_struct(structure: Structure):
         exit(f'Invalid data type: {structure.array_type[0]}')
 
     if structure.structure_type == 'sSoA':
-        everything_struct.member_variables.append(VariableDeclaration(
-            name=f'indirectionMap',
-            mtype=f'std::vector<{structure.name}Proxy>',
-            val=val
-        ))
-
         if structure.raw['indirection_type'] == 'pointers':
             def get_indirection_type(member: Member):
                 return f'{member.type}*'
@@ -99,62 +288,14 @@ def make_struct(structure: Structure):
                 implementation=get_indirection_access(member)
             ))
 
-    if structure.structure_type == 'SoA' or structure.structure_type == 'sSoA':
-        for member in structure.members + [structure.signature_member]:
-            everything_struct.member_variables.append(VariableDeclaration(
-                name=f'{member.name}s',
-                mtype=data_type(member.type),
-                val=val
-            ))
-    elif structure.structure_type == 'AoS':
-        everything_struct.member_variables.append(VariableDeclaration(
-            name='data',
-            mtype=data_type(structure.name),
-            val=val
-        ))
-    else:
-        exit(f'Invalid structure type: {structure.structure_type}')
-
-    if structure.structure_type == 'SoA':
-        def get_implementation(member):
-            if member.simple is not None:
-                sig_assert = f'assert(signature(i).test({enum.name}::{member.name.upper()}));\n'
-            else:
-                sig_assert = ''
-            return f'assert(i < {structure.array_type[1]});\n{sig_assert}return {member.name}s[i];'
-    elif structure.structure_type == 'AoS':
-        def get_implementation(member):
-            if member.simple is not None:
-                sig_assert = f'assert(signature(i).test({enum.name}::{member.name.upper()}));\n'
-            else:
-                sig_assert = ''
-            return f'assert(i < {structure.array_type[1]});\n{sig_assert}return data[i].{member};'
-    elif structure.structure_type == 'sSoA':
-        if structure.raw['indirection_type'] == 'integers':
-            def get_implementation(member):
-                return f'return {member.name}s[indirectionMap[i].{member.name}_];'
-        else:
-            def get_implementation(member):
-                return f'return indirectionMap[i].{member.name}();'
-    else:
-        exit(f'Invalid structure type: {structure.structure_type}')
-
-    for member in structure.members:
-        everything_struct.member_functions.append(MemberFunction(
-            name=member.name,
-            return_type=f'{member.type}&',
-            implementation=get_implementation(member),
-            arguments=[VariableDeclaration(name='i', mtype='SizeAlias')]
-        ))
-
-    everything_struct.member_functions.append(MemberFunction(
-        name=structure.signature_member.name,
-        return_type=f'{structure.signature_member.type}&',
-        implementation=f'return {structure.signature_member.name}s[i];',
-        arguments=[VariableDeclaration(name='i', mtype='SizeAlias')]
-    ))
-
-    return List(everything_struct, object_struct, enum, object_proxy)
+    return List(
+        make_everything_struct(structure),
+        object_struct,
+        enum,
+        object_proxy,
+        make_weak_ref(structure),
+        make_unique_ref(structure),
+    )
 
 
 class ForwardDeclaration:
@@ -176,7 +317,6 @@ def parse_structure(data):
     processed_data = dict()
 
     for line in data.splitlines()[1:-1]:
-        print(line)
         m = re.match(r'(\w+)(\[\])?:\s*(.+)$', line)
         key = m.group(1)
         value = m.group(3)
