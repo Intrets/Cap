@@ -48,6 +48,10 @@ class List:
         for data in self.data:
             data.implementation(writer)
 
+    def source_implementation(self, writer: Writer):
+        for data in self.data:
+            data.source_implementation(writer)
+
     def merge(self, other):
         self.data.extend(other.data)
 
@@ -73,6 +77,9 @@ class Enum:
     def implementation(self, writer: Writer):
         pass
 
+    def source_implementation(self, writer: Writer):
+        pass
+
 
 class Struct:
     def __init__(self, name, member_variables=None, member_functions=None, bases=None):
@@ -80,6 +87,65 @@ class Struct:
         self.member_variables: list[VariableDeclaration] = maybe(member_variables, [])
         self.member_functions: list[MemberFunction] = maybe(member_functions, [])
         self.bases: list[str] = maybe(bases, [])
+
+    def add_macro(self, s):
+        self.member_functions.append(MemberFunction(
+            name=s,
+            arguments=Write(self.name),
+            inline=False
+        ))
+
+    def move_constructor(self, impl):
+        self.member_functions.append(MemberFunction(
+            name=self.name,
+            arguments=[VariableDeclaration(name='other', mtype=self.name, type_qualifier='rvalue ref')],
+            implementation=impl,
+            inline=False
+        ))
+
+    def copy_constructor(self, impl):
+        self.member_functions.append(MemberFunction(
+            name=self.name,
+            arguments=[VariableDeclaration(name='other', mtype=self.name, type_qualifier='const ref')],
+            implementation=impl,
+            inline=False
+        ))
+
+    def copy_assignment(self, impl):
+        self.member_functions.append(MemberFunction(
+            name='operator=',
+            arguments=[VariableDeclaration(name='other', mtype=self.name, type_qualifier='const ref')],
+            implementation=impl,
+            return_type=VariableDeclaration(mtype=self.name, type_qualifier='ref').get_type(),
+            inline=False
+        ))
+
+    def move_assignment(self, impl):
+        self.member_functions.append(MemberFunction(
+            name='operator=',
+            arguments=[VariableDeclaration(name='other', mtype=self.name, type_qualifier='rvalue ref')],
+            implementation=impl,
+            return_type=VariableDeclaration(mtype=self.name, type_qualifier='ref').get_type(),
+            inline=False
+        ))
+
+    def no_copy(self):
+        self.add_macro('NOCOPY')
+
+    def no_move(self):
+        self.add_macro('NOMOVE')
+
+    def no_copy_move(self):
+        self.add_macro('NOCOPYMOVE')
+
+    def default_copy_move(self):
+        self.add_macro('DEFAULTCOPYMOVE')
+
+    def default_copy(self):
+        self.add_macro('DEFAULTCOPY')
+
+    def default_move(self):
+        self.add_macro('DEFAULTMOVE')
 
     def forward_declaration(self, writer: Writer):
         writer.writeln(f'struct {self.name};')
@@ -94,12 +160,20 @@ class Struct:
             writer.writeln(';')
         for member_function in self.member_functions:
             member_function.signature(writer)
+            if member_function.suffix is not None:
+                writer.write(f' = {member_function.suffix}')
             writer.writeln(';')
         writer.unindent()
         writer.writeln('};')
 
     def implementation(self, writer: Writer):
         for member_function in self.member_functions:
+            if not member_function.inline:
+                continue
+            if member_function.suffix is not None:
+                continue
+            if member_function.implementation is None:
+                continue
             member_function.signature(writer, namespace=self.name)
             writer.writeln(' {')
             writer.indent()
@@ -112,17 +186,37 @@ class Struct:
             writer.writeln('};')
         pass
 
+    def source_implementation(self, writer: Writer):
+        for member_function in self.member_functions:
+            if member_function.inline:
+                continue
+            if member_function.suffix is not None:
+                continue
+            if member_function.implementation is None:
+                continue
+            member_function.signature(writer, namespace=self.name)
+            writer.writeln(' {')
+            writer.indent()
+            if type(member_function.implementation) == str:
+                for line in member_function.implementation.split('\n'):
+                    writer.writeln(line)
+            else:
+                exit('Implementation not a string')
+            writer.unindent()
+            writer.writeln('};')
+
 
 class MemberFunction:
-    def __init__(self, name, implementation, return_type=None, arguments=None, inline=True, virtual=False,
-                 default=False):
+    def __init__(self, name, implementation=None, return_type=None, arguments=None, inline=True, virtual=False,
+                 suffix=None, const=False):
         self.name = name
         self.return_type = return_type
-        self.arguments: list[VariableDeclaration] = arguments
+        self.arguments = None if arguments is None else arguments if type(arguments) == list else [arguments]
         self.inline = inline
         self.implementation = implementation
         self.virtual = virtual
-        self.default = default
+        self.suffix = suffix
+        self.const = const
 
     def signature(self, writer: Writer, namespace=None):
         if self.inline:
@@ -136,23 +230,45 @@ class MemberFunction:
                 writer.write(', ')
                 argument.write(writer, initialize=False)
         writer.write(')')
+        if self.const:
+            writer.write(' const')
 
-        pass
 
 
 class VariableDeclaration:
-    def __init__(self, name, mtype, val=None):
+    def __init__(self, mtype, name=None, val=None, type_qualifier='value'):
         self.member_name = name
         self.member_type = mtype
+        if type_qualifier == 'value':
+            self.type = ''
+        elif type_qualifier == 'const ref':
+            self.type = ' const&'
+        elif type_qualifier == 'ref':
+            self.type = '&'
+        elif type_qualifier == 'rvalue ref':
+            self.type = '&&'
+        else:
+            exit(f'unknown type qualifier for variable declaration: {type_qualifier}')
         self.val = val
 
     def write(self, writer: Writer, initialize=True):
-        writer.write(f'{self.member_type} {self.member_name}')
+        writer.write(f'{self.member_type}{self.type} {self.member_name}')
         if self.val is not None and initialize:
             if self.val == '':
                 writer.write('{}')
             else:
                 writer.write(f'{{ {self.val} }}')
+
+    def get_type(self):
+        return f'{self.member_type}{self.type}'
+
+
+class Write:
+    def __init__(self, s):
+        self.s = s
+
+    def write(self, writer: Writer, *args, **kwargs):
+        writer.write(self.s)
 
 
 def test():

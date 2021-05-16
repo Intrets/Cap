@@ -54,32 +54,76 @@ class Code:
         self.code = code
 
 
-def make_unique_ref(structure: Structure):
-    unique_ref_struct = Struct(name=f'Unique{structure.name}')
-
-    unique_ref_struct.member_variables.append(VariableDeclaration(
+def base_struct(res, structure: Structure):
+    res.member_variables.append(VariableDeclaration(
         name='index',
         mtype=structure.index_type,
         val='0'
     ))
 
-    unique_ref_struct.member_variables.append(VariableDeclaration(
+    res.member_variables.append(VariableDeclaration(
         name='proxy',
         mtype=f'{structure.everything_name}*',
         val='nullptr'
     ))
 
     for member in structure.members:
-        unique_ref_struct.member_functions.append(MemberFunction(
+        res.member_functions.append(MemberFunction(
             name=member.name,
             return_type=f'{member.type}&',
             implementation=f'return proxy->{member.name}(index);'
         ))
 
-    unique_ref_struct.member_functions.append(MemberFunction(
-        name=f'~Unique{structure.name}',
-        implementation=f'// TODO'
+    res.member_functions.append(MemberFunction(
+        name=f'~{res.name}',
+        implementation=f'clear();'
     ))
+
+    res.member_functions.append(MemberFunction(
+        name=f'clear',
+        return_type='void',
+        implementation=f'proxy->remove(index);\nindex = 0;\nproxy = nullptr;'
+    ))
+
+    res.member_functions.append(MemberFunction(
+        name=f'isNotNull',
+        return_type='bool',
+        implementation=f'return index != 0;',
+        const=True
+    ))
+
+    res.member_functions.append(MemberFunction(
+        name=f'isNull',
+        return_type='bool',
+        implementation=f'return index == 0;',
+        const=True
+    ))
+
+    return res
+
+
+def make_unique_ref(structure: Structure):
+    unique_ref_struct = Struct(name=f'Unique{structure.name}')
+
+    base_struct(unique_ref_struct, structure)
+
+    unique_ref_struct.no_copy()
+    impl = '\n'.join([
+        'this->proxy->remove(this->index);',
+        'this->index = other.index;',
+        'this->proxy = other.proxy;',
+        'other.index = 0;',
+        'other.proxy = nullptr;'
+    ])
+    unique_ref_struct.move_constructor(impl)
+    impl = '\n'.join([
+        'this->index = other.index;',
+        'this->proxy = other.proxy;',
+        'other.index = 0;',
+        'other.proxy = nullptr;',
+        'return *this;'
+    ])
+    unique_ref_struct.move_assignment(impl)
 
     return unique_ref_struct
 
@@ -87,24 +131,7 @@ def make_unique_ref(structure: Structure):
 def make_weak_ref(structure: Structure):
     weak_ref_struct = Struct(name=f'Weak{structure.name}')
 
-    weak_ref_struct.member_variables.append(VariableDeclaration(
-        name='index',
-        mtype=structure.index_type,
-        val='0'
-    ))
-
-    weak_ref_struct.member_variables.append(VariableDeclaration(
-        name='proxy',
-        mtype=f'{structure.everything_name}*',
-        val='nullptr'
-    ))
-
-    for member in structure.members:
-        weak_ref_struct.member_functions.append(MemberFunction(
-            name=member.name,
-            return_type=f'{member.type}&',
-            implementation=f'return proxy->{member.name}(index);'
-        ))
+    base_struct(weak_ref_struct, structure)
 
     return weak_ref_struct
 
@@ -112,7 +139,7 @@ def make_weak_ref(structure: Structure):
 def make_everything_struct(structure: Structure):
     everything_struct = Struct(name=structure.everything_name)
 
-    implementation = []
+    implementation = ['if (i == 0) return;']
 
     if structure.structure_type == 'sSoA':
         for member in structure.members:
@@ -173,7 +200,7 @@ def make_everything_struct(structure: Structure):
                 sig_assert = f'assert(signature(i).test({structure.enum_name}::{member.name.upper()}));\n'
             else:
                 sig_assert = ''
-            return f'assert(i < {structure.array_type[1]});\n{sig_assert}return data[i].{member};'
+            return f'assert(i < {structure.array_type[1]});\n{sig_assert}return data[i].{member.name};'
     elif structure.structure_type == 'sSoA':
         if structure.raw['indirection_type'] == 'integers':
             def get_implementation(member):
@@ -207,12 +234,20 @@ def make_everything_struct(structure: Structure):
             arguments=[VariableDeclaration(name='i', mtype='SizeAlias')]
         ))
 
-    everything_struct.member_functions.append(MemberFunction(
-        name=structure.signature_member.name,
-        return_type=f'{structure.signature_member.type}&',
-        implementation=f'return {structure.signature_member.name}s[i];',
-        arguments=[VariableDeclaration(name='i', mtype='SizeAlias')]
-    ))
+    if structure.structure_type == 'AoS':
+        everything_struct.member_functions.append(MemberFunction(
+            name=structure.signature_member.name,
+            return_type=f'{structure.signature_member.type}&',
+            implementation=f'return data[i].{structure.signature_member.name};',
+            arguments=[VariableDeclaration(name='i', mtype='SizeAlias')]
+        ))
+    else:
+        everything_struct.member_functions.append(MemberFunction(
+            name=structure.signature_member.name,
+            return_type=f'{structure.signature_member.type}&',
+            implementation=f'return {structure.signature_member.name}s[i];',
+            arguments=[VariableDeclaration(name='i', mtype='SizeAlias')]
+        ))
 
     if structure.structure_type == 'sSoA':
         for member in structure.members:
@@ -357,15 +392,42 @@ def parse_structure(data):
 def main():
     parser = argparse.ArgumentParser(description='meta classes please')
 
-    parser.add_argument('--file', '-f', type=str, default='Test.h', dest='file_name')
+    parser.add_argument('--header', '-f', type=str, default='Test.h', dest='header_file_name')
+    parser.add_argument('--source', '-s', type=str, default='Test.cpp', dest='source_file_name')
     parser.add_argument('--dry-run', type=bool, default=False)
 
     args = parser.parse_args()
-    file_name = args.file_name
+    header_name = args.header_file_name
+    source_name = args.source_file_name
     dry_run = args.dry_run
 
-    with open(file_name, 'r') as file:
-        blocks = re.split(
+    with open(source_name, 'r') as file:
+        source_blocks = re.split(
+            r'(\/\/\# \w+.*?\/\/\# end)',
+            file.read(),
+            flags=re.DOTALL + re.MULTILINE
+        )
+
+        source_result = []
+        found = False
+
+        for r in source_blocks:
+            if r is None:
+                continue
+            elif r.startswith('//#'):
+                if not found:
+                    source_result.append(Implementation())
+                    found = True
+            else:
+                stripped = r.strip()
+                if stripped != '':
+                    source_result.append(Code(stripped))
+
+        if not found:
+            source_result.append(Implementation())
+
+    with open(header_name, 'r') as file:
+        header_blocks = re.split(
             r'(\/\*\#.*?\#\*\/$)|(\/\/\# \w+.*?\/\/\# end)',
             file.read(),
             flags=re.DOTALL + re.MULTILINE
@@ -379,7 +441,7 @@ def main():
 
         structures = List()
 
-        for r in blocks:
+        for r in header_blocks:
             if r is None:
                 continue
             elif r.startswith('/*#'):
@@ -417,39 +479,53 @@ def main():
             result.append(Implementation())
 
     if dry_run:
-        writer: Writer = Writer(lambda x: print(x, end=''))
+        header_writer: Writer = Writer(lambda x: print(x, end=''))
+        source_writer: Writer = Writer(lambda x: print(x, end=''))
     else:
-        file = open(file_name, 'w')
-        writer: Writer = Writer(lambda x: file.write(x))
+        header_file = open(header_name, 'w')
+        source_file = open(source_name, 'w')
+        header_writer: Writer = Writer(lambda x: header_file.write(x))
+        source_writer: Writer = Writer(lambda x: source_file.write(x))
 
     for r in result:
         if type(r) is Structure:
-            print_structure(writer, r)
-            writer.writeln('')
+            print_structure(header_writer, r)
+            header_writer.writeln('')
         elif type(r) is ForwardDeclaration:
-            writer.writeln('//# forward')
-            writer.writeln(f'using SizeAlias = {structure.index_type};')
-            structures.forward_declaration(writer)
-            writer.writeln('//# end')
+            header_writer.writeln('//# forward')
+            header_writer.writeln(f'using SizeAlias = {structure.index_type};')
+            structures.forward_declaration(header_writer)
+            header_writer.writeln('//# end')
         elif type(r) is Declaration:
-            writer.writeln('//# declaration')
-            structures.declaration(writer)
-            writer.writeln('//# end')
+            header_writer.writeln('//# declaration')
+            structures.declaration(header_writer)
+            header_writer.writeln('//# end')
         elif type(r) is Implementation:
-            writer.writeln('//# implementation')
-            structures.implementation(writer)
-            writer.writeln('//# end')
+            header_writer.writeln('//# implementation')
+            structures.implementation(header_writer)
+            header_writer.writeln('//# end')
         elif type(r) is Code:
-            writer.writeln(r.code)
+            header_writer.writeln(r.code)
         else:
-            pass
+            exit(0)
+
+    for r in source_result:
+        if type(r) is Code:
+            source_writer.writeln(r.code)
+        elif type(r) is Implementation:
+            source_writer.writeln('//# start')
+            structures.source_implementation(source_writer)
+            source_writer.writeln('//# end')
+        else:
+            exit(0)
 
     if result is None:
         print('Invalid file, no structure found')
         return 0
 
     if not dry_run:
-        file.close()
+        source_file.close()
+        header_file.close()
 
 
 if __name__ == '__main__':

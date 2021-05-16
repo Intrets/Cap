@@ -16,11 +16,11 @@ set(GENERATE_STRUCTS
 
 foreach(GEN ${GENERATE_STRUCTS})
 	set(FULL_PATH "${CMAKE_CURRENT_SOURCE_DIR}/include/${MODULE_NAME}/${GEN}.h")
+	set(FULL_SOURCE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/${GEN}.cpp")
 
 	execute_process(
-		COMMAND "C:/tools/msys64/usr/bin/python.exe" "${CMAKE_SOURCE_DIR}/scripts/meta.py" "-f${FULL_PATH}"
+		COMMAND "C:/tools/msys64/usr/bin/python.exe" "${CMAKE_SOURCE_DIR}/scripts/meta.py" "-f${FULL_PATH}" "-s${FULL_SOURCE_PATH}"
 		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-		RESULT_VARIABLE OUT
 	)
 endforeach()
 
