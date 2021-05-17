@@ -159,6 +159,10 @@ class Struct:
             member_variable.write(writer)
             writer.writeln(';')
         for member_function in self.member_functions:
+            if member_function.hide_declaration:
+                continue
+            if member_function.template is not None:
+                writer.writeln(f'template<{member_function.template}>')
             member_function.signature(writer)
             if member_function.suffix is not None:
                 writer.write(f' = {member_function.suffix}')
@@ -174,6 +178,8 @@ class Struct:
                 continue
             if member_function.implementation is None:
                 continue
+            if member_function.template is not None:
+                writer.writeln(f'template<{member_function.template}>')
             member_function.signature(writer, namespace=self.name)
             writer.writeln(' {')
             writer.indent()
@@ -184,10 +190,11 @@ class Struct:
                 exit('Implementation not a string')
             writer.unindent()
             writer.writeln('};')
-        pass
 
     def source_implementation(self, writer: Writer):
         for member_function in self.member_functions:
+            if member_function.template is not None:
+                continue
             if member_function.inline:
                 continue
             if member_function.suffix is not None:
@@ -208,7 +215,7 @@ class Struct:
 
 class MemberFunction:
     def __init__(self, name, implementation=None, return_type=None, arguments=None, inline=True, virtual=False,
-                 suffix=None, const=False):
+                 suffix=None, const=False, template=None, hide_declaration=False):
         self.name = name
         self.return_type = return_type
         self.arguments = None if arguments is None else arguments if type(arguments) == list else [arguments]
@@ -217,6 +224,8 @@ class MemberFunction:
         self.virtual = virtual
         self.suffix = suffix
         self.const = const
+        self.template = template
+        self.hide_declaration = hide_declaration
 
     def signature(self, writer: Writer, namespace=None):
         if self.inline:
@@ -232,7 +241,6 @@ class MemberFunction:
         writer.write(')')
         if self.const:
             writer.write(' const')
-
 
 
 class VariableDeclaration:

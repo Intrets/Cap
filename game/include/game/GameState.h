@@ -12,6 +12,7 @@
 #include <tuple>
 
 #include "GameObject.h"
+#include "Signature.h"
 
 #define WORLD_SIZE 200
 
@@ -22,6 +23,8 @@ namespace render
 
 namespace game
 {
+	using SignatureAlias = Signature<GAMEOBJECT_COMPONENT>;
+
 	//enum ACTION
 	//{
 	//	MOVE,
@@ -52,7 +55,7 @@ namespace game
 	// };
 	// example:
 	// Location location {x,y};
-	// Signature_ food;
+	// Signature food;
 	// food.set(COMPONENT::NUTRITION)
 	// !!!! how to give it a rating of how good? (how much food, is it a friendly? useful for anything apart eating?)
 	// actionList = {
@@ -74,124 +77,19 @@ namespace game
 	//		T doAction(Brain);
 	// };
 
-	class Object;
-	class Signature_;
-	struct Possession;
-	struct Vicinity;
-	struct ActionResult;
-
-	class Action
-	{
-	public:
-		std::vector<Signature_> requirements{};
-		std::vector<Signature_> results{};
-
-		std::function<ActionResult(Object* obj)> runFunction;
-
-		// obj should be the object which has access to the requirements in its possession
-		ActionResult run(Object* obj);
-	};
-
-	struct ActionResult
-	{
-		bool success = false;
-
-		std::vector<Possession> possessions{};
-		std::vector<Action> actions{};
-	};
-
-	enum COMPONENT
-	{
-		GAME_POSITION,
-		GRAPHIS_TILE,
-		BRAIN,
-		LOCOMOTION,
-		NUTRITION,
-		POSSESSION,
-		VICINITY,
-		MAX
-	};
-
-	struct GamePosition
-	{
-		glm::ivec2 pos;
-	};
-
-	struct GraphicsTile
-	{
-		int32_t blockID;
-	};
-
-	struct Brain
-	{
-		int32_t happiness = 0;
-		int32_t energy = 0;
-
-		std::optional<Action> currentAction;
-
-		std::vector<Action> memory;
-
-		Action const& findAction(std::vector<Signature_> const& requirements);
-
-		void merge(std::vector<Action>& other);
-	};
-
-	struct Possession
-	{
-		std::vector<UniqueReference<Object, Object>> inventory{};
-
-		Possession() = default;
-
-		DEFAULTMOVE(Possession);
-		NOCOPY(Possession);
-	};
-
-	struct Vicinity
-	{
-		std::vector<WeakReference<Object, Object>> vicinity;
-	};
-
-	struct Nutrition
-	{
-		int32_t energy = 0;
-	};
-
-	struct Locomotion
-	{
-		int32_t cooldown = 0;
-		int32_t fitness = 60;
-
-		std::optional<glm::ivec2> target;
-	};
-
 	// ---------------------------------------------------
-
-	class Signature_
-	{
-	private:
-		std::bitset<COMPONENT::MAX> data;
-
-		friend class Signature_;
-
-	public:
-		Signature_& set(COMPONENT component);
-		void set(std::initializer_list<COMPONENT> components);
-		bool test(COMPONENT component);
-
-		bool contains(Signature_ const& other) const;
-	};
 
 	struct Concept
 	{
 		struct Essence
 		{
 			float value;
-			Signature_ signature;
+			SignatureAlias signature;
 		};
 
 		std::vector<Essence> essences{};
 
-		float value(Signature_ const& signature);
+		float value(SignatureAlias const& signature);
 	};
 
 	// ---------------------------------------------------
@@ -222,45 +120,15 @@ namespace game
 	//     std::array<member_n> member_ns
 	//
 	//     Member_1& member_1(size_t i) {
-	//         return member_1s[i]; 
+	//         return member_1s[i];
 	//     };
 	//     Member_2& member_2(size_t i);
 	// };
 
-
-
-	class Object
-	{
-	private:
-		GamePosition gamePosition_{};
-		GraphicsTile graphicsTile_{};
-		Brain brain_{};
-		Nutrition nutrition_{};
-		Locomotion locomotion_{};
-		Possession possession_{};
-		Vicinity vicinity_{};
-
-	public:
-		Handle selfHandle;
-
-		Signature_ signature;
-
-		inline GamePosition& gamePosition();
-		inline Brain& brain();
-		inline GraphicsTile& graphicsTile();
-		inline Locomotion& locomotion();
-		inline Nutrition& nutrition();
-		inline Possession& possession();
-		inline Vicinity& vicinity();
-
-		Object(Handle s) : selfHandle(s) {
-		}
-	};
-
 	class GameState
 	{
 	private:
-		ReferenceManager<Object> refMan{ 100'000 };
+		std::unique_ptr<Everything> everything;
 
 	public:
 		int32_t tick = 0;
@@ -274,39 +142,4 @@ namespace game
 		GameState();
 		~GameState() = default;
 	};
-
-	inline Brain& Object::brain() {
-		assert(this->signature.test(COMPONENT::BRAIN));
-		return this->brain_;
-	}
-
-	inline GraphicsTile& Object::graphicsTile() {
-		assert(this->signature.test(COMPONENT::GRAPHIS_TILE));
-		return this->graphicsTile_;
-	}
-
-	inline Locomotion& Object::locomotion() {
-		assert(this->signature.test(COMPONENT::LOCOMOTION));
-		return this->locomotion_;
-	}
-
-	inline Nutrition& Object::nutrition() {
-		assert(this->signature.test(COMPONENT::NUTRITION));
-		return this->nutrition_;
-	}
-
-	inline Possession& Object::possession() {
-		assert(this->signature.test(COMPONENT::POSSESSION));
-		return this->possession_;
-	}
-
-	inline Vicinity& Object::vicinity() {
-		assert(this->signature.test(COMPONENT::VICINITY));
-		return this->vicinity_;
-	}
-
-	inline GamePosition& Object::gamePosition() {
-		assert(this->signature.test(COMPONENT::GAME_POSITION));
-		return this->gamePosition_;
-	}
 }

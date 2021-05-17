@@ -48,6 +48,12 @@ class Structure:
         self.index_type = 'size_t'
         self.enum_name = f'{name.upper()}_COMPONENT'
 
+    def get_array_type(self, s):
+        if self.array_type[0] == 'Vector':
+            return f'std::vector<{s}>'
+        else:
+            exit(f'Invalid data type: {self.array_type[0]}')
+
 
 class Code:
     def __init__(self, code):
@@ -68,6 +74,20 @@ def base_struct(res, structure: Structure):
     ))
 
     for member in structure.members:
+        res.member_functions.append(MemberFunction(
+            name=f'has{member.name}',
+            return_type=f'bool',
+            implementation=f'return proxy->has{member.name}(index);',
+        ))
+
+    for member in structure.members:
+        res.member_functions.append(MemberFunction(
+            name=f'add{member.name}',
+            return_type=f'void',
+            implementation=f'proxy->add{member.name}(index);'
+        ))
+
+    for member in structure.members + [structure.signature_member]:
         res.member_functions.append(MemberFunction(
             name=member.name,
             return_type=f'{member.type}&',
@@ -107,6 +127,12 @@ def make_unique_ref(structure: Structure):
 
     base_struct(unique_ref_struct, structure)
 
+    unique_ref_struct.member_functions.append(MemberFunction(
+        name=f'Unique{structure.name}',
+        suffix='default',
+        inline=False
+    ))
+
     unique_ref_struct.no_copy()
     impl = '\n'.join([
         'this->proxy->remove(this->index);',
@@ -139,6 +165,54 @@ def make_weak_ref(structure: Structure):
 def make_everything_struct(structure: Structure):
     everything_struct = Struct(name=structure.everything_name)
 
+    everything_struct.member_functions.append(MemberFunction(
+        name='run',
+        arguments=[VariableDeclaration(name='f', mtype='F')],
+        template='class F',
+        return_type='void',
+        implementation='this->run2(wrap2(f));'
+    ))
+
+    everything_struct.member_functions.append(MemberFunction(
+        name='run2',
+        arguments=[VariableDeclaration(name='f', mtype='std::function<void(Args...)>')],
+        template='class... Args',
+        return_type='void',
+        implementation='// TODO'
+    ))
+
+    if structure.structure_type == 'AoS' or structure.structure_type == 'SoA':
+        implementation = f'return last++;'
+    implementation = f'return last++;'
+
+
+    everything_struct.member_functions.append(MemberFunction(
+        name='takeFreeIndex',
+        return_type=structure.index_type,
+        implementation=implementation
+    ))
+
+    if structure.structure_type == 'AoS' or structure.structure_type == 'SoA':
+        implementation = f'auto res = Unique{structure.name}();\n' \
+                         f'res.index = takeFreeIndex();\n' \
+                         f'res.proxy = this;\n' \
+                         f'res.signature().reset();\n' \
+                         f'return res;'
+    elif structure.structure_type == 'sSoA':
+        implementation = f'' \
+                         f'' \
+                         f'' \
+                         f'' \
+                         f''
+    else:
+        exit('invalid structure type')
+
+    everything_struct.member_functions.append(MemberFunction(
+        name='makeUnique',
+        return_type=f'Unique{structure.name}',
+        implementation=implementation
+    ))
+
     implementation = ['if (i == 0) return;']
 
     if structure.structure_type == 'sSoA':
@@ -157,9 +231,6 @@ def make_everything_struct(structure: Structure):
     ))
 
     if structure.array_type[0] == 'Vector':
-        def data_type(s):
-            return f'std::vector<{s}>'
-
         val = structure.array_type[1]
     else:
         exit(f'Invalid data type: {structure.array_type[0]}')
@@ -167,7 +238,7 @@ def make_everything_struct(structure: Structure):
     if structure.structure_type == 'sSoA':
         everything_struct.member_variables.append(VariableDeclaration(
             name=f'indirectionMap',
-            mtype=f'std::vector<{structure.name}Proxy>',
+            mtype=structure.get_array_type(f'{structure.name}Proxy'),
             val=val
         ))
 
@@ -175,13 +246,13 @@ def make_everything_struct(structure: Structure):
         for member in structure.members + [structure.signature_member]:
             everything_struct.member_variables.append(VariableDeclaration(
                 name=f'{member.name}s',
-                mtype=data_type(member.type),
+                mtype=structure.get_array_type(member.type),
                 val=val
             ))
     elif structure.structure_type == 'AoS':
         everything_struct.member_variables.append(VariableDeclaration(
             name='data',
-            mtype=data_type(structure.name),
+            mtype=structure.get_array_type(structure.name),
             val=val
         ))
     else:
@@ -211,12 +282,42 @@ def make_everything_struct(structure: Structure):
     else:
         exit(f'Invalid structure type: {structure.structure_type}')
 
+    everything_struct.member_functions.append(MemberFunction(
+        name='gets',
+        return_type=structure.get_array_type('T') + '&',
+        template='class T'
+    ))
+
+    everything_struct.member_functions.append(MemberFunction(
+        name='get',
+        return_type='T&',
+        arguments=[VariableDeclaration(name='i', mtype='SizeAlias')],
+        template='class T'
+    ))
+
     for member in structure.members:
         everything_struct.member_functions.append(MemberFunction(
             name=member.name,
             return_type=f'{member.type}&',
             implementation=get_implementation(member),
             arguments=[VariableDeclaration(name='i', mtype='SizeAlias')]
+        ))
+
+        everything_struct.member_functions.append(MemberFunction(
+            name=f'get<{member.type}>',
+            return_type=f'{member.type}&',
+            template='',
+            arguments=[VariableDeclaration(name='i', mtype='SizeAlias')],
+            implementation=f'return {member.name}(i);',
+            hide_declaration=True
+        ))
+
+        everything_struct.member_functions.append(MemberFunction(
+            name=f'gets<{member.type}>',
+            return_type=f'{structure.get_array_type(member.type)}&',
+            template='',
+            implementation=f'return {member.name}s;',
+            hide_declaration=True
         ))
 
     if structure.structure_type == 'sSoA':
@@ -231,6 +332,22 @@ def make_everything_struct(structure: Structure):
             name=f'has{member.name}',
             return_type=f'bool',
             implementation=get_implementation(member),
+            arguments=[VariableDeclaration(name='i', mtype='SizeAlias')]
+        ))
+
+    if structure.structure_type == 'AoS' or structure.structure_type == 'SoA':
+        def implementation(member: Member):
+            return f'{structure.signature_member.name}(i).set({member.enum});\n' \
+                   f'{member.name}(i) = {{}};'
+    else:
+        def implementation(member: Member):
+            return f'{structure.signature_member.name}(i).set({member.enum});'
+
+    for member in structure.members:
+        everything_struct.member_functions.append(MemberFunction(
+            name=f'add{member.name}',
+            return_type=f'void',
+            implementation=implementation(member),
             arguments=[VariableDeclaration(name='i', mtype='SizeAlias')]
         ))
 
@@ -256,15 +373,12 @@ def make_everything_struct(structure: Structure):
                 mtype='SizeAlias',
                 val=0
             ))
-            pass
-    elif structure.structure_type == 'SoA' or structure.structure_type == 'AoS':
-        everything_struct.member_variables.append(VariableDeclaration(
-            name='last',
-            mtype=f'{structure.index_type}',
-            val=0
-        ))
-    else:
-        exit(f'Invalid structure type: {structure.structure_type}')
+
+    everything_struct.member_variables.append(VariableDeclaration(
+        name='last',
+        mtype=f'{structure.index_type}',
+        val=0
+    ))
 
     return everything_struct
 

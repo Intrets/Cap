@@ -10,136 +10,177 @@
 namespace game
 {
 	void GameState::addRenderInfo(render::RenderInfo& renderInfo) {
-		Signature_ renderSignature;
-		renderSignature.set(COMPONENT::GAME_POSITION);
-		renderSignature.set(COMPONENT::GRAPHIS_TILE);
+		SignatureAlias renderSignature;
+		renderSignature.set(GAMEOBJECT_COMPONENT::GAMEPOSITION);
+		renderSignature.set(GAMEOBJECT_COMPONENT::GRAPHICSTILE);
 
-		for (auto& [h, obj] : this->refMan.data) {
-			if (obj.get()->signature.contains(renderSignature)) {
-				renderInfo.tileRenderInfo.addBlitInfo(
-					glm::vec4(obj.get()->gamePosition().pos, 1, 1),
-					0,
-					obj.get()->graphicsTile().blockID
-				);
-			}
+		//std::function<void(GamePosition&, GraphicsTile&)> runRender = [&](GamePosition& pos, GraphicsTile& tile) {
+		//	(void)renderSignature;
+
+		//};
+
+		auto runRender = [&](GamePosition& pos, GraphicsTile& tile) {
+			(void)renderSignature;
+
+		};
+
+		everything->get<GamePosition>(1);
+
+		using a = decltype(runRender);
+		using b = decltype(&a::operator());
+
+
+		auto insanity3 = wrap2(runRender);
+
+		run(runRender);
+
+		using Test = List<int>;
+
+		Test ok;
+
+		if (Test::is_empty) {
+			std::cout << "empty\n";
 		}
+
+		ForEach<Executor, List<int, float>>::run();
+
+
+		//for (auto& [h, obj] : this->refMan.data) {
+		//	if (obj.get()->signature.contains(renderSignature)) {
+		//		renderInfo.tileRenderInfo.addBlitInfo(
+		//			glm::vec4(obj.get()->gamePosition().pos, 1, 1),
+		//			0,
+		//			obj.get()->graphicsTile().blockID
+		//		);
+		//	}
+		//}
+
+		renderInfo.tileRenderInfo.addBlitInfo(
+			glm::vec4(0),
+			0,
+			0
+		);
 	}
 
 	void GameState::runTick() {
 
-		Signature_ conciousSignature;
-		conciousSignature.set(COMPONENT::BRAIN);
-		conciousSignature.set(COMPONENT::POSSESSION);
-		conciousSignature.set(COMPONENT::VICINITY);
+		SignatureAlias conciousSignature;
+		conciousSignature.set(GAMEOBJECT_COMPONENT::BRAIN);
+		conciousSignature.set(GAMEOBJECT_COMPONENT::POSSESSION);
+		conciousSignature.set(GAMEOBJECT_COMPONENT::VICINITY);
 
-		Signature_ foodSignature;
-		foodSignature.set(COMPONENT::NUTRITION);
+		SignatureAlias foodSignature;
+		foodSignature.set(GAMEOBJECT_COMPONENT::NUTRITION);
 
-		Signature_ friendlySignature;
-		friendlySignature.set(COMPONENT::BRAIN);
+		SignatureAlias friendlySignature;
+		friendlySignature.set(GAMEOBJECT_COMPONENT::BRAIN);
 
-		Signature_ brainSignature;
-		brainSignature.set(COMPONENT::BRAIN);
+		SignatureAlias brainSignature;
+		brainSignature.set(GAMEOBJECT_COMPONENT::BRAIN);
 
-		Signature_ locomotionSignature;
-		locomotionSignature.set(COMPONENT::LOCOMOTION);
-		locomotionSignature.set(COMPONENT::GAME_POSITION);
+		SignatureAlias locomotionSignature;
+		locomotionSignature.set(GAMEOBJECT_COMPONENT::LOCOMOTION);
+		locomotionSignature.set(GAMEOBJECT_COMPONENT::GAMEPOSITION);
 
 		Concept foodConcept;
 
 		foodConcept.essences.push_back({ 10.0f, foodSignature });
 		foodConcept.essences.push_back({ -10.0f, friendlySignature });
 
-		for (auto& [h, obj] : this->refMan.data) {
-			// Advanced test
-			if (obj.get()->signature.contains(locomotionSignature)) {
-				auto& loc = obj.get()->locomotion();
-				auto& pos = obj.get()->gamePosition();
+		//for (auto& [h, obj] : this->refMan.data) {
+		//	// Advanced test
+		//	if (obj.get()->signature.contains(locomotionSignature)) {
+		//		auto& loc = obj.get()->locomotion();
+		//		auto& pos = obj.get()->gamePosition();
 
-				if (loc.cooldown != 0) {
-					loc.cooldown--;
-				}
-				else if (loc.target.has_value()) {
-					auto d = loc.target.value() - pos.pos;
-					std::cout << "d:" << d.x << " " << d.y << "\n";
-					if (d.x == 0 && d.y == 0) {
-						loc.target = std::nullopt;
-					}
-					else {
-						int32_t maxD = glm::max(glm::abs(d.x), glm::abs(d.y));
+		//		if (loc.cooldown != 0) {
+		//			loc.cooldown--;
+		//		}
+		//		else if (loc.target.has_value()) {
+		//			auto d = loc.target.value() - pos.pos;
+		//			std::cout << "d:" << d.x << " " << d.y << "\n";
+		//			if (d.x == 0 && d.y == 0) {
+		//				loc.target = std::nullopt;
+		//			}
+		//			else {
+		//				int32_t maxD = glm::max(glm::abs(d.x), glm::abs(d.y));
 
-						auto mov = glm::sign(d) * (glm::abs(d) / maxD);
-						std::cout << mov.x << " " << mov.y << "\n";
+		//				auto mov = glm::sign(d) * (glm::abs(d) / maxD);
+		//				std::cout << mov.x << " " << mov.y << "\n";
 
-						pos.pos += mov;
-						loc.cooldown = 120;
-					}
-				}
-			}
+		//				pos.pos += mov;
+		//				loc.cooldown = 120;
+		//			}
+		//		}
+		//	}
 
-			if (obj.get()->signature.contains(brainSignature)) {
-				if (obj.get()->brain().energy > 0) {
-					obj.get()->brain().energy--;
-				}
-			}
+		//	if (obj.get()->signature.contains(brainSignature)) {
+		//		if (obj.get()->brain().energy > 0) {
+		//			obj.get()->brain().energy--;
+		//		}
+		//	}
 
-			if (obj.get()->signature.contains(conciousSignature)) {
-				auto& brain = obj.get()->brain();
-				if (!brain.currentAction.has_value()) {
-					if (brain.energy == 0) {
-						std::cout << "energy low, seeking food\n";
+		//	if (obj.get()->signature.contains(conciousSignature)) {
+		//		auto& brain = obj.get()->brain();
+		//		if (!brain.currentAction.has_value()) {
+		//			if (brain.energy == 0) {
+		//				std::cout << "energy low, seeking food\n";
 
-						//for (auto& mem : obj.get()->brain().memory) {
-						//	for (auto& res : mem.results) {
-						//		if (foodConcept.value(res) > 1.0f) {
-						//			brain.currentAction = mem;
-						//		}
-						//	}
-						//}
+		//				//for (auto& mem : obj.get()->brain().memory) {
+		//				//	for (auto& res : mem.results) {
+		//				//		if (foodConcept.value(res) > 1.0f) {
+		//				//			brain.currentAction = mem;
+		//				//		}
+		//				//	}
+		//				//}
 
-						glm::ivec2 target{ std::rand() % 20, std::rand() % 20 };
+		//				glm::ivec2 target{ std::rand() % 20, std::rand() % 20 };
 
 
-						Action testAction;
-						testAction.runFunction = [target = target](Object* obj) -> ActionResult
-						{
-							ActionResult result{};
+		//				Action testAction;
+		//				//testAction.runFunction = [target = target](GameObject* obj) -> ActionResult
+		//				//{
+		//				//	ActionResult result{};
 
-							auto d = target - obj->gamePosition().pos;
+		//				//	auto d = target - obj->gamePosition().pos;
 
-							if (d.x == 0 && d.y == 0) {
-								obj->brain().energy = 200;
-								result.success = true;
-							}
-							else {
-								int32_t maxD = glm::max(glm::abs(d.x), glm::abs(d.y));
+		//				//	if (d.x == 0 && d.y == 0) {
+		//				//		obj->brain().energy = 200;
+		//				//		result.success = true;
+		//				//	}
+		//				//	else {
+		//				//		int32_t maxD = glm::max(glm::abs(d.x), glm::abs(d.y));
 
-								auto mov = glm::sign(d) * (glm::abs(d) / maxD);
-								std::cout << mov.x << " " << mov.y << "\n";
+		//				//		auto mov = glm::sign(d) * (glm::abs(d) / maxD);
+		//				//		std::cout << mov.x << " " << mov.y << "\n";
 
-								obj->gamePosition().pos += mov;
-							}
-							return result;
-						};
+		//				//		obj->gamePosition().pos += mov;
+		//				//	}
+		//				//	return result;
+		//				//};
 
-						obj.get()->brain().currentAction = testAction;
-					}
-				}
-				else {
-					if (brain.currentAction.value().run(obj.get()).success) {
-						brain.currentAction = std::nullopt;
-					}
-				}
-			}
+		//				obj.get()->brain().currentAction = testAction;
+		//			}
+		//		}
+		//		else {
+		//			//if (brain.currentAction.value().run(obj.get()).success) {
+		//			//	brain.currentAction = std::nullopt;
+		//			//}
+		//		}
+		//	}
 
-		}
+		//}
 
 		this->tick++;
 	}
 
 	GameState::GameState() {
 		Everything test;
-		test.brain(1);
+
+		auto u = test.makeUnique();
+		u.addbrain();
+
+
 
 		{
 			//for (size_t j = 1; j < 100; j++) {
@@ -149,139 +190,135 @@ namespace game
 
 			//		glm::ivec2 pos = { j, i };
 
-			//		ptr->signature.set(COMPONENT::BRAIN);
-			//		ptr->signature.set(COMPONENT::LOCOMOTION);
+			//		ptr->signature.set(GAMEOBJECT_COMPONENT::BRAIN);
+			//		ptr->signature.set(GAMEOBJECT_COMPONENT::LOCOMOTION);
 			//		ptr->locomotion().fitness = 0;
 
-			//		ptr->signature.set(COMPONENT::GAME_POSITION);
+			//		ptr->signature.set(GAMEOBJECT_COMPONENT::GAME_POSITION);
 			//		ptr->gamePosition().pos = pos;
 
-			//		ptr->signature.set(COMPONENT::GRAPHIS_TILE);
+			//		ptr->signature.set(GAMEOBJECT_COMPONENT::GRAPHIS_TILE);
 			//		ptr->graphicsTile().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("gnome.dds");
 			//	}
 			//}
 		}
 
 		{
-			auto ref = this->refMan.makeRef<Object>();
-			auto ptr = ref.get();
+			//auto ref = this->refMan.makeRef<Object>();
+			//auto ptr = ref.get();
 
-			ptr->signature.set(
-				{
-				COMPONENT::BRAIN,
-				COMPONENT::POSSESSION,
-				COMPONENT::VICINITY,
-				});
+			//ptr->signature.set(
+			//	{
+			//	GAMEOBJECT_COMPONENT::BRAIN,
+			//	GAMEOBJECT_COMPONENT::POSSESSION,
+			//	GAMEOBJECT_COMPONENT::VICINITY,
+			//	});
 
-			ptr->signature.set(COMPONENT::GAME_POSITION);
-			ptr->gamePosition().pos = { 10,10 };
+			//ptr->signature.set(GAMEOBJECT_COMPONENT::GAMEPOSITION);
+			//ptr->gamePosition().pos = { 10,10 };
 			//this->world[10][10] = ref;
 
-			ptr->signature.set(COMPONENT::GRAPHIS_TILE);
-			ptr->graphicsTile().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("gnome.dds");
+			//ptr->signature.set(GAMEOBJECT_COMPONENT::GRAPHICSTILE);
+			//ptr->graphicsTile().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("gnome.dds");
 
-			ptr->signature.set(COMPONENT::LOCOMOTION);
-			ptr->locomotion().fitness = 10;
+			//ptr->signature.set(GAMEOBJECT_COMPONENT::LOCOMOTION);
+			//ptr->locomotion().fitness = 10;
 
-			Action recallFood;
-			recallFood.requirements = {};
-			Signature_ foodSignature;
-			foodSignature.set(COMPONENT::NUTRITION).set(COMPONENT::GAME_POSITION);
-			recallFood.results = { foodSignature };
-			recallFood.runFunction = [](Object* obj) -> ActionResult
-			{
-				ActionResult result{};
+			//Action recallFood;
+			//recallFood.requirements = {};
+			//SignatureAlias foodSignature;
+			//foodSignature.set(GAMEOBJECT_COMPONENT::NUTRITION).set(GAMEOBJECT_COMPONENT::GAMEPOSITION);
+			//recallFood.results = { foodSignature };
+			////recallFood.runFunction = [](Object* obj) -> ActionResult
+			////{
+			////	ActionResult result{};
 
-				return result;
-			};
+			////	return result;
+			////};
 
-			ptr->brain().memory.push_back(recallFood);
+			//ptr->brain().memory.push_back(recallFood);
 
 		}
 
 
 		{
-			auto ref = this->refMan.makeRef<Object>();
-			auto ptr = ref.get();
+			//auto ref = this->refMan.makeRef<Object>();
+			//auto ptr = ref.get();
 
-			glm::ivec2 pos = { 14, 14 };
+			//glm::ivec2 pos = { 14, 14 };
 
-			ptr->signature.set(COMPONENT::GAME_POSITION);
-			ptr->gamePosition().pos = pos;
+			//ptr->signature.set(GAMEOBJECT_COMPONENT::GAMEPOSITION);
+			//ptr->gamePosition().pos = pos;
 			//this->world[14][14] = ref;
 
-			ptr->signature.set(COMPONENT::GRAPHIS_TILE);
-			ptr->graphicsTile().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("food.dds");
+			//ptr->signature.set(GAMEOBJECT_COMPONENT::GRAPHICSTILE);
+			//ptr->graphicsTile().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("food.dds");
 		}
 
 
-		for (size_t i = 0; i < WORLD_SIZE; i++) {
-			//for (size_t j = 0; j < 30; j++) {
-			{
-				size_t j = 0;
-				auto ref = this->refMan.makeRef<Object>();
-				auto ptr = ref.get();
-				ptr->signature.set(COMPONENT::GAME_POSITION);
-				ptr->gamePosition().pos = glm::ivec2(i, j);
+		//for (size_t i = 0; i < WORLD_SIZE; i++) {
+		//	//for (size_t j = 0; j < 30; j++) {
+		//	{
+		//		size_t j = 0;
+		//		auto ref = this->refMan.makeRef<Object>();
+		//		auto ptr = ref.get();
+		//		ptr->signature.set(GAMEOBJECT_COMPONENT::GAMEPOSITION);
+		//		ptr->gamePosition().pos = glm::ivec2(i, j);
 
-				ptr->signature.set(COMPONENT::GRAPHIS_TILE);
-				ptr->graphicsTile().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
+		//		ptr->signature.set(GAMEOBJECT_COMPONENT::GRAPHICSTILE);
+		//		ptr->graphicsTile().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
 
-				//this->world[i][j] = ref;
-			}
-		}
+		//		this->world[i][j] = ref;
+		//	}
+		//}
 
-		for (size_t i = 0; i < WORLD_SIZE; i++) {
-			//for (size_t j = 0; j < 30; j++) {
-			{
-				int j = WORLD_SIZE - 1;
-				auto ref = this->refMan.makeRef<Object>();
-				auto ptr = ref.get();
-				ptr->signature.set(COMPONENT::GAME_POSITION);
-				ptr->gamePosition().pos = glm::ivec2(i, j);
-				ptr->signature.set(COMPONENT::GRAPHIS_TILE);
-				ptr->graphicsTile().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
+		//for (size_t i = 0; i < WORLD_SIZE; i++) {
+		//	//for (size_t j = 0; j < 30; j++) {
+		//	{
+		//		int j = WORLD_SIZE - 1;
+		//		auto ref = this->refMan.makeRef<Object>();
+		//		auto ptr = ref.get();
+		//		ptr->signature.set(GAMEOBJECT_COMPONENT::GAMEPOSITION);
+		//		ptr->gamePosition().pos = glm::ivec2(i, j);
+		//		ptr->signature.set(GAMEOBJECT_COMPONENT::GRAPHICSTILE);
+		//		ptr->graphicsTile().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
 
-				//this->world[i][j] = ref;
-			}
-		}
+		//		this->world[i][j] = ref;
+		//	}
+		//}
 
-		//for (size_t i = 0; i < 30; i++) {
-		{
-			size_t i = 0;
-			for (size_t j = 0; j < WORLD_SIZE; j++) {
-				auto ref = this->refMan.makeRef<Object>();
-				auto ptr = ref.get();
-				ptr->signature.set(COMPONENT::GAME_POSITION);
-				ptr->gamePosition().pos = glm::ivec2(i, j);
-				ptr->signature.set(COMPONENT::GRAPHIS_TILE);
-				ptr->graphicsTile().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
+		////for (size_t i = 0; i < 30; i++) {
+		//{
+		//	size_t i = 0;
+		//	for (size_t j = 0; j < WORLD_SIZE; j++) {
+		//		auto ref = this->refMan.makeRef<Object>();
+		//		auto ptr = ref.get();
+		//		ptr->signature.set(GAMEOBJECT_COMPONENT::GAMEPOSITION);
+		//		ptr->gamePosition().pos = glm::ivec2(i, j);
+		//		ptr->signature.set(GAMEOBJECT_COMPONENT::GRAPHICSTILE);
+		//		ptr->graphicsTile().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
 
-				//this->world[i][j] = ref;
-			}
-		}
+		//		this->world[i][j] = ref;
+		//	}
+		//}
 
-		//for (size_t i = 0; i < 30; i++) {
-		{
-			int i = WORLD_SIZE - 1;
-			for (size_t j = 0; j < WORLD_SIZE; j++) {
-				auto ref = this->refMan.makeRef<Object>();
-				auto ptr = ref.get();
-				ptr->signature.set(COMPONENT::GAME_POSITION);
-				ptr->gamePosition().pos = glm::ivec2(i, j);
-				ptr->signature.set(COMPONENT::GRAPHIS_TILE);
-				ptr->graphicsTile().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
+		////for (size_t i = 0; i < 30; i++) {
+		//{
+		//	int i = WORLD_SIZE - 1;
+		//	for (size_t j = 0; j < WORLD_SIZE; j++) {
+		//		auto ref = this->refMan.makeRef<Object>();
+		//		auto ptr = ref.get();
+		//		ptr->signature.set(GAMEOBJECT_COMPONENT::GAMEPOSITION);
+		//		ptr->gamePosition().pos = glm::ivec2(i, j);
+		//		ptr->signature.set(GAMEOBJECT_COMPONENT::GRAPHICSTILE);
+		//		ptr->graphicsTile().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
 
-				//this->world[i][j] = ref;
-			}
-		}
+		//		this->world[i][j] = ref;
+		//	}
+		//}
 	}
 
-	ActionResult Action::run(Object* obj) {
-		return this->runFunction(obj);
-	}
-
-	float Concept::value(Signature_ const& signature) {
+	float Concept::value(SignatureAlias const& signature) {
 		float result = 0.0f;
 
 		for (auto const& essence : this->essences) {
@@ -292,45 +329,5 @@ namespace game
 		}
 
 		return result;
-	}
-
-	Signature_& Signature_::set(COMPONENT component) {
-		this->data.set(component);
-		return *this;
-	}
-
-	void Signature_::set(std::initializer_list<COMPONENT> components) {
-		for (auto comp : components) {
-			this->data.set(comp);
-		}
-	}
-
-	bool Signature_::test(COMPONENT component) {
-		return this->data.test(component);
-	}
-
-	bool Signature_::contains(Signature_ const& other) const {
-		return (this->data & other.data) == other.data;
-	}
-
-	Action const& Brain::findAction(std::vector<Signature_> const& requirements) {
-		for (auto const& action : this->memory) {
-			for (auto const& otherReq : requirements) {
-				for (auto const& memoryReq : action.requirements) {
-					if (!memoryReq.contains(otherReq)) {
-
-					}
-				}
-			}
-		}
-		return Action();
-	}
-
-	void Brain::merge(std::vector<Action>& other) {
-		this->memory.insert(
-			this->memory.end(),
-			std::make_move_iterator(other.begin()),
-			std::make_move_iterator(other.end())
-		);
 	}
 }
