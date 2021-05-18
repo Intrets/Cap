@@ -27,6 +27,26 @@ component[]: Vicinity
 object_name: GameObject
 #*/
 
+//# forward
+using SizeAlias = size_t;
+struct Everything;
+enum GAMEOBJECT_COMPONENT
+{
+	GAMEPOSITION,
+	GRAPHICSTILE,
+	BRAIN,
+	NUTRITION,
+	LOCOMOTION,
+	POSSESSION,
+	VICINITY,
+	None,
+	MAX
+};
+struct GameObjectProxy;
+struct WeakGameObject;
+struct UniqueGameObject;
+struct GetEnum;
+//# end
 using SizeAlias = size_t;
 
 struct ActionResult;
@@ -39,15 +59,6 @@ template<class H, class... Tail>
 struct Head
 {
 	using val = H;
-};
-
-template<class T>
-struct Phantom {};
-
-struct Executor
-{
-	template<class T>
-	static void run();
 };
 
 template<class... Ts>
@@ -64,14 +75,89 @@ struct List<Head, Tail...>
 	using tail = List<Tail...>;
 };
 
-//template<class T, class... Ts>
-//struct List
-//{
-//	static constexpr bool is_empty = sizeof...(Ts) == 0;
-//	using head = T;
-//	// using tail = List<Ts...>;
-//	using tail = TryFill<sizeof...(Ts) != 0, List, Ts...>::type;
-//};
+struct LoopTest
+{
+	template<class F, class L, class... Args>
+	static inline void run(F f, Args... args) {
+		if constexpr (L::is_empty) {
+			f(args...);
+		}
+		else {
+			for (size_t i = 0; i < 50; i++) {
+				LoopTest::run<F, L::tail, Args...>(f, i, args...);
+			}
+		}
+	};
+};
+
+struct Loop
+{
+	template<class F, class L, class... Args>
+	static inline void run(Everything& e, F f, Args... args) {
+		if constexpr (L::is_empty) {
+			f(args...);
+		}
+		else {
+			L::head::run<F, typename L::tail, Args...>(e, f, args...);
+		}
+	}
+};
+
+template<class T, class L>
+struct Contains
+{
+	constexpr static bool val() {
+		if constexpr (L::is_empty) {
+			return false;
+		}
+		else if constexpr (std::is_same_v<T, L::head>) {
+			return true;
+		}
+		else {
+			return Contains<T, L::tail>::val();
+		}
+	}
+};
+
+struct GameObjectProxy;
+struct Everything;
+
+using SignatureType = decltype(Signature<GAMEOBJECT_COMPONENT>::data);
+
+template<class M, class... Ms>
+struct Match
+{
+	GameObjectProxy proxy;
+
+	inline static SignatureType sig = []() {
+		SignatureType sig;
+
+		if constexpr (sizeof...(Ms) == 0) {
+			sig.set(static_cast<size_t>(GetEnum::val<M>()));
+		}
+		else {
+			for (auto s : { GetEnum::val<M>(), GetEnum::val<Ms>()... }) {
+				sig.set(static_cast<size_t>(s));
+			}
+		}
+		return sig;
+	}();
+
+	template<class T>
+	T& get() {
+		static_assert(Contains<T, List<M, Ms...>>::val());
+		return proxy.get<T>();
+	};
+
+	template<class F, class L, class... Args>
+	static inline void run(Everything& e, F f, Args... args) {
+		for (auto& h : e.gets<M>()) {
+			if (e.signature(h.index).contains(sig)) {
+				Loop::run<F, L, Match<M, Ms...>, Args...>(e, f, Match<M, Ms...>{e.indirectionMap[h.index]}, args...);
+			}
+		}
+	};
+};
 
 template<class F, class L>
 struct ForEach
@@ -97,6 +183,16 @@ template<class R, class B, class... Args>
 struct unwrap<R(B::*)(Args...) const>
 {
 	using std_function_type = std::function<R(Args...)>;
+};
+
+template<class T>
+struct unwrap_std_fun;
+
+template<class R, class... Args>
+struct unwrap_std_fun<std::function<R(Args...)>>
+{
+	using return_type = R;
+	using args = List<Args...>;
 };
 
 template<class T>
@@ -184,26 +280,6 @@ struct Locomotion
 
 	std::optional<glm::ivec2> target;
 };
-//# forward
-using SizeAlias = size_t;
-struct Everything;
-enum GAMEOBJECT_COMPONENT
-{
-	GAMEPOSITION,
-	GRAPHICSTILE,
-	BRAIN,
-	NUTRITION,
-	LOCOMOTION,
-	POSSESSION,
-	VICINITY,
-	None,
-	MAX
-};
-struct GameObjectProxy;
-struct WeakGameObject;
-struct UniqueGameObject;
-struct GetEnum;
-//# end
 //# declaration
 struct Everything
 {
@@ -271,6 +347,8 @@ struct GameObjectProxy
 	size_t vicinity_{ 0 };
 	inline GameObjectProxy(Everything* ptr);
 	inline GameObjectProxy() = default;
+	template<class T>
+	inline T& get();
 	inline GamePosition& gameposition();
 	inline GraphicsTile& graphicstile();
 	inline Brain& brain();
@@ -359,13 +437,15 @@ template<class... Args>
 inline void Everything::run2(std::function<void(Args...)> f) {
 	decltype(Signature<GAMEOBJECT_COMPONENT>::data) sig;
 	for (auto s : { GetEnum::val<std::remove_reference_t<Args>>()... }) {
-	    sig.set(static_cast<size_t>(s));
+		sig.set(static_cast<size_t>(s));
 	}
 	using H = typename Head<Args...>::val;
+	size_t i = 0;
+	//size_t limit = this->last
 	for (auto& h : this->gets<std::remove_reference_t<H>>()) {
-	    if (this->signature(h.index).contains(sig)) {
-	        f(this->get<std::remove_reference_t<Args>>(h.index)...);
-	    }
+		if (this->signature(h.index).contains(sig)) {
+			f(this->get<std::remove_reference_t<Args>>(h.index)...);
+		}
 	}
 };
 inline size_t Everything::takeFreeIndex() {
@@ -536,22 +616,50 @@ inline GameObjectProxy::GameObjectProxy(Everything* ptr) {
 inline GamePosition& GameObjectProxy::gameposition() {
 	return proxy->gamepositions[gameposition_];
 };
+template<>
+inline GamePosition& GameObjectProxy::get<GamePosition>() {
+	return proxy->gamepositions[gameposition_];
+};
 inline GraphicsTile& GameObjectProxy::graphicstile() {
+	return proxy->graphicstiles[graphicstile_];
+};
+template<>
+inline GraphicsTile& GameObjectProxy::get<GraphicsTile>() {
 	return proxy->graphicstiles[graphicstile_];
 };
 inline Brain& GameObjectProxy::brain() {
 	return proxy->brains[brain_];
 };
+template<>
+inline Brain& GameObjectProxy::get<Brain>() {
+	return proxy->brains[brain_];
+};
 inline Nutrition& GameObjectProxy::nutrition() {
+	return proxy->nutritions[nutrition_];
+};
+template<>
+inline Nutrition& GameObjectProxy::get<Nutrition>() {
 	return proxy->nutritions[nutrition_];
 };
 inline Locomotion& GameObjectProxy::locomotion() {
 	return proxy->locomotions[locomotion_];
 };
+template<>
+inline Locomotion& GameObjectProxy::get<Locomotion>() {
+	return proxy->locomotions[locomotion_];
+};
 inline Possession& GameObjectProxy::possession() {
 	return proxy->possessions[possession_];
 };
+template<>
+inline Possession& GameObjectProxy::get<Possession>() {
+	return proxy->possessions[possession_];
+};
 inline Vicinity& GameObjectProxy::vicinity() {
+	return proxy->vicinitys[vicinity_];
+};
+template<>
+inline Vicinity& GameObjectProxy::get<Vicinity>() {
 	return proxy->vicinitys[vicinity_];
 };
 inline bool WeakGameObject::hasgameposition() {

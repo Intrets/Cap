@@ -126,7 +126,6 @@ def make_unique_ref(structure: Structure):
         implementation=f'clear();'
     ))
 
-
     unique_ref_struct.member_functions.append(MemberFunction(
         name=f'Unique{structure.name}',
         suffix='default',
@@ -369,7 +368,6 @@ def make_struct(structure: Structure):
         suffix='default'
     ))
 
-
     for member in structure.members:
         enum_lookup_template.member_functions.append(MemberFunction(
             name=f'val<{member.type}>',
@@ -409,6 +407,12 @@ def make_struct(structure: Structure):
         def get_indirection_access(member: Member):
             return f'return proxy->{member.name}s[{member.name}_];'
 
+    object_proxy.member_functions.append(MemberFunction(
+        name='get',
+        template='class T',
+        return_type=f'T&'
+    ))
+
     for member in structure.members:
         object_proxy.member_variables.append(VariableDeclaration(
             name=f'{member.name}_',
@@ -420,6 +424,14 @@ def make_struct(structure: Structure):
             name=member.name,
             return_type=f'{member.type}&',
             implementation=get_indirection_access(member)
+        ))
+
+        object_proxy.member_functions.append(MemberFunction(
+            name=f'get<{member.type}>',
+            template='',
+            return_type=f'{member.type}&',
+            implementation=get_indirection_access(member),
+            hide_declaration=True
         ))
 
     return List(

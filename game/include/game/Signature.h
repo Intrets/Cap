@@ -6,12 +6,11 @@
 template<class T>
 class Signature
 {
-private:
+public:
 	std::bitset<T::MAX> data;
 
 	friend class Signature<T>;
 
-public:
 	Signature<T>& set(T component);
 	void set(std::initializer_list<T> components);
 	bool test(T component) const;

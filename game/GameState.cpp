@@ -7,6 +7,8 @@
 
 #include <cstdlib>
 
+#include <misc/Timer.h>
+
 namespace game
 {
 	void GameState::addRenderInfo(render::RenderInfo& renderInfo) {
@@ -14,24 +16,52 @@ namespace game
 		renderSignature.set(GAMEOBJECT_COMPONENT::GAMEPOSITION);
 		renderSignature.set(GAMEOBJECT_COMPONENT::GRAPHICSTILE);
 
-		this->everything->run([&](GamePosition& pos, GraphicsTile& tile) {
+		//this->everything->run([&](GamePosition& pos, GraphicsTile& tile) {
+		//	renderInfo.tileRenderInfo.addBlitInfo(
+		//		glm::vec4(pos.pos, 1, 1),
+		//		0,
+		//		tile.blockID
+		//	);
+		//	});
+
+		Match<GamePosition, GraphicsTile> test;
+		int i = 0;
+
+		auto f = wrap2([&](Match<GamePosition, GraphicsTile> e1, Match<GamePosition, GraphicsTile> e2) {
+			i++;
 			renderInfo.tileRenderInfo.addBlitInfo(
-				glm::vec4(pos.pos, 1, 1),
+				glm::vec4(e1.get<GamePosition>().pos, 1, 1),
 				0,
-				tile.blockID
+				e1.get<GraphicsTile>().blockID
 			);
-			});
+		});
+
+		Loop::run<decltype(f), unwrap_std_fun<decltype(f)>::args>(*this->everything.get(), f);
+
+		std::cout << this->everything->gets<GamePosition>().size() << '\n';
+		std::cout << i << '\n';
 
 
-		//for (auto& [h, obj] : this->refMan.data) {
-		//	if (obj.get()->signature.contains(renderSignature)) {
-		//		renderInfo.tileRenderInfo.addBlitInfo(
-		//			glm::vec4(obj.get()->gamePosition().pos, 1, 1),
-		//			0,
-		//			obj.get()->graphicsTile().blockID
-		//		);
-		//	}
-		//}
+			//Match<GamePosition> a;
+			//Match<GamePosition, GraphicsTile>::run(this->everything, );
+
+
+			//std::cout << Contains<void, List<float, float, int>>::val() << '\n';
+
+			//this->everything->run([&](Match<GamePosition, GraphicsTile>& e1, Match<GamePosition, GraphicsTile>& e2) {
+			//	e1.get<GamePosition>() = e2.get<GamePosition>();
+			//	});
+
+
+			//for (auto& [h, obj] : this->refMan.data) {
+			//	if (obj.get()->signature.contains(renderSignature)) {
+			//		renderInfo.tileRenderInfo.addBlitInfo(
+			//			glm::vec4(obj.get()->gamePosition().pos, 1, 1),
+			//			0,
+			//			obj.get()->graphicsTile().blockID
+			//		);
+			//	}
+			//}
 
 		renderInfo.tileRenderInfo.addBlitInfo(
 			glm::vec4(0),
@@ -41,6 +71,20 @@ namespace game
 	}
 
 	void GameState::runTick() {
+		{
+			Locator<misc::Timer>::ref().newTiming("templates");
+			int i = 0;
+			auto f = [&](int a, int b, int c) {
+				i++;
+			};
+
+			LoopTest::run<decltype(f), List<int, int, int>>(f);
+			Locator<misc::Timer>::ref().endTiming("templates");
+			std::cout << i << '\n';
+		}
+
+
+		std::cout << '\n';
 
 		SignatureAlias conciousSignature;
 		conciousSignature.set(GAMEOBJECT_COMPONENT::BRAIN);
@@ -154,7 +198,6 @@ namespace game
 
 	GameState::GameState() {
 		this->everything = std::make_unique<Everything>();
-
 
 
 		{
