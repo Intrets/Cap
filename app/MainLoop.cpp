@@ -94,7 +94,9 @@ void mainLoop(GLFWwindow* window) {
 		uiState.updateSize(window);
 
 		render::RenderInfo renderInfo;
+		Locator<misc::Timer>::ref().newTiming("prep render");
 		prepareRender(window, renderInfo, playerInfo);
+		Locator<misc::Timer>::ref().endTiming("prep render");
 
 		controlState.cycleStates();
 		glfwPollEvents();

@@ -171,7 +171,7 @@ namespace game
 
 			ptr->signature.set(COMPONENT::GAME_POSITION);
 			ptr->gamePosition().pos = { 10,10 };
-			this->world[10][10] = ref;
+			//this->world[10][10] = ref;
 
 			ptr->signature.set(COMPONENT::GRAPHIS_TILE);
 			ptr->graphicsTile().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("gnome.dds");
@@ -204,7 +204,7 @@ namespace game
 
 			ptr->signature.set(COMPONENT::GAME_POSITION);
 			ptr->gamePosition().pos = pos;
-			this->world[14][14] = ref;
+			//this->world[14][14] = ref;
 
 			ptr->signature.set(COMPONENT::GRAPHIS_TILE);
 			ptr->graphicsTile().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("food.dds");
@@ -223,7 +223,7 @@ namespace game
 				ptr->signature.set(COMPONENT::GRAPHIS_TILE);
 				ptr->graphicsTile().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
 
-				this->world[i][j] = ref;
+				//this->world[i][j] = ref;
 			}
 		}
 
@@ -238,7 +238,7 @@ namespace game
 				ptr->signature.set(COMPONENT::GRAPHIS_TILE);
 				ptr->graphicsTile().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
 
-				this->world[i][j] = ref;
+				//this->world[i][j] = ref;
 			}
 		}
 
@@ -253,7 +253,7 @@ namespace game
 				ptr->signature.set(COMPONENT::GRAPHIS_TILE);
 				ptr->graphicsTile().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
 
-				this->world[i][j] = ref;
+				//this->world[i][j] = ref;
 			}
 		}
 
@@ -268,7 +268,7 @@ namespace game
 				ptr->signature.set(COMPONENT::GRAPHIS_TILE);
 				ptr->graphicsTile().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
 
-				this->world[i][j] = ref;
+				//this->world[i][j] = ref;
 			}
 		}
 	}

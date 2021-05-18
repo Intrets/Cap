@@ -11,7 +11,7 @@
 #include <functional>
 #include <tuple>
 
-#define WORLD_SIZE 200
+#define WORLD_SIZE 20000
 
 namespace render
 {
@@ -230,7 +230,7 @@ namespace game
 	public:
 		int32_t tick = 0;
 
-		std::array<std::array<WeakReference<Object, Object>, WORLD_SIZE>, WORLD_SIZE> world;
+		//std::array<std::array<WeakReference<Object, Object>, WORLD_SIZE>, WORLD_SIZE> world;
 
 		void addRenderInfo(render::RenderInfo& renderInfo);
 
