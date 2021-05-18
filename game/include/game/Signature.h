@@ -18,6 +18,7 @@ public:
 	void reset();
 
 	bool contains(Signature const& other) const;
+	bool contains(decltype(Signature<T>::data) const& other) const;
 };
 
 template<class T>
@@ -46,4 +47,9 @@ inline void Signature<T>::reset() {
 template<class T>
 inline bool Signature<T>::contains(Signature const& other) const {
 	return (this->data & other.data) == other.data;
+}
+
+template<class T>
+inline bool Signature<T>::contains(decltype(Signature<T>::data) const& other) const {
+	return (this->data & other) == other;
 }

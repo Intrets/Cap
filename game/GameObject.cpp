@@ -1,14 +1,4 @@
 #include "GameObject.h"
-
-template<>
-void Executor::run<float>() {
-	std::cout << "float\n";
-}
-
-template<>
-void Executor::run<int>() {
-	std::cout << "int\n";
-}
 //# start
 void Everything::remove(SizeAlias i) {
 	if (i == 0) return;

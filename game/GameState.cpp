@@ -14,35 +14,13 @@ namespace game
 		renderSignature.set(GAMEOBJECT_COMPONENT::GAMEPOSITION);
 		renderSignature.set(GAMEOBJECT_COMPONENT::GRAPHICSTILE);
 
-		//std::function<void(GamePosition&, GraphicsTile&)> runRender = [&](GamePosition& pos, GraphicsTile& tile) {
-		//	(void)renderSignature;
-
-		//};
-
-		auto runRender = [&](GamePosition& pos, GraphicsTile& tile) {
-			(void)renderSignature;
-
-		};
-
-		everything->get<GamePosition>(1);
-
-		using a = decltype(runRender);
-		using b = decltype(&a::operator());
-
-
-		auto insanity3 = wrap2(runRender);
-
-		run(runRender);
-
-		using Test = List<int>;
-
-		Test ok;
-
-		if (Test::is_empty) {
-			std::cout << "empty\n";
-		}
-
-		ForEach<Executor, List<int, float>>::run();
+		this->everything->run([&](GamePosition& pos, GraphicsTile& tile) {
+			renderInfo.tileRenderInfo.addBlitInfo(
+				glm::vec4(pos.pos, 1, 1),
+				0,
+				tile.blockID
+			);
+			});
 
 
 		//for (auto& [h, obj] : this->refMan.data) {
@@ -175,10 +153,7 @@ namespace game
 	}
 
 	GameState::GameState() {
-		Everything test;
-
-		auto u = test.makeUnique();
-		u.addbrain();
+		this->everything = std::make_unique<Everything>();
 
 
 
@@ -256,66 +231,59 @@ namespace game
 		}
 
 
-		//for (size_t i = 0; i < WORLD_SIZE; i++) {
-		//	//for (size_t j = 0; j < 30; j++) {
-		//	{
-		//		size_t j = 0;
-		//		auto ref = this->refMan.makeRef<Object>();
-		//		auto ptr = ref.get();
-		//		ptr->signature.set(GAMEOBJECT_COMPONENT::GAMEPOSITION);
-		//		ptr->gamePosition().pos = glm::ivec2(i, j);
+		for (size_t i = 0; i < WORLD_SIZE; i++) {
+			//for (size_t j = 0; j < 30; j++) {
+			{
+				size_t j = 0;
+				auto p = this->everything->makeWeak();
+				p.addgameposition();
+				p.gameposition().pos = glm::ivec2(i, j);
 
-		//		ptr->signature.set(GAMEOBJECT_COMPONENT::GRAPHICSTILE);
-		//		ptr->graphicsTile().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
+				p.addgraphicstile();
+				p.graphicstile().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
 
-		//		this->world[i][j] = ref;
-		//	}
-		//}
+				//this->world[i][j] = ref;
+			}
+		}
 
-		//for (size_t i = 0; i < WORLD_SIZE; i++) {
-		//	//for (size_t j = 0; j < 30; j++) {
-		//	{
-		//		int j = WORLD_SIZE - 1;
-		//		auto ref = this->refMan.makeRef<Object>();
-		//		auto ptr = ref.get();
-		//		ptr->signature.set(GAMEOBJECT_COMPONENT::GAMEPOSITION);
-		//		ptr->gamePosition().pos = glm::ivec2(i, j);
-		//		ptr->signature.set(GAMEOBJECT_COMPONENT::GRAPHICSTILE);
-		//		ptr->graphicsTile().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
+		for (size_t i = 0; i < WORLD_SIZE; i++) {
+			//for (size_t j = 0; j < 30; j++) {
+			{
+				int j = WORLD_SIZE - 1;
+				auto p = this->everything->makeWeak();
+				p.addgameposition();
+				p.gameposition().pos = glm::ivec2(i, j);
 
-		//		this->world[i][j] = ref;
-		//	}
-		//}
+				p.addgraphicstile();
+				p.graphicstile().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
+			}
+		}
 
-		////for (size_t i = 0; i < 30; i++) {
-		//{
-		//	size_t i = 0;
-		//	for (size_t j = 0; j < WORLD_SIZE; j++) {
-		//		auto ref = this->refMan.makeRef<Object>();
-		//		auto ptr = ref.get();
-		//		ptr->signature.set(GAMEOBJECT_COMPONENT::GAMEPOSITION);
-		//		ptr->gamePosition().pos = glm::ivec2(i, j);
-		//		ptr->signature.set(GAMEOBJECT_COMPONENT::GRAPHICSTILE);
-		//		ptr->graphicsTile().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
+		//for (size_t i = 0; i < 30; i++) {
+		{
+			size_t i = 0;
+			for (size_t j = 0; j < WORLD_SIZE; j++) {
+				auto p = this->everything->makeWeak();
+				p.addgameposition();
+				p.gameposition().pos = glm::ivec2(i, j);
 
-		//		this->world[i][j] = ref;
-		//	}
-		//}
+				p.addgraphicstile();
+				p.graphicstile().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
+			}
+		}
 
-		////for (size_t i = 0; i < 30; i++) {
-		//{
-		//	int i = WORLD_SIZE - 1;
-		//	for (size_t j = 0; j < WORLD_SIZE; j++) {
-		//		auto ref = this->refMan.makeRef<Object>();
-		//		auto ptr = ref.get();
-		//		ptr->signature.set(GAMEOBJECT_COMPONENT::GAMEPOSITION);
-		//		ptr->gamePosition().pos = glm::ivec2(i, j);
-		//		ptr->signature.set(GAMEOBJECT_COMPONENT::GRAPHICSTILE);
-		//		ptr->graphicsTile().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
+		//for (size_t i = 0; i < 30; i++) {
+		{
+			int i = WORLD_SIZE - 1;
+			for (size_t j = 0; j < WORLD_SIZE; j++) {
+				auto p = this->everything->makeWeak();
+				p.addgameposition();
+				p.gameposition().pos = glm::ivec2(i, j);
 
-		//		this->world[i][j] = ref;
-		//	}
-		//}
+				p.addgraphicstile();
+				p.graphicstile().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
+			}
+		}
 	}
 
 	float Concept::value(SignatureAlias const& signature) {

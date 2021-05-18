@@ -14,10 +14,9 @@
 #include "Signature.h"
 /*#
 everything_name: Everything
-structure: sSoA
 indirection_type: integers
 type: Vector
-size: 100
+size: 100000
 component[]: GamePosition
 component[]: GraphicsTile
 component[]: Brain
@@ -28,11 +27,19 @@ component[]: Vicinity
 object_name: GameObject
 #*/
 
+using SizeAlias = size_t;
+
 struct ActionResult;
 struct GameObject;
 struct Possession;
 
 enum GAMEOBJECT_COMPONENT;
+
+template<class H, class... Tail>
+struct Head
+{
+	using val = H;
+};
 
 template<class T>
 struct Phantom {};
@@ -98,16 +105,6 @@ auto wrap2(T f) {
 	return t(f);
 }
 
-template<class... Args>
-static void run2(std::function<void(Args&...)> f) {
-
-}
-
-template<class T>
-static void run(T f) {
-	run2(wrap2(f));
-}
-
 class Action
 {
 public:
@@ -130,16 +127,19 @@ struct ActionResult
 
 struct GamePosition
 {
+	SizeAlias index = 0;
 	glm::ivec2 pos;
 };
 
 struct GraphicsTile
 {
+	SizeAlias index = 0;
 	int32_t blockID;
 };
 
 struct Brain
 {
+	SizeAlias index = 0;
 	int32_t happiness = 0;
 	int32_t energy = 0;
 
@@ -154,6 +154,7 @@ struct Brain
 
 struct Possession
 {
+	SizeAlias index = 0;
 	//std::vector<UniqueReference<Object, Object>> inventory{};
 
 	Possession() = default;
@@ -164,17 +165,20 @@ struct Possession
 
 struct Vicinity
 {
+	SizeAlias index = 0;
 	//std::vector<WeakReference<Object, Object>> vicinity;
 	//std::unique_ptr<GameObject> test;
 };
 
 struct Nutrition
 {
+	SizeAlias index = 0;
 	int32_t energy = 0;
 };
 
 struct Locomotion
 {
+	SizeAlias index = 0;
 	int32_t cooldown = 0;
 	int32_t fitness = 60;
 
@@ -198,33 +202,35 @@ enum GAMEOBJECT_COMPONENT
 struct GameObjectProxy;
 struct WeakGameObject;
 struct UniqueGameObject;
+struct GetEnum;
 //# end
 //# declaration
 struct Everything
 {
-	std::vector<GameObjectProxy> indirectionMap{ 100 };
-	std::vector<GamePosition> gamepositions{ 100 };
-	std::vector<GraphicsTile> graphicstiles{ 100 };
-	std::vector<Brain> brains{ 100 };
-	std::vector<Nutrition> nutritions{ 100 };
-	std::vector<Locomotion> locomotions{ 100 };
-	std::vector<Possession> possessions{ 100 };
-	std::vector<Vicinity> vicinitys{ 100 };
-	std::vector<Signature<GAMEOBJECT_COMPONENT>> signatures{ 100 };
-	SizeAlias gamepositionlast{ 0 };
-	SizeAlias graphicstilelast{ 0 };
-	SizeAlias brainlast{ 0 };
-	SizeAlias nutritionlast{ 0 };
-	SizeAlias locomotionlast{ 0 };
-	SizeAlias possessionlast{ 0 };
-	SizeAlias vicinitylast{ 0 };
-	size_t last{ 0 };
+	std::vector<GameObjectProxy> indirectionMap{ 100000 };
+	std::vector<GamePosition> gamepositions{ 100000 };
+	std::vector<GraphicsTile> graphicstiles{ 100000 };
+	std::vector<Brain> brains{ 100000 };
+	std::vector<Nutrition> nutritions{ 100000 };
+	std::vector<Locomotion> locomotions{ 100000 };
+	std::vector<Possession> possessions{ 100000 };
+	std::vector<Vicinity> vicinitys{ 100000 };
+	std::vector<Signature<GAMEOBJECT_COMPONENT>> signatures{ 100000 };
+	SizeAlias gamepositionlast{ 1 };
+	SizeAlias graphicstilelast{ 1 };
+	SizeAlias brainlast{ 1 };
+	SizeAlias nutritionlast{ 1 };
+	SizeAlias locomotionlast{ 1 };
+	SizeAlias possessionlast{ 1 };
+	SizeAlias vicinitylast{ 1 };
+	size_t last{ 1 };
 	template<class F>
 	inline void run(F f);
 	template<class... Args>
 	inline void run2(std::function<void(Args...)> f);
 	inline size_t takeFreeIndex();
 	inline UniqueGameObject makeUnique();
+	inline WeakGameObject makeWeak();
 	void remove(SizeAlias i);
 	template<class T>
 	inline std::vector<T>& gets();
@@ -256,13 +262,15 @@ struct Everything
 struct GameObjectProxy
 {
 	Everything* proxy;
-	size_t gameposition_;
-	size_t graphicstile_;
-	size_t brain_;
-	size_t nutrition_;
-	size_t locomotion_;
-	size_t possession_;
-	size_t vicinity_;
+	size_t gameposition_{ 0 };
+	size_t graphicstile_{ 0 };
+	size_t brain_{ 0 };
+	size_t nutrition_{ 0 };
+	size_t locomotion_{ 0 };
+	size_t possession_{ 0 };
+	size_t vicinity_{ 0 };
+	inline GameObjectProxy(Everything* ptr);
+	inline GameObjectProxy() = default;
 	inline GamePosition& gameposition();
 	inline GraphicsTile& graphicstile();
 	inline Brain& brain();
@@ -297,7 +305,6 @@ struct WeakGameObject
 	inline Possession& possession();
 	inline Vicinity& vicinity();
 	inline Signature<GAMEOBJECT_COMPONENT>& signature();
-	inline ~WeakGameObject();
 	inline void clear();
 	inline bool isNotNull() const;
 	inline bool isNull() const;
@@ -328,14 +335,19 @@ struct UniqueGameObject
 	inline Possession& possession();
 	inline Vicinity& vicinity();
 	inline Signature<GAMEOBJECT_COMPONENT>& signature();
-	inline ~UniqueGameObject();
 	inline void clear();
 	inline bool isNotNull() const;
 	inline bool isNull() const;
+	inline ~UniqueGameObject();
 	UniqueGameObject() = default;
 	NOCOPY(UniqueGameObject);
 	UniqueGameObject(UniqueGameObject&& other);
 	UniqueGameObject& operator=(UniqueGameObject&& other);
+};
+struct GetEnum
+{
+	template<class T>
+	inline static constexpr GAMEOBJECT_COMPONENT val();
 };
 //# end
 //# implementation
@@ -345,13 +357,35 @@ inline void Everything::run(F f) {
 };
 template<class... Args>
 inline void Everything::run2(std::function<void(Args...)> f) {
-	// TODO
+	decltype(Signature<GAMEOBJECT_COMPONENT>::data) sig;
+	for (auto s : { GetEnum::val<std::remove_reference_t<Args>>()... }) {
+	    sig.set(static_cast<size_t>(s));
+	}
+	using H = typename Head<Args...>::val;
+	for (auto& h : this->gets<std::remove_reference_t<H>>()) {
+	    if (this->signature(h.index).contains(sig)) {
+	        f(this->get<std::remove_reference_t<Args>>(h.index)...);
+	    }
+	}
 };
 inline size_t Everything::takeFreeIndex() {
 	return last++;
 };
 inline UniqueGameObject Everything::makeUnique() {
-	
+	auto res = UniqueGameObject();
+	res.index = takeFreeIndex();
+	res.proxy = this;
+	res.signature().reset();
+	indirectionMap[res.index] = { this };
+	return res;
+};
+inline WeakGameObject Everything::makeWeak() {
+	auto res = WeakGameObject();
+	res.index = takeFreeIndex();
+	res.proxy = this;
+	res.signature().reset();
+	indirectionMap[res.index] = { this };
+	return res;
 };
 inline GamePosition& Everything::gameposition(SizeAlias i) {
 	return gamepositions[indirectionMap[i].gameposition_];
@@ -453,27 +487,51 @@ inline bool Everything::hasvicinity(SizeAlias i) {
 };
 inline void Everything::addgameposition(SizeAlias i) {
 	signature(i).set(GAMEPOSITION);
+	indirectionMap[i].gameposition_ = gamepositionlast++;
+	indirectionMap[i].gameposition() = {};
+	indirectionMap[i].gameposition().index = i;
 };
 inline void Everything::addgraphicstile(SizeAlias i) {
 	signature(i).set(GRAPHICSTILE);
+	indirectionMap[i].graphicstile_ = graphicstilelast++;
+	indirectionMap[i].graphicstile() = {};
+	indirectionMap[i].graphicstile().index = i;
 };
 inline void Everything::addbrain(SizeAlias i) {
 	signature(i).set(BRAIN);
+	indirectionMap[i].brain_ = brainlast++;
+	indirectionMap[i].brain() = {};
+	indirectionMap[i].brain().index = i;
 };
 inline void Everything::addnutrition(SizeAlias i) {
 	signature(i).set(NUTRITION);
+	indirectionMap[i].nutrition_ = nutritionlast++;
+	indirectionMap[i].nutrition() = {};
+	indirectionMap[i].nutrition().index = i;
 };
 inline void Everything::addlocomotion(SizeAlias i) {
 	signature(i).set(LOCOMOTION);
+	indirectionMap[i].locomotion_ = locomotionlast++;
+	indirectionMap[i].locomotion() = {};
+	indirectionMap[i].locomotion().index = i;
 };
 inline void Everything::addpossession(SizeAlias i) {
 	signature(i).set(POSSESSION);
+	indirectionMap[i].possession_ = possessionlast++;
+	indirectionMap[i].possession() = {};
+	indirectionMap[i].possession().index = i;
 };
 inline void Everything::addvicinity(SizeAlias i) {
 	signature(i).set(VICINITY);
+	indirectionMap[i].vicinity_ = vicinitylast++;
+	indirectionMap[i].vicinity() = {};
+	indirectionMap[i].vicinity().index = i;
 };
 inline Signature<GAMEOBJECT_COMPONENT>& Everything::signature(SizeAlias i) {
 	return signatures[i];
+};
+inline GameObjectProxy::GameObjectProxy(Everything* ptr) {
+	proxy = ptr;
 };
 inline GamePosition& GameObjectProxy::gameposition() {
 	return proxy->gamepositions[gameposition_];
@@ -562,9 +620,6 @@ inline Vicinity& WeakGameObject::vicinity() {
 inline Signature<GAMEOBJECT_COMPONENT>& WeakGameObject::signature() {
 	return proxy->signature(index);
 };
-inline WeakGameObject::~WeakGameObject() {
-	clear();
-};
 inline void WeakGameObject::clear() {
 	proxy->remove(index);
 	index = 0;
@@ -642,9 +697,6 @@ inline Vicinity& UniqueGameObject::vicinity() {
 inline Signature<GAMEOBJECT_COMPONENT>& UniqueGameObject::signature() {
 	return proxy->signature(index);
 };
-inline UniqueGameObject::~UniqueGameObject() {
-	clear();
-};
 inline void UniqueGameObject::clear() {
 	proxy->remove(index);
 	index = 0;
@@ -655,5 +707,36 @@ inline bool UniqueGameObject::isNotNull() const {
 };
 inline bool UniqueGameObject::isNull() const {
 	return index == 0;
+};
+inline UniqueGameObject::~UniqueGameObject() {
+	clear();
+};
+template<>
+inline constexpr GAMEOBJECT_COMPONENT GetEnum::val<GamePosition>() {
+	return GAMEPOSITION;
+};
+template<>
+inline constexpr GAMEOBJECT_COMPONENT GetEnum::val<GraphicsTile>() {
+	return GRAPHICSTILE;
+};
+template<>
+inline constexpr GAMEOBJECT_COMPONENT GetEnum::val<Brain>() {
+	return BRAIN;
+};
+template<>
+inline constexpr GAMEOBJECT_COMPONENT GetEnum::val<Nutrition>() {
+	return NUTRITION;
+};
+template<>
+inline constexpr GAMEOBJECT_COMPONENT GetEnum::val<Locomotion>() {
+	return LOCOMOTION;
+};
+template<>
+inline constexpr GAMEOBJECT_COMPONENT GetEnum::val<Possession>() {
+	return POSSESSION;
+};
+template<>
+inline constexpr GAMEOBJECT_COMPONENT GetEnum::val<Vicinity>() {
+	return VICINITY;
 };
 //# end
