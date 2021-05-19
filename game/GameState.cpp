@@ -27,7 +27,7 @@ namespace game
 		Match<GamePosition, GraphicsTile> test;
 		int i = 0;
 
-		auto f = wrap2([&](Match<GamePosition, GraphicsTile> e1, Match<GamePosition, GraphicsTile> e2) {
+		auto f = wrap2([&](Match<GamePosition, GraphicsTile> e1, Match<Brain, GraphicsTile> e2) {
 			i++;
 			renderInfo.tileRenderInfo.addBlitInfo(
 				glm::vec4(e1.get<GamePosition>().pos, 1, 1),
@@ -36,9 +36,20 @@ namespace game
 			);
 		});
 
-		Loop::run<decltype(f), unwrap_std_fun<decltype(f)>::args>(*this->everything.get(), f);
+		//Loop::run<decltype(f), reverse_t<unwrap_std_fun<decltype(f)>::args>>(*this->everything.get(), f);
 
-		std::cout << this->everything->gets<GamePosition>().size() << '\n';
+		using L = List<int, float, char>;
+		L l;
+
+		//using LL = append<float, L>::val;
+		//LL ll;
+
+		using R = reverse_t<L>;
+		R r;
+
+
+
+		std::cout << "total: " << this->everything->gets<GamePosition>().size() << '\n';
 		std::cout << i << '\n';
 
 
@@ -71,17 +82,17 @@ namespace game
 	}
 
 	void GameState::runTick() {
-		{
-			Locator<misc::Timer>::ref().newTiming("templates");
-			int i = 0;
-			auto f = [&](int a, int b, int c) {
-				i++;
-			};
+		//{
+		//	Locator<misc::Timer>::ref().newTiming("templates");
+		//	int i = 0;
+		//	auto f = [&](int a, int b, int c) {
+		//		i++;
+		//	};
 
-			LoopTest::run<decltype(f), List<int, int, int>>(f);
-			Locator<misc::Timer>::ref().endTiming("templates");
-			std::cout << i << '\n';
-		}
+		//	LoopTest::run<decltype(f), List<int, int, int>>(f);
+		//	Locator<misc::Timer>::ref().endTiming("templates");
+		//	std::cout << i << '\n';
+		//}
 
 
 		std::cout << '\n';

@@ -61,19 +61,75 @@ struct Head
 	using val = H;
 };
 
+
+struct Void;
+
 template<class... Ts>
 struct List
 {
 	static constexpr bool is_empty = true;
+	using head = Void;
+	using tail = Void;
 };
 
 template<class Head, class... Tail>
 struct List<Head, Tail...>
 {
 	static constexpr bool is_empty = false;
+	static constexpr int size = 1 + sizeof...(Tail);
 	using head = Head;
 	using tail = List<Tail...>;
 };
+
+template<class E, class F>
+struct prepend;
+
+template<class E>
+struct prepend<E, Void>
+{
+	using val = List<E>;
+};
+
+template<class E, class... Args>
+struct prepend<E, List<Args...>>
+{
+	using val = typename List<E, Args...>;
+};
+
+template<int I, class L, class R>
+struct reverse2;
+
+template<class L, class R>
+struct reverse2<0, L, R>
+{
+	using val = R;
+};
+
+template<int I, class L, class R>
+struct reverse2
+{
+	using val = typename reverse2<
+		I - 1,
+		typename L::tail,
+		typename prepend<typename L::head, typename R>::val
+	>::val;
+};
+
+//template<class T>
+//struct reverse
+//{
+//	using val = typename reverse2<T, List<Void>>::tail;
+//};
+
+
+//template<class... Args>
+//struct reverse<List<Args...>>
+//{
+//};
+
+template<class T>
+using reverse_t = typename reverse2<T::size, T, Void>::val;
+
 
 struct LoopTest
 {
@@ -151,7 +207,12 @@ struct Match
 
 	template<class F, class L, class... Args>
 	static inline void run(Everything& e, F f, Args... args) {
+		size_t i = 0;
+		size_t end = e.getlast<M>();
 		for (auto& h : e.gets<M>()) {
+			if (i++ == end) {
+				break;
+			}
 			if (e.signature(h.index).contains(sig)) {
 				Loop::run<F, L, Match<M, Ms...>, Args...>(e, f, Match<M, Ms...>{e.indirectionMap[h.index]}, args...);
 			}
@@ -311,6 +372,8 @@ struct Everything
 	template<class T>
 	inline std::vector<T>& gets();
 	template<class T>
+	inline size_t getlast();
+	template<class T>
 	inline T& get(SizeAlias i);
 	inline GamePosition& gameposition(SizeAlias i);
 	inline GraphicsTile& graphicstile(SizeAlias i);
@@ -440,8 +503,6 @@ inline void Everything::run2(std::function<void(Args...)> f) {
 		sig.set(static_cast<size_t>(s));
 	}
 	using H = typename Head<Args...>::val;
-	size_t i = 0;
-	//size_t limit = this->last
 	for (auto& h : this->gets<std::remove_reference_t<H>>()) {
 		if (this->signature(h.index).contains(sig)) {
 			f(this->get<std::remove_reference_t<Args>>(h.index)...);
@@ -478,6 +539,10 @@ template<>
 inline std::vector<GamePosition>& Everything::gets<GamePosition>() {
 	return gamepositions;
 };
+template<>
+inline size_t Everything::getlast<GamePosition>() {
+	return gamepositionlast;
+};
 inline GraphicsTile& Everything::graphicstile(SizeAlias i) {
 	return graphicstiles[indirectionMap[i].graphicstile_];
 };
@@ -488,6 +553,10 @@ inline GraphicsTile& Everything::get<GraphicsTile>(SizeAlias i) {
 template<>
 inline std::vector<GraphicsTile>& Everything::gets<GraphicsTile>() {
 	return graphicstiles;
+};
+template<>
+inline size_t Everything::getlast<GraphicsTile>() {
+	return graphicstilelast;
 };
 inline Brain& Everything::brain(SizeAlias i) {
 	return brains[indirectionMap[i].brain_];
@@ -500,6 +569,10 @@ template<>
 inline std::vector<Brain>& Everything::gets<Brain>() {
 	return brains;
 };
+template<>
+inline size_t Everything::getlast<Brain>() {
+	return brainlast;
+};
 inline Nutrition& Everything::nutrition(SizeAlias i) {
 	return nutritions[indirectionMap[i].nutrition_];
 };
@@ -510,6 +583,10 @@ inline Nutrition& Everything::get<Nutrition>(SizeAlias i) {
 template<>
 inline std::vector<Nutrition>& Everything::gets<Nutrition>() {
 	return nutritions;
+};
+template<>
+inline size_t Everything::getlast<Nutrition>() {
+	return nutritionlast;
 };
 inline Locomotion& Everything::locomotion(SizeAlias i) {
 	return locomotions[indirectionMap[i].locomotion_];
@@ -522,6 +599,10 @@ template<>
 inline std::vector<Locomotion>& Everything::gets<Locomotion>() {
 	return locomotions;
 };
+template<>
+inline size_t Everything::getlast<Locomotion>() {
+	return locomotionlast;
+};
 inline Possession& Everything::possession(SizeAlias i) {
 	return possessions[indirectionMap[i].possession_];
 };
@@ -533,6 +614,10 @@ template<>
 inline std::vector<Possession>& Everything::gets<Possession>() {
 	return possessions;
 };
+template<>
+inline size_t Everything::getlast<Possession>() {
+	return possessionlast;
+};
 inline Vicinity& Everything::vicinity(SizeAlias i) {
 	return vicinitys[indirectionMap[i].vicinity_];
 };
@@ -543,6 +628,10 @@ inline Vicinity& Everything::get<Vicinity>(SizeAlias i) {
 template<>
 inline std::vector<Vicinity>& Everything::gets<Vicinity>() {
 	return vicinitys;
+};
+template<>
+inline size_t Everything::getlast<Vicinity>() {
+	return vicinitylast;
 };
 inline bool Everything::hasgameposition(SizeAlias i) {
 	return indirectionMap[i].gameposition_ != 0;

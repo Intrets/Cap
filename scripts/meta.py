@@ -272,6 +272,12 @@ for (auto& h : this->gets<std::remove_reference_t<H>>()) {
     ))
 
     everything_struct.member_functions.append(MemberFunction(
+        name='getlast',
+        return_type=structure.index_type,
+        template='class T'
+    ))
+
+    everything_struct.member_functions.append(MemberFunction(
         name='get',
         return_type='T&',
         arguments=[VariableDeclaration(name='i', mtype='SizeAlias')],
@@ -300,6 +306,14 @@ for (auto& h : this->gets<std::remove_reference_t<H>>()) {
             return_type=f'{structure.get_array_type(member.type)}&',
             template='',
             implementation=f'return {member.name}s;',
+            hide_declaration=True
+        ))
+
+        everything_struct.member_functions.append(MemberFunction(
+            name=f'getlast<{member.type}>',
+            return_type=structure.index_type,
+            template='',
+            implementation=f'return {member.name}last;',
             hide_declaration=True
         ))
 
