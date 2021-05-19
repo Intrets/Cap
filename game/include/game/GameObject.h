@@ -404,7 +404,7 @@ inline void Everything::runsimpleStd(std::function<void(Args...)> f) {
 };
 template<class F>
 inline void Everything::run(F f) {
-	Loop::run(*this, te::wrap_in_std_fun(te::wrap_in_std_fun(f)));
+	Loop::run(*this, te::wrap_in_std_fun(f));
 };
 inline size_t Everything::takeFreeIndex() {
 	return last++;
