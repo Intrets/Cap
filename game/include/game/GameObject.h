@@ -118,7 +118,7 @@ struct Match
 	inline static SignatureType sig = initialize_sig();
 
 	template<class T>
-	T& get() {
+	inline T& get() {
 		static_assert(te::Contains<T, te::List<M, Ms...>>::val());
 		return proxy.get<T>();
 	};
@@ -286,14 +286,21 @@ struct Everything
 };
 struct GameObjectProxy
 {
-	Everything* proxy;
+	Everything* proxy{ nullptr };
 	size_t gameposition_{ 0 };
+	GamePosition* gamepositionPtr{ nullptr };
 	size_t graphicstile_{ 0 };
+	GraphicsTile* graphicstilePtr{ nullptr };
 	size_t brain_{ 0 };
+	Brain* brainPtr{ nullptr };
 	size_t nutrition_{ 0 };
+	Nutrition* nutritionPtr{ nullptr };
 	size_t locomotion_{ 0 };
+	Locomotion* locomotionPtr{ nullptr };
 	size_t possession_{ 0 };
+	Possession* possessionPtr{ nullptr };
 	size_t vicinity_{ 0 };
+	Vicinity* vicinityPtr{ nullptr };
 	inline GameObjectProxy(Everything* ptr);
 	inline GameObjectProxy() = default;
 	template<class T>
@@ -397,7 +404,7 @@ inline void Everything::runsimpleStd(std::function<void(Args...)> f) {
 };
 template<class F>
 inline void Everything::run(F f) {
-	Loop::run(*this, te::wrap_in_std_fun(f));
+	Loop::run(*this, te::wrap_in_std_fun(te::wrap_in_std_fun(f)));
 };
 inline size_t Everything::takeFreeIndex() {
 	return last++;
@@ -546,43 +553,57 @@ inline bool Everything::hasvicinity(SizeAlias i) {
 };
 inline void Everything::addgameposition(SizeAlias i) {
 	signature(i).set(GAMEPOSITION);
-	indirectionMap[i].gameposition_ = gamepositionlast++;
+	size_t index = gamepositionlast++;
+	indirectionMap[i].gameposition_ = index;
+	indirectionMap[i].gamepositionPtr = &gets<GamePosition>()[index];
 	indirectionMap[i].gameposition() = {};
 	indirectionMap[i].gameposition().index = i;
 };
 inline void Everything::addgraphicstile(SizeAlias i) {
 	signature(i).set(GRAPHICSTILE);
-	indirectionMap[i].graphicstile_ = graphicstilelast++;
+	size_t index = graphicstilelast++;
+	indirectionMap[i].graphicstile_ = index;
+	indirectionMap[i].graphicstilePtr = &gets<GraphicsTile>()[index];
 	indirectionMap[i].graphicstile() = {};
 	indirectionMap[i].graphicstile().index = i;
 };
 inline void Everything::addbrain(SizeAlias i) {
 	signature(i).set(BRAIN);
-	indirectionMap[i].brain_ = brainlast++;
+	size_t index = brainlast++;
+	indirectionMap[i].brain_ = index;
+	indirectionMap[i].brainPtr = &gets<Brain>()[index];
 	indirectionMap[i].brain() = {};
 	indirectionMap[i].brain().index = i;
 };
 inline void Everything::addnutrition(SizeAlias i) {
 	signature(i).set(NUTRITION);
-	indirectionMap[i].nutrition_ = nutritionlast++;
+	size_t index = nutritionlast++;
+	indirectionMap[i].nutrition_ = index;
+	indirectionMap[i].nutritionPtr = &gets<Nutrition>()[index];
 	indirectionMap[i].nutrition() = {};
 	indirectionMap[i].nutrition().index = i;
 };
 inline void Everything::addlocomotion(SizeAlias i) {
 	signature(i).set(LOCOMOTION);
-	indirectionMap[i].locomotion_ = locomotionlast++;
+	size_t index = locomotionlast++;
+	indirectionMap[i].locomotion_ = index;
+	indirectionMap[i].locomotionPtr = &gets<Locomotion>()[index];
 	indirectionMap[i].locomotion() = {};
 	indirectionMap[i].locomotion().index = i;
 };
 inline void Everything::addpossession(SizeAlias i) {
 	signature(i).set(POSSESSION);
-	indirectionMap[i].possession_ = possessionlast++;
+	size_t index = possessionlast++;
+	indirectionMap[i].possession_ = index;
+	indirectionMap[i].possessionPtr = &gets<Possession>()[index];
 	indirectionMap[i].possession() = {};
 	indirectionMap[i].possession().index = i;
 };
 inline void Everything::addvicinity(SizeAlias i) {
 	signature(i).set(VICINITY);
-	indirectionMap[i].vicinity_ = vicinitylast++;
+	size_t index = vicinitylast++;
+	indirectionMap[i].vicinity_ = index;
+	indirectionMap[i].vicinityPtr = &gets<Vicinity>()[index];
 	indirectionMap[i].vicinity() = {};
 	indirectionMap[i].vicinity().index = i;
 };
@@ -593,53 +614,53 @@ inline GameObjectProxy::GameObjectProxy(Everything* ptr) {
 	proxy = ptr;
 };
 inline GamePosition& GameObjectProxy::gameposition() {
-	return proxy->gamepositions[gameposition_];
+	return *gamepositionPtr;
 };
 template<>
 inline GamePosition& GameObjectProxy::get<GamePosition>() {
-	return proxy->gamepositions[gameposition_];
+	return *gamepositionPtr;
 };
 inline GraphicsTile& GameObjectProxy::graphicstile() {
-	return proxy->graphicstiles[graphicstile_];
+	return *graphicstilePtr;
 };
 template<>
 inline GraphicsTile& GameObjectProxy::get<GraphicsTile>() {
-	return proxy->graphicstiles[graphicstile_];
+	return *graphicstilePtr;
 };
 inline Brain& GameObjectProxy::brain() {
-	return proxy->brains[brain_];
+	return *brainPtr;
 };
 template<>
 inline Brain& GameObjectProxy::get<Brain>() {
-	return proxy->brains[brain_];
+	return *brainPtr;
 };
 inline Nutrition& GameObjectProxy::nutrition() {
-	return proxy->nutritions[nutrition_];
+	return *nutritionPtr;
 };
 template<>
 inline Nutrition& GameObjectProxy::get<Nutrition>() {
-	return proxy->nutritions[nutrition_];
+	return *nutritionPtr;
 };
 inline Locomotion& GameObjectProxy::locomotion() {
-	return proxy->locomotions[locomotion_];
+	return *locomotionPtr;
 };
 template<>
 inline Locomotion& GameObjectProxy::get<Locomotion>() {
-	return proxy->locomotions[locomotion_];
+	return *locomotionPtr;
 };
 inline Possession& GameObjectProxy::possession() {
-	return proxy->possessions[possession_];
+	return *possessionPtr;
 };
 template<>
 inline Possession& GameObjectProxy::get<Possession>() {
-	return proxy->possessions[possession_];
+	return *possessionPtr;
 };
 inline Vicinity& GameObjectProxy::vicinity() {
-	return proxy->vicinitys[vicinity_];
+	return *vicinityPtr;
 };
 template<>
 inline Vicinity& GameObjectProxy::get<Vicinity>() {
-	return proxy->vicinitys[vicinity_];
+	return *vicinityPtr;
 };
 inline bool WeakGameObject::hasgameposition() {
 	return proxy->hasgameposition(index);

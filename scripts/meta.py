@@ -337,7 +337,9 @@ def make_everything_struct(structure: Structure):
             name=f'add{member.name}',
             return_type=f'void',
             implementation=f'{structure.signature_member.name}(i).set({member.enum});\n'
-                           f'indirectionMap[i].{member.name}_ = {member.name}last++;\n'
+                           f'{structure.index_type} index = {member.name}last++;\n'
+                           f'indirectionMap[i].{member.name}_ = index;\n'
+                           f'indirectionMap[i].{member.name}Ptr = &gets<{member.type}>()[index];\n'
                            f'indirectionMap[i].{member.name}() = {{}};\n'
                            f'indirectionMap[i].{member.name}().index = i;',
             arguments=[VariableDeclaration(name='i', mtype='SizeAlias')]
@@ -366,17 +368,8 @@ def make_everything_struct(structure: Structure):
     return everything_struct
 
 
-def make_struct(structure: Structure):
+def make_object_proxy(structure: Structure):
     object_proxy = Struct(name=f'{structure.name}Proxy')
-    enum = Enum(name=structure.enum_name)
-
-    enum_lookup_template = Struct(name=f'GetEnum')
-
-    enum_lookup_template.member_functions.append(MemberFunction(
-        name='val',
-        return_type=f'static constexpr {structure.enum_name}',
-        template='class T'
-    ))
 
     object_proxy.member_functions.append(MemberFunction(
         name=f'{object_proxy.name}',
@@ -387,6 +380,66 @@ def make_struct(structure: Structure):
     object_proxy.member_functions.append(MemberFunction(
         name=f'{object_proxy.name}',
         suffix='default'
+    ))
+
+    object_proxy.member_variables.append(VariableDeclaration(
+        name='proxy',
+        mtype=f'{structure.everything_name}*',
+        val='nullptr'
+    ))
+
+    def get_indirection_type(member: Member):
+        return f'{structure.index_type}'
+
+    def get_indirection_access(member: Member):
+        return f'return *{member.name}Ptr;'
+        # return f'return proxy->{member.name}s[{member.name}_];'
+
+    object_proxy.member_functions.append(MemberFunction(
+        name='get',
+        template='class T',
+        return_type=f'T&'
+    ))
+
+    for member in structure.members:
+        object_proxy.member_variables.append(VariableDeclaration(
+            name=f'{member.name}_',
+            mtype=get_indirection_type(member),
+            val='0'
+        ))
+
+        object_proxy.member_variables.append(VariableDeclaration(
+            name=f'{member.name}Ptr',
+            mtype=f'{member.type}*',
+            val='nullptr'
+        ))
+
+        object_proxy.member_functions.append(MemberFunction(
+            name=member.name,
+            return_type=f'{member.type}&',
+            implementation=get_indirection_access(member)
+        ))
+
+        object_proxy.member_functions.append(MemberFunction(
+            name=f'get<{member.type}>',
+            template='',
+            return_type=f'{member.type}&',
+            implementation=get_indirection_access(member),
+            hide_declaration=True
+        ))
+
+    return object_proxy
+
+
+def make_struct(structure: Structure):
+    enum = Enum(name=structure.enum_name)
+
+    enum_lookup_template = Struct(name=f'GetEnum')
+
+    enum_lookup_template.member_functions.append(MemberFunction(
+        name='val',
+        return_type=f'static constexpr {structure.enum_name}',
+        template='class T'
     ))
 
     for member in structure.members:
@@ -409,56 +462,10 @@ def make_struct(structure: Structure):
     else:
         exit(f'Invalid data type: {structure.array_type[0]}')
 
-    if structure.raw['indirection_type'] == 'pointers':
-        def get_indirection_type(member: Member):
-            return f'{member.type}*'
-
-        def get_indirection_access(member: Member):
-            return f'return *{member.name}_;'
-
-    elif structure.raw['indirection_type'] == 'integers':
-        object_proxy.member_variables.append(VariableDeclaration(
-            name='proxy',
-            mtype=f'{structure.everything_name}*'
-        ))
-
-        def get_indirection_type(member: Member):
-            return f'{structure.index_type}'
-
-        def get_indirection_access(member: Member):
-            return f'return proxy->{member.name}s[{member.name}_];'
-
-    object_proxy.member_functions.append(MemberFunction(
-        name='get',
-        template='class T',
-        return_type=f'T&'
-    ))
-
-    for member in structure.members:
-        object_proxy.member_variables.append(VariableDeclaration(
-            name=f'{member.name}_',
-            mtype=get_indirection_type(member),
-            val='0'
-        ))
-
-        object_proxy.member_functions.append(MemberFunction(
-            name=member.name,
-            return_type=f'{member.type}&',
-            implementation=get_indirection_access(member)
-        ))
-
-        object_proxy.member_functions.append(MemberFunction(
-            name=f'get<{member.type}>',
-            template='',
-            return_type=f'{member.type}&',
-            implementation=get_indirection_access(member),
-            hide_declaration=True
-        ))
-
     return List(
         make_everything_struct(structure),
         enum,
-        object_proxy,
+        make_object_proxy(structure),
         make_weak_ref(structure),
         make_unique_ref(structure),
         enum_lookup_template,

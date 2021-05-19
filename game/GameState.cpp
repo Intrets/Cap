@@ -153,41 +153,38 @@ namespace game
 
 
 		{
-			//for (size_t j = 1; j < 100; j++) {
-			//	for (size_t i = 1; i < WORLD_SIZE - 2; i++) {
-			//		auto ref = this->refMan.makeRef<Object>();
-			//		auto ptr = ref.get();
+			for (size_t j = 1; j < 100; j++) {
+				for (size_t i = 1; i < WORLD_SIZE - 2; i++) {
+					auto p = this->everything->makeWeak();
 
-			//		glm::ivec2 pos = { j, i };
+					p.addgameposition();
+					p.gameposition().pos = { j, i };
 
-			//		ptr->signature.set(GAMEOBJECT_COMPONENT::BRAIN);
-			//		ptr->signature.set(GAMEOBJECT_COMPONENT::LOCOMOTION);
-			//		ptr->locomotion().fitness = 0;
+					p.addbrain();
+					p.addlocomotion();
+					p.locomotion().fitness = 0;
 
-			//		ptr->signature.set(GAMEOBJECT_COMPONENT::GAME_POSITION);
-			//		ptr->gamePosition().pos = pos;
-
-			//		ptr->signature.set(GAMEOBJECT_COMPONENT::GRAPHIS_TILE);
-			//		ptr->graphicsTile().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("gnome.dds");
-			//	}
-			//}
+					p.addgraphicstile();
+					p.graphicstile().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("gnome.dds");
+				}
+			}
 		}
 
 		{
 
-			auto p = this->everything->makeWeak();
-			p.addbrain();
-			p.addpossession();
-			p.addvicinity();
-			p.addgraphicstile();
-			p.addlocomotion();
-			p.addgameposition();
+			//auto p = this->everything->makeWeak();
+			//p.addbrain();
+			//p.addpossession();
+			//p.addvicinity();
+			//p.addgraphicstile();
+			//p.addlocomotion();
+			//p.addgameposition();
 
-			p.gameposition().pos = { 5 , 5 };
+			//p.gameposition().pos = { 5 , 5 };
 
-			p.graphicstile().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("gnome.dds");
+			//p.graphicstile().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("gnome.dds");
 
-			p.locomotion().fitness = 10;
+			//p.locomotion().fitness = 10;
 
 
 			//Action recallFood;

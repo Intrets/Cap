@@ -14,7 +14,7 @@
 #include "GameObject.h"
 #include "Signature.h"
 
-#define WORLD_SIZE 10
+#define WORLD_SIZE 100
 
 namespace render
 {
