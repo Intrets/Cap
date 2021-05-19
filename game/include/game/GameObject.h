@@ -61,7 +61,6 @@ struct Head
 	using val = H;
 };
 
-
 struct Void;
 
 template<class... Ts>
@@ -70,15 +69,6 @@ struct List
 	static constexpr bool is_empty = true;
 	using head = Void;
 	using tail = Void;
-};
-
-template<class Head, class... Tail>
-struct List<Head, Tail...>
-{
-	static constexpr bool is_empty = false;
-	static constexpr int size = 1 + sizeof...(Tail);
-	using head = Head;
-	using tail = List<Tail...>;
 };
 
 template<class E, class F>
@@ -93,7 +83,19 @@ struct prepend<E, Void>
 template<class E, class... Args>
 struct prepend<E, List<Args...>>
 {
-	using val = typename List<E, Args...>;
+	using val = List<E, Args...>;
+};
+
+template<class E, class F>
+using prepend_t = typename prepend<E, F>::val;
+
+template<class Head, class... Tail>
+struct List<Head, Tail...>
+{
+	static constexpr bool is_empty = false;
+	static constexpr int size = 1 + sizeof...(Tail);
+	using head = Head;
+	using tail = typename List<Tail...>;
 };
 
 template<int I, class L, class R>
@@ -111,25 +113,12 @@ struct reverse2
 	using val = typename reverse2<
 		I - 1,
 		typename L::tail,
-		typename prepend<typename L::head, typename R>::val
+		typename prepend_t<typename L::head, R>
 	>::val;
 };
 
-//template<class T>
-//struct reverse
-//{
-//	using val = typename reverse2<T, List<Void>>::tail;
-//};
-
-
-//template<class... Args>
-//struct reverse<List<Args...>>
-//{
-//};
-
 template<class T>
 using reverse_t = typename reverse2<T::size, T, Void>::val;
-
 
 struct LoopTest
 {
@@ -148,6 +137,11 @@ struct LoopTest
 
 struct Loop
 {
+	template<class F>
+	static inline void run(Everything& e, F f) {
+		run<decltype(f), reverse_t<unwrap_std_fun<decltype(f)>::args>>(e, f);
+	}
+
 	template<class F, class L, class... Args>
 	static inline void run(Everything& e, F f, Args... args) {
 		if constexpr (L::is_empty) {

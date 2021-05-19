@@ -165,7 +165,7 @@ def make_everything_struct(structure: Structure):
     everything_struct = Struct(name=structure.everything_name)
 
     everything_struct.member_functions.append(MemberFunction(
-        name='run',
+        name='runsimple',
         arguments=[VariableDeclaration(name='f', mtype='F')],
         template='class F',
         return_type='void',
@@ -173,7 +173,7 @@ def make_everything_struct(structure: Structure):
     ))
 
     everything_struct.member_functions.append(MemberFunction(
-        name='run2',
+        name='runsimpleStd',
         arguments=[VariableDeclaration(name='f', mtype='std::function<void(Args...)>')],
         template='class... Args',
         return_type='void',
@@ -186,9 +186,22 @@ for (auto& h : this->gets<std::remove_reference_t<H>>()) {
     if (this->signature(h.index).contains(sig)) {
         f(this->get<std::remove_reference_t<Args>>(h.index)...);
     }
-}'''
+}'''))
 
+    everything_struct.member_functions.append(MemberFunction(
+        name='run',
+        arguments=[VariableDeclaration(name='f', mtype='F')],
+        template='class F',
+        return_type='void',
+        implementation='this->run2(wrap2(f));'
     ))
+
+    everything_struct.member_functions.append(MemberFunction(
+        name='runStd',
+        arguments=[VariableDeclaration(name='f', mtype='std::function<void(Args...)>')],
+        template='class... Args',
+        return_type='void',
+        implementation='Loop::run(*this, f);'))
 
     implementation = f'return last++;'
 

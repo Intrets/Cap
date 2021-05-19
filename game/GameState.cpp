@@ -27,7 +27,7 @@ namespace game
 		Match<GamePosition, GraphicsTile> test;
 		int i = 0;
 
-		auto f = wrap2([&](Match<GamePosition, GraphicsTile> e1, Match<Brain, GraphicsTile> e2) {
+		auto f = wrap2([&](Match<GamePosition, GraphicsTile> e1) {
 			i++;
 			renderInfo.tileRenderInfo.addBlitInfo(
 				glm::vec4(e1.get<GamePosition>().pos, 1, 1),
@@ -36,7 +36,7 @@ namespace game
 			);
 		});
 
-		//Loop::run<decltype(f), reverse_t<unwrap_std_fun<decltype(f)>::args>>(*this->everything.get(), f);
+		Loop::run(*this->everything.get(), f);
 
 		using L = List<int, float, char>;
 		L l;
