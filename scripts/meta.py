@@ -177,16 +177,17 @@ def make_everything_struct(structure: Structure):
         arguments=[VariableDeclaration(name='f', mtype='std::function<void(Args...)>')],
         template='class... Args',
         return_type='void',
-        implementation='''decltype(Signature<GAMEOBJECT_COMPONENT>::data) sig;
-for (auto s : { GetEnum::val<std::remove_reference_t<Args>>()... }) {
-    sig.set(static_cast<size_t>(s));
-}
-using H = typename Head<Args...>::val;
-for (auto& h : this->gets<std::remove_reference_t<H>>()) {
-    if (this->signature(h.index).contains(sig)) {
-        f(this->get<std::remove_reference_t<Args>>(h.index)...);
-    }
-}'''))
+        implementation='decltype(Signature<GAMEOBJECT_COMPONENT>::data) sig;\n'
+                       'for (auto s : { GetEnum::val<std::remove_reference_t<Args>>()... }) {\n'
+                       '\tsig.set(static_cast<size_t>(s));\n'
+                       '}\n'
+                       'using H = typename Head<Args...>::val;\n'
+                       'for (auto& h : this->gets<std::remove_reference_t<H>>()) {\n'
+                       '\tif (this->signature(h.index).contains(sig)) {\n'
+                       '\t\tf(this->get<std::remove_reference_t<Args>>(h.index)...);\n'
+                       '\t}\n'
+                       '}'
+    ))
 
     everything_struct.member_functions.append(MemberFunction(
         name='run',

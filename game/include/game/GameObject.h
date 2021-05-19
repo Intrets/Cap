@@ -356,9 +356,13 @@ struct Everything
 	SizeAlias vicinitylast{ 1 };
 	size_t last{ 1 };
 	template<class F>
+	inline void runsimple(F f);
+	template<class... Args>
+	inline void runsimpleStd(std::function<void(Args...)> f);
+	template<class F>
 	inline void run(F f);
 	template<class... Args>
-	inline void run2(std::function<void(Args...)> f);
+	inline void runStd(std::function<void(Args...)> f);
 	inline size_t takeFreeIndex();
 	inline UniqueGameObject makeUnique();
 	inline WeakGameObject makeWeak();
@@ -487,11 +491,11 @@ struct GetEnum
 //# end
 //# implementation
 template<class F>
-inline void Everything::run(F f) {
+inline void Everything::runsimple(F f) {
 	this->run2(wrap2(f));
 };
 template<class... Args>
-inline void Everything::run2(std::function<void(Args...)> f) {
+inline void Everything::runsimpleStd(std::function<void(Args...)> f) {
 	decltype(Signature<GAMEOBJECT_COMPONENT>::data) sig;
 	for (auto s : { GetEnum::val<std::remove_reference_t<Args>>()... }) {
 		sig.set(static_cast<size_t>(s));
@@ -502,6 +506,14 @@ inline void Everything::run2(std::function<void(Args...)> f) {
 			f(this->get<std::remove_reference_t<Args>>(h.index)...);
 		}
 	}
+};
+template<class F>
+inline void Everything::run(F f) {
+	this->run2(wrap2(f));
+};
+template<class... Args>
+inline void Everything::runStd(std::function<void(Args...)> f) {
+	Loop::run(*this, f);
 };
 inline size_t Everything::takeFreeIndex() {
 	return last++;
