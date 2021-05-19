@@ -10,6 +10,7 @@
 
 #include <wglm/glm.hpp>
 #include <misc/Misc.h>
+#include <templates/Everything.h>
 
 #include "Signature.h"
 /*#
@@ -55,71 +56,6 @@ struct Possession;
 
 enum GAMEOBJECT_COMPONENT;
 
-template<class H, class... Tail>
-struct Head
-{
-	using val = H;
-};
-
-struct Void;
-
-template<class... Ts>
-struct List
-{
-	static constexpr bool is_empty = true;
-	using head = Void;
-	using tail = Void;
-};
-
-template<class E, class F>
-struct prepend;
-
-template<class E>
-struct prepend<E, Void>
-{
-	using val = List<E>;
-};
-
-template<class E, class... Args>
-struct prepend<E, List<Args...>>
-{
-	using val = List<E, Args...>;
-};
-
-template<class E, class F>
-using prepend_t = typename prepend<E, F>::val;
-
-template<class Head, class... Tail>
-struct List<Head, Tail...>
-{
-	static constexpr bool is_empty = false;
-	static constexpr int size = 1 + sizeof...(Tail);
-	using head = Head;
-	using tail = typename List<Tail...>;
-};
-
-template<int I, class L, class R>
-struct reverse2;
-
-template<class L, class R>
-struct reverse2<0, L, R>
-{
-	using val = R;
-};
-
-template<int I, class L, class R>
-struct reverse2
-{
-	using val = typename reverse2<
-		I - 1,
-		typename L::tail,
-		typename prepend_t<typename L::head, R>
-	>::val;
-};
-
-template<class T>
-using reverse_t = typename reverse2<T::size, T, Void>::val;
-
 struct LoopTest
 {
 	template<class F, class L, class... Args>
@@ -139,7 +75,8 @@ struct Loop
 {
 	template<class F>
 	static inline void run(Everything& e, F f) {
-		run<decltype(f), reverse_t<unwrap_std_fun<decltype(f)>::args>>(e, f);
+		using A = typename te::reverse_t<te::unwrap_std_fun<decltype(f)>::args>;
+		run<decltype(f), A>(e, f);
 	}
 
 	template<class F, class L, class... Args>
@@ -148,23 +85,8 @@ struct Loop
 			f(args...);
 		}
 		else {
-			L::head::run<F, typename L::tail, Args...>(e, f, args...);
-		}
-	}
-};
-
-template<class T, class L>
-struct Contains
-{
-	constexpr static bool val() {
-		if constexpr (L::is_empty) {
-			return false;
-		}
-		else if constexpr (std::is_same_v<T, L::head>) {
-			return true;
-		}
-		else {
-			return Contains<T, L::tail>::val();
+			using head_stripped_ref = std::remove_reference_t<L::head>;
+			head_stripped_ref::run<F, typename L::tail, Args...>(e, f, args...);
 		}
 	}
 };
@@ -179,34 +101,33 @@ struct Match
 {
 	GameObjectProxy proxy;
 
-	inline static SignatureType sig = []() {
-		SignatureType sig;
+	static inline SignatureType initialize_sig() {
+		SignatureType res;
 
 		if constexpr (sizeof...(Ms) == 0) {
-			sig.set(static_cast<size_t>(GetEnum::val<M>()));
+			res.set(static_cast<size_t>(GetEnum::val<M>()));
 		}
 		else {
 			for (auto s : { GetEnum::val<M>(), GetEnum::val<Ms>()... }) {
-				sig.set(static_cast<size_t>(s));
+				res.set(static_cast<size_t>(s));
 			}
 		}
-		return sig;
-	}();
+		return res;
+	}
+
+	inline static SignatureType sig = initialize_sig();
 
 	template<class T>
 	T& get() {
-		static_assert(Contains<T, List<M, Ms...>>::val());
+		static_assert(te::Contains<T, te::List<M, Ms...>>::val());
 		return proxy.get<T>();
 	};
 
 	template<class F, class L, class... Args>
 	static inline void run(Everything& e, F f, Args... args) {
-		size_t i = 0;
 		size_t end = e.getlast<M>();
-		for (auto& h : e.gets<M>()) {
-			if (i++ == end) {
-				break;
-			}
+		for (size_t i = 1; i < end; i++) 		{
+			auto const& h = e.get<M>(i);
 			if (e.signature(h.index).contains(sig)) {
 				Loop::run<F, L, Match<M, Ms...>, Args...>(e, f, Match<M, Ms...>{e.indirectionMap[h.index]}, args...);
 			}
@@ -224,37 +145,6 @@ struct ForEach
 		}
 	};
 };
-
-template<class F, class L>
-struct Fold
-{
-
-};
-
-template<class T>
-struct unwrap;
-
-template<class R, class B, class... Args>
-struct unwrap<R(B::*)(Args...) const>
-{
-	using std_function_type = std::function<R(Args...)>;
-};
-
-template<class T>
-struct unwrap_std_fun;
-
-template<class R, class... Args>
-struct unwrap_std_fun<std::function<R(Args...)>>
-{
-	using return_type = R;
-	using args = List<Args...>;
-};
-
-template<class T>
-auto wrap2(T f) {
-	using t = typename unwrap<decltype(&T::operator())>::std_function_type;
-	return t(f);
-}
 
 class Action
 {
@@ -361,8 +251,6 @@ struct Everything
 	inline void runsimpleStd(std::function<void(Args...)> f);
 	template<class F>
 	inline void run(F f);
-	template<class... Args>
-	inline void runStd(std::function<void(Args...)> f);
 	inline size_t takeFreeIndex();
 	inline UniqueGameObject makeUnique();
 	inline WeakGameObject makeWeak();
@@ -492,7 +380,7 @@ struct GetEnum
 //# implementation
 template<class F>
 inline void Everything::runsimple(F f) {
-	this->run2(wrap2(f));
+	this->run2(te::wrap_in_std_fun(f));
 };
 template<class... Args>
 inline void Everything::runsimpleStd(std::function<void(Args...)> f) {
@@ -509,11 +397,7 @@ inline void Everything::runsimpleStd(std::function<void(Args...)> f) {
 };
 template<class F>
 inline void Everything::run(F f) {
-	this->run2(wrap2(f));
-};
-template<class... Args>
-inline void Everything::runStd(std::function<void(Args...)> f) {
-	Loop::run(*this, f);
+	Loop::run(*this, te::wrap_in_std_fun(f));
 };
 inline size_t Everything::takeFreeIndex() {
 	return last++;

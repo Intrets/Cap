@@ -31,3 +31,7 @@ target_link_libraries(${MODULE_NAME} PRIVATE
 	render
 	ui
 )
+
+target_link_libraries(${MODULE_NAME} PUBLIC
+	templates
+)

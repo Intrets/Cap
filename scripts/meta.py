@@ -169,7 +169,7 @@ def make_everything_struct(structure: Structure):
         arguments=[VariableDeclaration(name='f', mtype='F')],
         template='class F',
         return_type='void',
-        implementation='this->run2(wrap2(f));'
+        implementation='this->run2(te::wrap_in_std_fun(f));'
     ))
 
     everything_struct.member_functions.append(MemberFunction(
@@ -194,15 +194,8 @@ def make_everything_struct(structure: Structure):
         arguments=[VariableDeclaration(name='f', mtype='F')],
         template='class F',
         return_type='void',
-        implementation='this->run2(wrap2(f));'
+        implementation='Loop::run(*this, te::wrap_in_std_fun(f));'
     ))
-
-    everything_struct.member_functions.append(MemberFunction(
-        name='runStd',
-        arguments=[VariableDeclaration(name='f', mtype='std::function<void(Args...)>')],
-        template='class... Args',
-        return_type='void',
-        implementation='Loop::run(*this, f);'))
 
     implementation = f'return last++;'
 

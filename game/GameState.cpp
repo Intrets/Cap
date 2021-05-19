@@ -16,85 +16,16 @@ namespace game
 		renderSignature.set(GAMEOBJECT_COMPONENT::GAMEPOSITION);
 		renderSignature.set(GAMEOBJECT_COMPONENT::GRAPHICSTILE);
 
-		//this->everything->run([&](GamePosition& pos, GraphicsTile& tile) {
-		//	renderInfo.tileRenderInfo.addBlitInfo(
-		//		glm::vec4(pos.pos, 1, 1),
-		//		0,
-		//		tile.blockID
-		//	);
-		//	});
-
-		Match<GamePosition, GraphicsTile> test;
-		int i = 0;
-
-		auto f = wrap2([&](Match<GamePosition, GraphicsTile> e1) {
-			i++;
+		this->everything->run([&](Match<GamePosition, GraphicsTile> e) {
 			renderInfo.tileRenderInfo.addBlitInfo(
-				glm::vec4(e1.get<GamePosition>().pos, 1, 1),
+				glm::vec4(e.get<GamePosition>().pos, 1, 1),
 				0,
-				e1.get<GraphicsTile>().blockID
+				e.get<GraphicsTile>().blockID
 			);
-		});
-
-		Loop::run(*this->everything.get(), f);
-
-		using L = List<int, float, char>;
-		L l;
-
-		//using LL = append<float, L>::val;
-		//LL ll;
-
-		using R = reverse_t<L>;
-		R r;
-
-
-
-		std::cout << "total: " << this->everything->gets<GamePosition>().size() << '\n';
-		std::cout << i << '\n';
-
-
-			//Match<GamePosition> a;
-			//Match<GamePosition, GraphicsTile>::run(this->everything, );
-
-
-			//std::cout << Contains<void, List<float, float, int>>::val() << '\n';
-
-			//this->everything->run([&](Match<GamePosition, GraphicsTile>& e1, Match<GamePosition, GraphicsTile>& e2) {
-			//	e1.get<GamePosition>() = e2.get<GamePosition>();
-			//	});
-
-
-			//for (auto& [h, obj] : this->refMan.data) {
-			//	if (obj.get()->signature.contains(renderSignature)) {
-			//		renderInfo.tileRenderInfo.addBlitInfo(
-			//			glm::vec4(obj.get()->gamePosition().pos, 1, 1),
-			//			0,
-			//			obj.get()->graphicsTile().blockID
-			//		);
-			//	}
-			//}
-
-		renderInfo.tileRenderInfo.addBlitInfo(
-			glm::vec4(0),
-			0,
-			0
-		);
+			});
 	}
 
 	void GameState::runTick() {
-		//{
-		//	Locator<misc::Timer>::ref().newTiming("templates");
-		//	int i = 0;
-		//	auto f = [&](int a, int b, int c) {
-		//		i++;
-		//	};
-
-		//	LoopTest::run<decltype(f), List<int, int, int>>(f);
-		//	Locator<misc::Timer>::ref().endTiming("templates");
-		//	std::cout << i << '\n';
-		//}
-
-
 		std::cout << '\n';
 
 		SignatureAlias conciousSignature;
@@ -119,6 +50,16 @@ namespace game
 
 		foodConcept.essences.push_back({ 10.0f, foodSignature });
 		foodConcept.essences.push_back({ -10.0f, friendlySignature });
+
+		this->everything->run([](Match<GamePosition, Locomotion>& e) {
+			if (e.get<Locomotion>().cooldown != 0) {
+				e.get<Locomotion>().cooldown--;
+			}
+			else {
+				e.get<Locomotion>().cooldown = e.get<Locomotion>().fitness;
+				e.get<GamePosition>().pos += glm::ivec2((rand() % 3) - 1, (rand() % 3) - 1);
+			}
+			});
 
 		//for (auto& [h, obj] : this->refMan.data) {
 		//	// Advanced test
@@ -233,25 +174,21 @@ namespace game
 		}
 
 		{
-			//auto ref = this->refMan.makeRef<Object>();
-			//auto ptr = ref.get();
 
-			//ptr->signature.set(
-			//	{
-			//	GAMEOBJECT_COMPONENT::BRAIN,
-			//	GAMEOBJECT_COMPONENT::POSSESSION,
-			//	GAMEOBJECT_COMPONENT::VICINITY,
-			//	});
+			auto p = this->everything->makeWeak();
+			p.addbrain();
+			p.addpossession();
+			p.addvicinity();
+			p.addgraphicstile();
+			p.addlocomotion();
+			p.addgameposition();
 
-			//ptr->signature.set(GAMEOBJECT_COMPONENT::GAMEPOSITION);
-			//ptr->gamePosition().pos = { 10,10 };
-			//this->world[10][10] = ref;
+			p.gameposition().pos = { 5 , 5 };
 
-			//ptr->signature.set(GAMEOBJECT_COMPONENT::GRAPHICSTILE);
-			//ptr->graphicsTile().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("gnome.dds");
+			p.graphicstile().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("gnome.dds");
 
-			//ptr->signature.set(GAMEOBJECT_COMPONENT::LOCOMOTION);
-			//ptr->locomotion().fitness = 10;
+			p.locomotion().fitness = 10;
+
 
 			//Action recallFood;
 			//recallFood.requirements = {};
@@ -264,9 +201,6 @@ namespace game
 
 			////	return result;
 			////};
-
-			//ptr->brain().memory.push_back(recallFood);
-
 		}
 
 
