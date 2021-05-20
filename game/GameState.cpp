@@ -9,8 +9,6 @@
 
 #include <misc/Timer.h>
 
-#include "Game.h"
-
 namespace game
 {
 	void GameState::addRenderInfo(render::RenderInfo& renderInfo) {
@@ -29,6 +27,7 @@ namespace game
 			);
 			});
 		Locator<misc::Timer>::ref().endTiming("old");
+		renderInfo.tileRenderInfo = {};
 		std::cout << "old count " << count << '\n';
 
 		Locator<misc::Timer>::ref().newTiming("new");
@@ -50,7 +49,16 @@ namespace game
 		}
 		Locator<misc::Timer>::ref().endTiming("new");
 		std::cout << "new count " << count << '\n';
+		renderInfo.tileRenderInfo = {};
+		count = 0;
 
+		Locator<misc::Timer>::ref().newTiming("new2");
+		this->everything2.run([&](game::MatchS<GamePosition, GraphicsTile> e) {
+			count++;
+
+			});
+		Locator<misc::Timer>::ref().endTiming("new2");
+		std::cout << "new2 count " << count << '\n';
 	}
 
 	void GameState::runTick() {

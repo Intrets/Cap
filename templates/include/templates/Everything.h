@@ -2,13 +2,12 @@
 
 #include <type_traits>
 #include <functional>
-#include <atomic>
 
 namespace te
 {
 	struct ctype_base
 	{
-		static inline std::atomic<size_t> t = 1;
+		static inline size_t t = 1;
 	};
 
 	template<class T>
@@ -136,4 +135,24 @@ namespace te
 			return t(f);
 		}
 	}
+
+	struct Loop
+	{
+		template<class E, class F>
+		static inline void run(E& e, F f) {
+			using A = typename te::reverse_t<te::unwrap_std_fun<decltype(f)>::args>;
+			Loop::run<E, decltype(f), A>(e, f);
+		}
+
+		template<class E, class F, class L, class... Args>
+		static inline void run(E& e, F f, Args... args) {
+			if constexpr (L::is_empty) {
+				f(args...);
+			}
+			else {
+				using head_stripped_ref = std::remove_reference_t<L::head>;
+				head_stripped_ref::run<F, typename L::tail, Args...>(e, f, args...);
+			}
+		}
+	};
 }

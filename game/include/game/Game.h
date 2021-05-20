@@ -6,11 +6,15 @@
 #include <array>
 
 #include <templates/Everything.h>
+#include <misc/Misc.h>
 
 using SizeAlias = size_t;
 
 namespace game
 {
+	static const size_t SIZE = 100;
+	using SignatureType = std::bitset<SIZE>;
+
 	struct RawData
 	{
 		template<class T>
@@ -59,23 +63,54 @@ namespace game
 
 	struct EverythingS
 	{
-		static const size_t SIZE = 100;
-
 		struct counter
 		{
-			static inline std::atomic<size_t> t = 0;
+			static inline size_t t = 0;
 		};
 
 		template<class T>
 		struct component_index : counter
 		{
 			static inline size_t val = t++;
+			static inline size_t getVal() {
+				return val;
+			};
+		};
+
+		template<class M, class... Ms>
+		struct group_signature
+		{
+			static inline SignatureType fillSignature() {
+				SignatureType res{};
+				//if constexpr (sizeof...(Ms) == 0) {
+				//	res.set(EverythingS::component_index<M>.getVal());
+				//}
+				//else {
+				//	for (auto s : { EverythingS::component_index<M>.getVal(), EverythingS::component_index<Ms>.getVal()... }) {
+				//		res.set(s);
+				//	}
+				//}
+				return res;
+			};
+
+			static inline SignatureType val = fillSignature();
 		};
 
 		struct indirection
 		{
-			std::bitset<SIZE> signature{ 0 };
-			std::array<size_t, SIZE> index;
+			EverythingS* proxy;
+			SignatureType signature{ 0 };
+			std::array<size_t, SIZE> index{};
+
+			template<class T>
+			T& get();
+
+			bool contains(SignatureType& sig);
+
+			indirection() = default;
+			indirection(EverythingS* p) : proxy(p) {};
+			~indirection() = default;
+			DEFAULTCOPYMOVE(indirection);
 		};
 
 		std::array<RawData, SIZE> data;
@@ -90,8 +125,39 @@ namespace game
 		T& get(SizeAlias i);
 
 		template<class T>
+		RawData& gets();
+
+		template<class T>
 		bool has(SizeAlias i);
+
+		template<class F>
+		void run(F f);
 	};
+
+	template<class M, class... Ms>
+	struct MatchS
+	{
+		EverythingS::indirection proxy;
+
+		template<class T>
+		inline T& get() {
+			static_assert(te::Contains<T, te::List<M, Ms...>>::val());
+			return proxy.get<T>();
+		};
+
+		template<class F, class L, class... Args>
+		static inline void run(EverythingS& e, F f, Args... args) {
+			size_t end = e.gets<M>().index;
+			for (size_t i = 0; i < end; i++) {
+				auto h = e.indirectionMap[e.gets<M>().get<M>(i).index];
+				auto sig = EverythingS::group_signature<M, Ms...>::val;
+				if (h.contains(sig)) {
+					te::Loop::run<EverythingS, F, L, MatchS<M, Ms...>, Args...>(e, f, MatchS<M, Ms...>{h}, args...);
+				}
+			}
+		};
+	};
+
 
 	template<class T>
 	inline T& RawData::get(SizeAlias i) {
@@ -124,11 +190,20 @@ namespace game
 	}
 	template<class T>
 	inline T& EverythingS::get(SizeAlias i) {
-		return this->data[component_index<T>::val].get<T>(this->indirectionMap[i].index[component_index<T>::val]);
+		return this->indirectionMap[i].get<T>();
+		//return this->data[component_index<T>::val].get<T>(this->indirectionMap[i].index[component_index<T>::val]);
+	}
+	template<class T>
+	inline RawData& EverythingS::gets() {
+		return this->data[component_index<T>::val];
 	}
 	template<class T>
 	inline bool EverythingS::has(SizeAlias i) {
 		return this->indirectionMap[i].signature.test(component_index<T>::val);
+	}
+	template<class F>
+	inline void EverythingS::run(F f) {
+		te::Loop::run(*this, te::wrap_in_std_fun(f));
 	}
 	template<class T>
 	inline T& WeakObject::get() {
@@ -141,5 +216,9 @@ namespace game
 	template<class T>
 	inline bool WeakObject::has() {
 		return this->proxy->has<T>(this->index);
+	}
+	template<class T>
+	inline T& EverythingS::indirection::get() {
+		return this->proxy->gets<T>().get<T>(this->index[component_index<T>::val]);
 	}
 }
