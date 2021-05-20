@@ -9,6 +9,8 @@
 
 #include <misc/Timer.h>
 
+#include "Game.h"
+
 namespace game
 {
 	void GameState::addRenderInfo(render::RenderInfo& renderInfo) {
@@ -16,18 +18,42 @@ namespace game
 		renderSignature.set(GAMEOBJECT_COMPONENT::GAMEPOSITION);
 		renderSignature.set(GAMEOBJECT_COMPONENT::GRAPHICSTILE);
 
+		size_t count = 0;
+		Locator<misc::Timer>::ref().newTiming("old");
 		this->everything->run([&](Match<GamePosition, GraphicsTile> e) {
+			count++;
 			renderInfo.tileRenderInfo.addBlitInfo(
 				glm::vec4(e.get<GamePosition>().pos, 1, 1),
 				0,
 				e.get<GraphicsTile>().blockID
 			);
 			});
+		Locator<misc::Timer>::ref().endTiming("old");
+		std::cout << "old count " << count << '\n';
+
+		Locator<misc::Timer>::ref().newTiming("new");
+		SizeAlias end = this->everything2.data[EverythingS::component_index<GamePosition>::val].index;
+
+		count = 0;
+
+		for (SizeAlias i = 0; i < end; i++) {
+			auto& e = this->everything2.data[EverythingS::component_index<GamePosition>::val].get<GamePosition>(i);
+
+			if (this->everything2.has<GraphicsTile>(e.index)) {
+				count++;
+				renderInfo.tileRenderInfo.addBlitInfo(
+					glm::vec4(e.pos, 1, 1),
+					0,
+					this->everything2.get<GraphicsTile>(e.index).blockID
+				);
+			}
+		}
+		Locator<misc::Timer>::ref().endTiming("new");
+		std::cout << "new count " << count << '\n';
+
 	}
 
 	void GameState::runTick() {
-		std::cout << '\n';
-
 		SignatureAlias conciousSignature;
 		conciousSignature.set(GAMEOBJECT_COMPONENT::BRAIN);
 		conciousSignature.set(GAMEOBJECT_COMPONENT::POSSESSION);
@@ -61,6 +87,22 @@ namespace game
 			}
 			});
 
+		SizeAlias end = this->everything2.data[EverythingS::component_index<GamePosition>::val].index;
+
+		for (SizeAlias i = 0; i < end; i++) {
+			auto& e = this->everything2.data[EverythingS::component_index<GamePosition>::val].get<GamePosition>(i);
+
+			if (this->everything2.has<Locomotion>(e.index)) {
+				auto& loco = this->everything2.get<Locomotion>(e.index);
+				if (loco.cooldown != 0) {
+					loco.cooldown--;
+				}
+				else {
+					loco.cooldown = loco.fitness;
+					e.pos += glm::ivec2((rand() % 3) - 1, (rand() % 3) - 1);
+				}
+			}
+		}
 		//for (auto& [h, obj] : this->refMan.data) {
 		//	// Advanced test
 		//	if (obj.get()->signature.contains(locomotionSignature)) {
@@ -148,9 +190,12 @@ namespace game
 		this->tick++;
 	}
 
+	struct Void {};
+
 	GameState::GameState() {
 		this->everything = std::make_unique<Everything>();
 
+		rand();
 
 		{
 			//for (size_t j = 1; j < 100; j++) {
@@ -172,20 +217,35 @@ namespace game
 
 		{
 
-			auto p = this->everything->makeWeak();
-			p.addbrain();
-			p.addpossession();
-			p.addvicinity();
-			p.addgraphicstile();
-			p.addlocomotion();
-			p.addgameposition();
+			{
+				//auto p = this->everything->makeWeak();
+				//p.addbrain();
+				//p.addpossession();
+				//p.addvicinity();
+				//p.addgraphicstile();
+				//p.addlocomotion();
+				//p.addgameposition();
 
-			p.gameposition().pos = { 5 , 5 };
+				//p.gameposition().pos = { 5 , 5 };
 
-			p.graphicstile().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("gnome.dds");
+				//p.graphicstile().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("gnome.dds");
 
-			p.locomotion().fitness = 10;
+				//p.locomotion().fitness = 10;
+			}
+			{
+				auto p = this->everything2.make();
+				p.add<Brain>();
+				p.add<Vicinity>();
+				p.add<GraphicsTile>();
+				p.add<Locomotion>();
+				p.add<GamePosition>();
 
+				p.get<GamePosition>().pos = { 5, 5 };
+
+				p.get<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("gnome.dds");
+
+				p.get<Locomotion>().fitness = 10;
+			}
 
 			//Action recallFood;
 			//recallFood.requirements = {};
@@ -227,6 +287,14 @@ namespace game
 				p.addgraphicstile();
 				p.graphicstile().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
 
+				auto p2 = this->everything2.make();
+				p2.add<GamePosition>();
+				p2.add<GraphicsTile>();
+
+				p2.get<GamePosition>().pos = glm::ivec2(i, j);
+				p2.get<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
+
+
 				//this->world[i][j] = ref;
 			}
 		}
@@ -241,6 +309,13 @@ namespace game
 
 				p.addgraphicstile();
 				p.graphicstile().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
+
+				auto p2 = this->everything2.make();
+				p2.add<GamePosition>();
+				p2.add<GraphicsTile>();
+
+				p2.get<GamePosition>().pos = glm::ivec2(i, j);
+				p2.get<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
 			}
 		}
 
@@ -254,6 +329,13 @@ namespace game
 
 				p.addgraphicstile();
 				p.graphicstile().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
+
+				auto p2 = this->everything2.make();
+				p2.add<GamePosition>();
+				p2.add<GraphicsTile>();
+
+				p2.get<GamePosition>().pos = glm::ivec2(i, j);
+				p2.get<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
 			}
 		}
 
@@ -267,6 +349,13 @@ namespace game
 
 				p.addgraphicstile();
 				p.graphicstile().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
+
+				auto p2 = this->everything2.make();
+				p2.add<GamePosition>();
+				p2.add<GraphicsTile>();
+
+				p2.get<GamePosition>().pos = glm::ivec2(i, j);
+				p2.get<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
 			}
 		}
 	}

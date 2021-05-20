@@ -2,9 +2,21 @@
 
 #include <type_traits>
 #include <functional>
+#include <atomic>
 
 namespace te
 {
+	struct ctype_base
+	{
+		static inline std::atomic<size_t> t = 1;
+	};
+
+	template<class T>
+	struct ctype : ctype_base
+	{
+		static inline size_t val = t++;
+	};
+
 	struct Void;
 
 	template<class... Ts>

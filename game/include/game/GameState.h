@@ -13,8 +13,9 @@
 
 #include "GameObject.h"
 #include "Signature.h"
+#include "Game.h"
 
-#define WORLD_SIZE 100
+#define WORLD_SIZE 10000
 
 namespace render
 {
@@ -129,6 +130,7 @@ namespace game
 	{
 	private:
 		std::unique_ptr<Everything> everything;
+		EverythingS everything2;
 
 	public:
 		int32_t tick = 0;
