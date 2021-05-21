@@ -24,8 +24,6 @@ namespace render
 
 namespace game
 {
-	using SignatureAlias = Signature<GAMEOBJECT_COMPONENT>;
-
 	//enum ACTION
 	//{
 	//	MOVE,
@@ -80,18 +78,18 @@ namespace game
 
 	// ---------------------------------------------------
 
-	struct Concept
-	{
-		struct Essence
-		{
-			float value;
-			SignatureAlias signature;
-		};
+	//struct Concept
+	//{
+	//	struct Essence
+	//	{
+	//		float value;
+	//		SignatureAlias signature;
+	//	};
 
-		std::vector<Essence> essences{};
+	//	std::vector<Essence> essences{};
 
-		float value(SignatureAlias const& signature);
-	};
+	//	float value(SignatureAlias const& signature);
+	//};
 
 	class GameState
 	{

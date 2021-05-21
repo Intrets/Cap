@@ -26,29 +26,6 @@ namespace game
 	}
 
 	void GameState::runTick() {
-		SignatureAlias conciousSignature;
-		conciousSignature.set(GAMEOBJECT_COMPONENT::BRAIN);
-		conciousSignature.set(GAMEOBJECT_COMPONENT::POSSESSION);
-		conciousSignature.set(GAMEOBJECT_COMPONENT::VICINITY);
-
-		SignatureAlias foodSignature;
-		foodSignature.set(GAMEOBJECT_COMPONENT::NUTRITION);
-
-		SignatureAlias friendlySignature;
-		friendlySignature.set(GAMEOBJECT_COMPONENT::BRAIN);
-
-		SignatureAlias brainSignature;
-		brainSignature.set(GAMEOBJECT_COMPONENT::BRAIN);
-
-		SignatureAlias locomotionSignature;
-		locomotionSignature.set(GAMEOBJECT_COMPONENT::LOCOMOTION);
-		locomotionSignature.set(GAMEOBJECT_COMPONENT::GAMEPOSITION);
-
-		Concept foodConcept;
-
-		foodConcept.essences.push_back({ 10.0f, foodSignature });
-		foodConcept.essences.push_back({ -10.0f, friendlySignature });
-
 		this->everything2.run([](MatchS<Locomotion, GamePosition>& e) {
 			if (e.get<Locomotion>().cooldown != 0) {
 				e.get<Locomotion>().cooldown--;
@@ -66,21 +43,6 @@ namespace game
 
 	GameState::GameState() {
 		{
-			{
-				//auto p = this->everything->makeWeak();
-				//p.addbrain();
-				//p.addpossession();
-				//p.addvicinity();
-				//p.addgraphicstile();
-				//p.addlocomotion();
-				//p.addgameposition();
-
-				//p.gameposition().pos = { 5 , 5 };
-
-				//p.graphicstile().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("gnome.dds");
-
-				//p.locomotion().fitness = 10;
-			}
 			{
 				auto p = this->everything2.make();
 				p.add<Brain>();
@@ -108,22 +70,6 @@ namespace game
 			////	return result;
 			////};
 		}
-
-
-		{
-			//auto ref = this->refMan.makeRef<Object>();
-			//auto ptr = ref.get();
-
-			//glm::ivec2 pos = { 14, 14 };
-
-			//ptr->signature.set(GAMEOBJECT_COMPONENT::GAMEPOSITION);
-			//ptr->gamePosition().pos = pos;
-			//this->world[14][14] = ref;
-
-			//ptr->signature.set(GAMEOBJECT_COMPONENT::GRAPHICSTILE);
-			//ptr->graphicsTile().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("food.dds");
-		}
-
 
 		for (size_t i = 0; i < WORLD_SIZE; i++) {
 			//for (size_t j = 0; j < 30; j++) {
@@ -181,16 +127,16 @@ namespace game
 		}
 	}
 
-	float Concept::value(SignatureAlias const& signature) {
-		float result = 0.0f;
+	//float Concept::value(SignatureAlias const& signature) {
+	//	float result = 0.0f;
 
-		for (auto const& essence : this->essences) {
-			if (signature.contains(essence.signature)) {
+	//	for (auto const& essence : this->essences) {
+	//		if (signature.contains(essence.signature)) {
 
-				result += essence.value;
-			}
-		}
+	//			result += essence.value;
+	//		}
+	//	}
 
-		return result;
-	}
+	//	return result;
+	//}
 }
