@@ -1,7 +1,4 @@
-﻿# CMakeList.txt : CMake PROJECT for Game, include source and define
-# PROJECT specific logic here.
-#
-CMAKE_MINIMUM_REQUIRED(VERSION 3.16)
+﻿CMAKE_MINIMUM_REQUIRED(VERSION 3.16)
 
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
@@ -19,7 +16,6 @@ add_subdirectory(misc)
 add_subdirectory(game)
 add_subdirectory(render)
 add_subdirectory(wrapped_glm)
-# add_subdirectory(templates)
 add_subdirectory(tepp)
 
 add_subdirectory(app)
