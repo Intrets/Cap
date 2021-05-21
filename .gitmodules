@@ -1,0 +1,3 @@
+[submodule "tepp"]
+	path = tepp
+	url = https://www.github.com/intrets/tepp
