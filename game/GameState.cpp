@@ -13,7 +13,7 @@ namespace game
 {
 	void GameState::addRenderInfo(render::RenderInfo& renderInfo) {
 		Locator<misc::Timer>::ref().newTiming("new2");
-		this->everything2.run([&](game::MatchS<GamePosition, GraphicsTile>& e) {
+		this->everything.run([&](game::Match<GamePosition, GraphicsTile>& e) {
 			renderInfo.tileRenderInfo.addBlitInfo(
 				glm::vec4(e.get<GamePosition>().pos, 1, 1),
 				0,
@@ -26,7 +26,7 @@ namespace game
 	}
 
 	void GameState::runTick() {
-		this->everything2.run([](MatchS<Locomotion, GamePosition>& e) {
+		this->everything.run([](Match<Locomotion, GamePosition>& e) {
 			if (e.get<Locomotion>().cooldown != 0) {
 				e.get<Locomotion>().cooldown--;
 			}
@@ -44,7 +44,7 @@ namespace game
 	GameState::GameState() {
 		{
 			{
-				auto p = this->everything2.make();
+				auto p = this->everything.make();
 				p.add<Brain>();
 				p.add<Vicinity>();
 				p.add<GraphicsTile>();
@@ -75,7 +75,7 @@ namespace game
 			//for (size_t j = 0; j < 30; j++) {
 			{
 				size_t j = 0;
-				auto p2 = this->everything2.make();
+				auto p2 = this->everything.make();
 				p2.add<GamePosition>();
 				p2.add<GraphicsTile>();
 
@@ -91,7 +91,7 @@ namespace game
 			//for (size_t j = 0; j < 30; j++) {
 			{
 				int j = WORLD_SIZE - 1;
-				auto p2 = this->everything2.make();
+				auto p2 = this->everything.make();
 				p2.add<GamePosition>();
 				p2.add<GraphicsTile>();
 
@@ -104,7 +104,7 @@ namespace game
 		{
 			size_t i = 0;
 			for (size_t j = 0; j < WORLD_SIZE; j++) {
-				auto p2 = this->everything2.make();
+				auto p2 = this->everything.make();
 				p2.add<GamePosition>();
 				p2.add<GraphicsTile>();
 
@@ -117,7 +117,7 @@ namespace game
 		{
 			int i = WORLD_SIZE - 1;
 			for (size_t j = 0; j < WORLD_SIZE; j++) {
-				auto p2 = this->everything2.make();
+				auto p2 = this->everything.make();
 				p2.add<GamePosition>();
 				p2.add<GraphicsTile>();
 

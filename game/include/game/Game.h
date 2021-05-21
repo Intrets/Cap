@@ -18,7 +18,7 @@ namespace game
 	static const size_t SIZE = 64;
 	using SignatureType = std::bitset<SIZE>;
 
-	struct EverythingS;
+	struct Everything;
 
 	struct RawData
 	{
@@ -38,13 +38,13 @@ namespace game
 			}
 		};
 
-		EverythingS& parent;
+		Everything& parent;
 		SizeAlias size = 0;
 		SizeAlias index = 0;
 		std::vector<std::byte> data{};
 
 		RawData() = delete;
-		RawData(EverythingS& p) : parent(p) {};
+		RawData(Everything& p) : parent(p) {};
 
 		DEFAULTCOPYMOVE(RawData);
 
@@ -63,7 +63,7 @@ namespace game
 	struct WeakObject
 	{
 		SizeAlias index{ 0 };
-		EverythingS* proxy{ nullptr };
+		Everything* proxy{ nullptr };
 
 		template<class T>
 		inline T& get();
@@ -75,7 +75,7 @@ namespace game
 		inline bool has();
 	};
 
-	struct EverythingS
+	struct Everything
 	{
 		struct counter
 		{
@@ -97,10 +97,10 @@ namespace game
 			static const inline SignatureType fillSignature() {
 				SignatureType res{};
 				if constexpr (sizeof...(Ms) == 0) {
-					res.set(EverythingS::component_index<M>.getVal());
+					res.set(Everything::component_index<M>.getVal());
 				}
 				else {
-					for (auto s : { EverythingS::component_index<M>::val, EverythingS::component_index<Ms>::val... }) {
+					for (auto s : { Everything::component_index<M>::val, Everything::component_index<Ms>::val... }) {
 						res.set(s);
 					}
 				}
@@ -115,7 +115,7 @@ namespace game
 
 		struct indirection
 		{
-			EverythingS* proxy;
+			Everything* proxy;
 			SignatureType signature{ 0 };
 			std::array<size_t, SIZE> index{};
 
@@ -131,7 +131,7 @@ namespace game
 			};
 
 			indirection() = default;
-			indirection(EverythingS* p) : proxy(p) {};
+			indirection(Everything* p) : proxy(p) {};
 			~indirection() = default;
 			DEFAULTCOPYMOVE(indirection);
 		};
@@ -158,9 +158,9 @@ namespace game
 	};
 
 	template<class M, class... Ms>
-	struct MatchS
+	struct Match
 	{
-		EverythingS::indirection& proxy;
+		Everything::indirection& proxy;
 
 		template<class T>
 		inline T& get() {
@@ -169,14 +169,14 @@ namespace game
 		};
 
 		template<class F, class L, class... Args>
-		static inline void run(EverythingS& e, F f, Args... args) {
+		static inline void run(Everything& e, F f, Args... args) {
 			size_t end = e.gets<M>().index;
-			auto& g = e.data[EverythingS::component_index<M>::val];
+			auto& g = e.data[Everything::component_index<M>::val];
 			for (SizeAlias i = 0; i < end; i++) {
 				auto& el = g.get<M>(i);
 
-				if (e.indirectionMap[el.index].contains(EverythingS::group_signature_v<M, Ms...>)) {
-					te::Loop::run<EverythingS, F, L, MatchS<M, Ms...>, Args...>(e, f, MatchS<M, Ms...>{ e.indirectionMap[el.index] }, args...);
+				if (e.indirectionMap[el.index].contains(Everything::group_signature_v<M, Ms...>)) {
+					te::Loop::run<Everything, F, L, Match<M, Ms...>, Args...>(e, f, Match<M, Ms...>{ e.indirectionMap[el.index] }, args...);
 				}
 			}
 		};
@@ -193,7 +193,7 @@ namespace game
 	inline void RawData::refreshPointers() {
 		for (size_t i = 0; i < this->index; i++) {
 			auto& p = this->get<T>(i);
-			this->parent.indirectionMap[p.index].ptrs[EverythingS::component_index_v<T>] = &p;
+			this->parent.indirectionMap[p.index].ptrs[Everything::component_index_v<T>] = &p;
 		}
 	}
 #endif // POINTER_INDIRECTION
@@ -224,7 +224,7 @@ namespace game
 		return { this->index++, &obj };
 	}
 	template<class T>
-	inline void EverythingS::add(SizeAlias i) {
+	inline void Everything::add(SizeAlias i) {
 		auto [index, ptr] = this->data[component_index_v<T>].add<T>(i);
 		this->indirectionMap[i].index[component_index_v<T>] = index;
 		this->indirectionMap[i].signature.set(component_index_v<T>);
@@ -233,19 +233,19 @@ namespace game
 #endif // POINTER_INDIRECTION
 	}
 	template<class T>
-	inline T& EverythingS::get(SizeAlias i) {
+	inline T& Everything::get(SizeAlias i) {
 		return this->indirectionMap[i].get<T>();
 	}
 	template<class T>
-	inline RawData& EverythingS::gets() {
+	inline RawData& Everything::gets() {
 		return this->data[component_index<T>::val];
 	}
 	template<class T>
-	inline bool EverythingS::has(SizeAlias i) {
+	inline bool Everything::has(SizeAlias i) {
 		return this->indirectionMap[i].signature.test(component_index<T>::val);
 	}
 	template<class F>
-	inline void EverythingS::run(F f) {
+	inline void Everything::run(F f) {
 		te::Loop::run(*this, f);
 	}
 	template<class T>
@@ -261,7 +261,7 @@ namespace game
 		return this->proxy->has<T>(this->index);
 	}
 	template<class T>
-	inline T& EverythingS::indirection::get() {
+	inline T& Everything::indirection::get() {
 #ifdef POINTER_INDIRECTION
 		auto& r = *reinterpret_cast<T*>(this->ptrs[component_index_v<T>]);
 		return r;
@@ -269,7 +269,7 @@ namespace game
 		return this->proxy->gets<T>().get<T>(this->index[component_index_v<T>]);
 #endif // POINTER_INDIRECTION
 	}
-	inline WeakObject EverythingS::make() {
+	inline WeakObject Everything::make() {
 		WeakObject res{ this->indirectionMap.size(), this };
 		this->indirectionMap.push_back({ this });
 		return res;

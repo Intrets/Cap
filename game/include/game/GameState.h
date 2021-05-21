@@ -94,7 +94,7 @@ namespace game
 	class GameState
 	{
 	private:
-		EverythingS everything2;
+		Everything everything;
 
 	public:
 		int32_t tick = 0;
