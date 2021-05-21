@@ -4,6 +4,7 @@ set(MODULE_NAME templates)
 
 set(MODULE_FILES
 	Everything
+	tests/Tests
 )
 
 make_module(${MODULE_NAME} "${MODULE_FILES}")

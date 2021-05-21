@@ -38,10 +38,10 @@ namespace game
 		std::vector<std::byte> data{};
 
 		template<class T>
-		T& get(SizeAlias i);
+		inline T& get(SizeAlias i);
 
 		template<class T>
-		SizeAlias add();
+		inline SizeAlias add();
 	};
 
 	struct EverythingS;
@@ -72,28 +72,25 @@ namespace game
 		struct component_index : counter
 		{
 			static inline size_t val = t++;
-			static inline size_t getVal() {
-				return val;
-			};
 		};
 
 		template<class M, class... Ms>
 		struct group_signature
 		{
-			static inline SignatureType fillSignature() {
+			static const inline SignatureType fillSignature() {
 				SignatureType res{};
-				//if constexpr (sizeof...(Ms) == 0) {
-				//	res.set(EverythingS::component_index<M>.getVal());
-				//}
-				//else {
-				//	for (auto s : { EverythingS::component_index<M>.getVal(), EverythingS::component_index<Ms>.getVal()... }) {
-				//		res.set(s);
-				//	}
-				//}
+				if constexpr (sizeof...(Ms) == 0) {
+					res.set(EverythingS::component_index<M>.getVal());
+				}
+				else {
+					for (auto s : { EverythingS::component_index<M>::val, EverythingS::component_index<Ms>::val... }) {
+						res.set(s);
+					}
+				}
 				return res;
 			};
 
-			static inline SignatureType val = fillSignature();
+			static const inline SignatureType val = fillSignature();
 		};
 
 		struct indirection
@@ -105,7 +102,9 @@ namespace game
 			template<class T>
 			T& get();
 
-			bool contains(SignatureType& sig);
+			inline bool contains(SignatureType const& sig) const {
+				return (this->signature & sig) == sig;
+			};
 
 			indirection() = default;
 			indirection(EverythingS* p) : proxy(p) {};
@@ -119,42 +118,80 @@ namespace game
 		WeakObject make();
 
 		template<class T>
-		void add(SizeAlias i);
+		inline void add(SizeAlias i);
 
 		template<class T>
-		T& get(SizeAlias i);
+		inline T& get(SizeAlias i);
 
 		template<class T>
-		RawData& gets();
+		inline RawData& gets();
 
 		template<class T>
-		bool has(SizeAlias i);
+		inline bool has(SizeAlias i);
 
 		template<class F>
-		void run(F f);
+		inline void run(F f);
 	};
 
 	template<class M, class... Ms>
 	struct MatchS
 	{
-		EverythingS::indirection proxy;
+		EverythingS::indirection& proxy;
 
 		template<class T>
 		inline T& get() {
-			static_assert(te::Contains<T, te::List<M, Ms...>>::val());
+			static_assert(te::contains_v<te::list<M, Ms...>, T>);
 			return proxy.get<T>();
 		};
 
 		template<class F, class L, class... Args>
 		static inline void run(EverythingS& e, F f, Args... args) {
+			//EverythingS::indirection r;
+
+			//size_t end = e.gets<M>().index;
+			//for (size_t i = 0; i < end; i++) {
+			//	auto match = MatchS<M, Ms...>{r};
+			//	//f(MatchS<M, Ms...>{r});
+			//	te::Loop::run<EverythingS, F, L, MatchS<M, Ms...>&>(e, f, match);
+			//}
+
+			//auto sig = EverythingS::group_signature<M, Ms...>::val;
+			//size_t end = e.gets<M>().index;
+			//for (size_t i = 0; i < end; i++) {
+			//	//auto obj = e.gets<M>().get<M>(i);
+			//	//auto index = e.gets<M>().get<M>(i).index;
+			//	auto h = e.indirectionMap[1];
+			//	//if (h.contains(sig)) {
+			//		te::Loop::run<EverythingS, F, L, MatchS<M, Ms...>, Args...>(e, f, MatchS<M, Ms...>{h}, args...);
+			//	//}
+			//}
+
 			size_t end = e.gets<M>().index;
-			for (size_t i = 0; i < end; i++) {
-				auto h = e.indirectionMap[e.gets<M>().get<M>(i).index];
-				auto sig = EverythingS::group_signature<M, Ms...>::val;
-				if (h.contains(sig)) {
-					te::Loop::run<EverythingS, F, L, MatchS<M, Ms...>, Args...>(e, f, MatchS<M, Ms...>{h}, args...);
+			auto& g = e.data[EverythingS::component_index<GamePosition>::val];
+			for (SizeAlias i = 0; i < end; i++) {
+				auto& el = g.get<GamePosition>(i);
+
+				if (e.indirectionMap[el.index].contains(EverythingS::group_signature<GamePosition, GraphicsTile>::val)) {
+					//f(MatchS<M, Ms...>{ e.indirectionMap[el.index]});
+					te::Loop::run<EverythingS, F, L, MatchS<M, Ms...>, Args...>(e, f, MatchS<M, Ms...>{ e.indirectionMap[el.index] }, args...);
 				}
 			}
+
+
+			//SizeAlias end = e.data[EverythingS::component_index<GamePosition>::val].index;
+			//for (SizeAlias i = 0; i < end; i++) {
+			//	auto& ee = e.data[EverythingS::component_index<GamePosition>::val].get<GamePosition>(i);
+
+			//	if (e.indirectionMap[ee.index].contains(EverythingS::group_signature<GamePosition, GraphicsTile>::val)) {
+			//		count++;
+			//		//f(MatchS<GamePosition, GraphicsTile>{e.indirectionMap[ee.index]});
+			//		//renderInfo.tileRenderInfo.addBlitInfo(
+			//		//	glm::vec4(e.pos, 1, 1),
+			//		//	0,
+			//		//	this->everything2.get<GraphicsTile>(e.index).blockID
+			//		//);
+			//	}
+			//}
 		};
 	};
 
@@ -203,7 +240,7 @@ namespace game
 	}
 	template<class F>
 	inline void EverythingS::run(F f) {
-		te::Loop::run(*this, te::wrap_in_std_fun(f));
+		te::Loop::run(*this, f);
 	}
 	template<class T>
 	inline T& WeakObject::get() {

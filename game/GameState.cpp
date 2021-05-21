@@ -12,53 +12,155 @@
 namespace game
 {
 	void GameState::addRenderInfo(render::RenderInfo& renderInfo) {
+		renderInfo.tileRenderInfo.addBlitInfo(
+			glm::vec4(0),
+			0,
+			0
+		);
+		static int cycle = 5;
+		cycle = (cycle + 1) % 6;
 		SignatureAlias renderSignature;
 		renderSignature.set(GAMEOBJECT_COMPONENT::GAMEPOSITION);
 		renderSignature.set(GAMEOBJECT_COMPONENT::GRAPHICSTILE);
 
-		size_t count = 0;
-		Locator<misc::Timer>::ref().newTiming("old");
-		this->everything->run([&](Match<GamePosition, GraphicsTile> e) {
-			count++;
-			renderInfo.tileRenderInfo.addBlitInfo(
-				glm::vec4(e.get<GamePosition>().pos, 1, 1),
-				0,
-				e.get<GraphicsTile>().blockID
-			);
-			});
-		Locator<misc::Timer>::ref().endTiming("old");
-		renderInfo.tileRenderInfo = {};
-		std::cout << "old count " << count << '\n';
-
-		Locator<misc::Timer>::ref().newTiming("new");
-		SizeAlias end = this->everything2.data[EverythingS::component_index<GamePosition>::val].index;
-
-		count = 0;
-
-		for (SizeAlias i = 0; i < end; i++) {
-			auto& e = this->everything2.data[EverythingS::component_index<GamePosition>::val].get<GamePosition>(i);
-
-			if (this->everything2.has<GraphicsTile>(e.index)) {
+		switch (cycle) {
+		case 4:
+		{
+			size_t count = 0;
+			Locator<misc::Timer>::ref().newTiming("old1.1");
+			size_t end = this->everything->getlast<GamePosition>();
+			for (size_t i = 0; i < end; i++) {
+				if (this->everything->signatures[this->everything->gamepositions[i].index].contains(renderSignature)) {
+					count++;
+				}
+			}
+			Locator<misc::Timer>::ref().endTiming("old1.1");
+			std::cout << "old1.1 count " << count << '\n';
+			break;
+		}
+		case 0:
+		{
+			size_t count = 0;
+			Locator<misc::Timer>::ref().newTiming("old");
+			this->everything->run([&](Match<GamePosition, GraphicsTile> e) {
 				count++;
 				renderInfo.tileRenderInfo.addBlitInfo(
-					glm::vec4(e.pos, 1, 1),
+					glm::vec4(e.get<GamePosition>().pos, 1, 1),
 					0,
-					this->everything2.get<GraphicsTile>(e.index).blockID
+					e.get<GraphicsTile>().blockID
 				);
-			}
+				});
+			Locator<misc::Timer>::ref().endTiming("old");
+			std::cout << "old count " << count << '\n';
+
+			break;
 		}
-		Locator<misc::Timer>::ref().endTiming("new");
-		std::cout << "new count " << count << '\n';
-		renderInfo.tileRenderInfo = {};
-		count = 0;
+		case 1:
+		{
+			Locator<misc::Timer>::ref().newTiming("new");
+			size_t count = 0;
+			SizeAlias end = this->everything2.data[EverythingS::component_index<GamePosition>::val].index;
 
-		Locator<misc::Timer>::ref().newTiming("new2");
-		this->everything2.run([&](game::MatchS<GamePosition, GraphicsTile> e) {
-			count++;
+			for (SizeAlias i = 0; i < end; i++) {
+				auto& e = this->everything2.data[EverythingS::component_index<GamePosition>::val].get<GamePosition>(i);
 
-			});
-		Locator<misc::Timer>::ref().endTiming("new2");
-		std::cout << "new2 count " << count << '\n';
+				if (this->everything2.has<GraphicsTile>(e.index)) {
+					count++;
+					renderInfo.tileRenderInfo.addBlitInfo(
+						glm::vec4(e.pos, 1, 1),
+						0,
+						this->everything2.get<GraphicsTile>(e.index).blockID
+					);
+				}
+			}
+			Locator<misc::Timer>::ref().endTiming("new");
+			std::cout << "new count " << count << '\n';
+			break;
+		}
+		case 2:
+		{
+			Locator<misc::Timer>::ref().newTiming("new1.1");
+			SizeAlias end = this->everything2.data[EverythingS::component_index<GamePosition>::val].index;
+
+			size_t count = 0;
+
+			for (SizeAlias i = 0; i < end; i++) {
+				auto& e = this->everything2.data[EverythingS::component_index<GamePosition>::val].get<GamePosition>(i);
+
+				if (this->everything2.indirectionMap[e.index].contains(EverythingS::group_signature<GamePosition, GraphicsTile>::val)) {
+					count++;
+					renderInfo.tileRenderInfo.addBlitInfo(
+						glm::vec4(e.pos, 1, 1),
+						0,
+						this->everything2.get<GraphicsTile>(e.index).blockID
+					);
+				}
+			}
+			Locator<misc::Timer>::ref().endTiming("new1.1");
+			std::cout << "new1.1 count " << count << '\n';
+			break;
+		}
+		case 3:
+		{
+
+			size_t count = 0;
+			//std::function<void(game::MatchS<GamePosition, GraphicsTile>)> f = [&](game::MatchS<GamePosition, GraphicsTile> e) {
+			//	count++;
+			//	renderInfo.tileRenderInfo.addBlitInfo(
+			//		//glm::vec4(e.get<GamePosition>().pos, 1, 1),
+			//		glm::vec4(0),
+			//		0,
+			//		0
+			//		//e.get<GraphicsTile>().blockID
+			//	);
+			//};
+
+			Locator<misc::Timer>::ref().newTiming("new2");
+			this->everything2.run([&](game::MatchS<GamePosition, GraphicsTile>& e) {
+				count++;
+				renderInfo.tileRenderInfo.addBlitInfo(
+					glm::vec4(e.get<GamePosition>().pos, 1, 1),
+					0,
+					e.get<GraphicsTile>().blockID
+				);
+				});
+
+			Locator<misc::Timer>::ref().endTiming("new2");
+			std::cout << "new2 count " << count << '\n';
+
+			break;
+		}
+		case 5:
+		{
+			Locator<misc::Timer>::ref().newTiming("something new");
+			size_t count = 0;
+			void(*f)(game::MatchS<GamePosition, GraphicsTile>&, render::RenderInfo&, size_t&) = [](game::MatchS<GamePosition, GraphicsTile>& e, render::RenderInfo& renderInfo, size_t& count) {
+				count++;
+
+				renderInfo.tileRenderInfo.addBlitInfo(
+					glm::vec4(e.get<GamePosition>().pos, 1, 1),
+					0,
+					e.get<GraphicsTile>().blockID
+				);
+			};
+
+			te::Loop::run<
+				EverythingS,
+				decltype(f),
+				te::list<game::MatchS<GamePosition, GraphicsTile>>,
+
+				render::RenderInfo&,
+				size_t&>
+				(this->everything2, f, renderInfo, count);
+
+			Locator<misc::Timer>::ref().endTiming("something new");
+			std::cout << "something new count: " << count << '\n';
+			break;
+		}
+		default:
+			break;
+		}
+
 	}
 
 	void GameState::runTick() {

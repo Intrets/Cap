@@ -17,7 +17,7 @@
 everything_name: Everything
 indirection_type: integers
 type: Vector
-size: 100000
+size: 1000000
 component[]: GamePosition
 component[]: GraphicsTile
 component[]: Brain
@@ -75,7 +75,7 @@ struct Loop
 {
 	template<class F>
 	static inline void run(Everything& e, F f) {
-		using A = typename te::reverse_t<te::unwrap_std_fun<decltype(f)>::args>;
+		using A = te::reverse_t<te::arguments_list_t<F>>;
 		run<decltype(f), A>(e, f);
 	}
 
@@ -99,7 +99,7 @@ using SignatureType = decltype(Signature<GAMEOBJECT_COMPONENT>::data);
 template<class M, class... Ms>
 struct Match
 {
-	GameObjectProxy proxy;
+	GameObjectProxy& proxy;
 
 	static inline SignatureType initialize_sig() {
 		SignatureType res;
@@ -119,14 +119,14 @@ struct Match
 
 	template<class T>
 	inline T& get() {
-		static_assert(te::Contains<T, te::List<M, Ms...>>::val());
+		static_assert(te::contains_v<te::list<M, Ms...>, T>);
 		return proxy.get<T>();
 	};
 
 	template<class F, class L, class... Args>
 	static inline void run(Everything& e, F f, Args... args) {
 		size_t end = e.getlast<M>();
-		for (size_t i = 1; i < end; i++) 		{
+		for (size_t i = 1; i < end; i++) {
 			auto const& h = e.get<M>(i);
 			if (e.signature(h.index).contains(sig)) {
 				Loop::run<F, L, Match<M, Ms...>, Args...>(e, f, Match<M, Ms...>{e.indirectionMap[h.index]}, args...);
@@ -228,15 +228,15 @@ struct Locomotion
 //# declaration
 struct Everything
 {
-	std::vector<GameObjectProxy> indirectionMap{ 100000 };
-	std::vector<GamePosition> gamepositions{ 100000 };
-	std::vector<GraphicsTile> graphicstiles{ 100000 };
-	std::vector<Brain> brains{ 100000 };
-	std::vector<Nutrition> nutritions{ 100000 };
-	std::vector<Locomotion> locomotions{ 100000 };
-	std::vector<Possession> possessions{ 100000 };
-	std::vector<Vicinity> vicinitys{ 100000 };
-	std::vector<Signature<GAMEOBJECT_COMPONENT>> signatures{ 100000 };
+	std::vector<GameObjectProxy> indirectionMap{ 1000000 };
+	std::vector<GamePosition> gamepositions{ 1000000 };
+	std::vector<GraphicsTile> graphicstiles{ 1000000 };
+	std::vector<Brain> brains{ 1000000 };
+	std::vector<Nutrition> nutritions{ 1000000 };
+	std::vector<Locomotion> locomotions{ 1000000 };
+	std::vector<Possession> possessions{ 1000000 };
+	std::vector<Vicinity> vicinitys{ 1000000 };
+	std::vector<Signature<GAMEOBJECT_COMPONENT>> signatures{ 1000000 };
 	SizeAlias gamepositionlast{ 1 };
 	SizeAlias graphicstilelast{ 1 };
 	SizeAlias brainlast{ 1 };
@@ -404,7 +404,7 @@ inline void Everything::runsimpleStd(std::function<void(Args...)> f) {
 };
 template<class F>
 inline void Everything::run(F f) {
-	Loop::run(*this, te::wrap_in_std_fun(f));
+	Loop::run(*this, f);
 };
 inline size_t Everything::takeFreeIndex() {
 	return last++;

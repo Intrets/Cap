@@ -7,7 +7,8 @@ template<class T>
 class Signature
 {
 public:
-	std::bitset<T::MAX> data;
+	//std::bitset<T::MAX> data;
+	std::bitset<100> data;
 
 	friend class Signature<T>;
 
