@@ -15,7 +15,7 @@
 #include "Signature.h"
 #include "Game.h"
 
-#define WORLD_SIZE 200000
+constexpr auto WORLD_SIZE = 200000;
 
 namespace render
 {
@@ -93,43 +93,9 @@ namespace game
 		float value(SignatureAlias const& signature);
 	};
 
-	// ---------------------------------------------------
-
-	// Object - SoA or AoS
-	// Member_1
-	// Member_2
-	// |
-	// |
-	// |
-	// Member_n
-
-	// class Everything {
-	//     std::array<Object> stuff;
-	//
-	//     Member_1& member_1(size_t i) {
-	//	       return stuff[i].member_1;
-	//     };
-	//     Member_2& member_2(size_t i);
-	// };
-
-	// class Everything {
-	//     std::array<member_1> member_1s
-	//     std::array<member_2> member_2s
-	//     |
-	//     |
-	//     |
-	//     std::array<member_n> member_ns
-	//
-	//     Member_1& member_1(size_t i) {
-	//         return member_1s[i];
-	//     };
-	//     Member_2& member_2(size_t i);
-	// };
-
 	class GameState
 	{
 	private:
-		std::unique_ptr<Everything> everything;
 		EverythingS everything2;
 
 	public:
