@@ -11,7 +11,8 @@
 
 using SizeAlias = size_t;
 
-#define POINTER_INDIRECTION
+//#define POINTER_INDIRECTION
+//#define GAMEOBJECT_POINTER_CACHE
 
 namespace game
 {
@@ -85,7 +86,12 @@ namespace game
 		template<class T>
 		struct component_index : counter
 		{
-			static inline size_t val = t++;
+			static inline size_t getVal() {
+				assert(t < SIZE);
+				return t++;
+			};
+
+			static inline size_t val = getVal();
 		};
 
 		template<class T>
@@ -121,13 +127,18 @@ namespace game
 
 #ifdef POINTER_INDIRECTION
 			std::array<void*, SIZE> ptrs{};
-#endif
+#endif // POINTER_INDIRECTION
 
 			template<class T>
 			T& get();
 
 			inline bool contains(SignatureType const& sig) const {
 				return (this->signature & sig) == sig;
+			};
+
+			template<class T>
+			inline bool has() {
+				return this->index[component_index_v<T>] != 0;
 			};
 
 			indirection() = default;
@@ -137,7 +148,13 @@ namespace game
 		};
 
 		std::vector<RawData> data{ SIZE, {*this} };
+
+#ifdef GAMEOBJECT_POINTER_CACHE
+		std::vector<indirection> indirectionMap{ 10'000'000 };
+#else
 		std::vector<indirection> indirectionMap{};
+#endif // GAMEOBJECT_POINTER_CACHE
+
 
 		inline WeakObject make();
 
@@ -172,11 +189,29 @@ namespace game
 		static inline void run(Everything& e, F f, Args... args) {
 			size_t end = e.gets<M>().index;
 			auto& g = e.data[Everything::component_index<M>::val];
-			for (SizeAlias i = 0; i < end; i++) {
-				auto& el = g.get<M>(i);
 
-				if (e.indirectionMap[el.index].contains(Everything::group_signature_v<M, Ms...>)) {
-					te::Loop::run<Everything, F, L, Match<M, Ms...>, Args...>(e, f, Match<M, Ms...>{ e.indirectionMap[el.index] }, args...);
+			if constexpr (sizeof...(Ms) == 0) {
+				for (SizeAlias i = 0; i < end; i++) {
+					auto& indirection = e.indirectionMap[g.get<M>(i).index];
+					te::Loop::run<Everything, F, L, Match<M, Ms...>, Args...>(e, f, Match<M, Ms...>{ indirection }, args...);
+				}
+			}
+			else if constexpr (sizeof...(Ms) == 1) {
+				for (SizeAlias i = 0; i < end; i++) {
+					auto& indirection = e.indirectionMap[g.get<M>(i).index];
+
+					if (indirection.has<Ms...>()) {
+						te::Loop::run<Everything, F, L, Match<M, Ms...>, Args...>(e, f, Match<M, Ms...>{ indirection }, args...);
+					}
+				}
+			}
+			else {
+				for (SizeAlias i = 0; i < end; i++) {
+					auto& indirection = e.indirectionMap[g.get<M>(i).index];
+
+					if (indirection.contains(Everything::group_signature_v<M, Ms...>)) {
+						te::Loop::run<Everything, F, L, Match<M, Ms...>, Args...>(e, f, Match<M, Ms...>{ indirection }, args...);
+					}
 				}
 			}
 		};
@@ -195,7 +230,7 @@ namespace game
 			auto& p = this->get<T>(i);
 			this->parent.indirectionMap[p.index].ptrs[Everything::component_index_v<T>] = &p;
 		}
-	}
+}
 #endif // POINTER_INDIRECTION
 
 
@@ -231,6 +266,10 @@ namespace game
 #ifdef POINTER_INDIRECTION
 		this->indirectionMap[i].ptrs[component_index_v<T>] = ptr;
 #endif // POINTER_INDIRECTION
+
+#ifdef GAMEOBJECT_POINTER_CACHE
+		ptr->indirectionCache = &this->indirectionMap[i];
+#endif // GAMEOBJECT_POINTER_CACHE
 	}
 	template<class T>
 	inline T& Everything::get(SizeAlias i) {
@@ -263,15 +302,19 @@ namespace game
 	template<class T>
 	inline T& Everything::indirection::get() {
 #ifdef POINTER_INDIRECTION
-		auto& r = *reinterpret_cast<T*>(this->ptrs[component_index_v<T>]);
-		return r;
+		return *reinterpret_cast<T*>(this->ptrs[component_index_v<T>]);
 #else
 		return this->proxy->gets<T>().get<T>(this->index[component_index_v<T>]);
 #endif // POINTER_INDIRECTION
 	}
 	inline WeakObject Everything::make() {
 		WeakObject res{ this->indirectionMap.size(), this };
+
+#ifdef GAMEOBJECT_POINTER_CACHE
+		assert(this->indirectionMap.capacity() > this->indirectionMap.size());
+#endif // GAMEOBJECT_POINTER_CACHE
+
 		this->indirectionMap.push_back({ this });
 		return res;
 	}
-}
+		}
