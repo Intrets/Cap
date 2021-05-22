@@ -12,9 +12,16 @@
 namespace game
 {
 	void GameState::addRenderInfo(render::RenderInfo& renderInfo) {
+		renderInfo.tileRenderInfo.addBlitInfo(
+			glm::vec4(0),
+			0,
+			0
+		);
+
+		const_cast<std::vector<render::SingleBlitArrayRenderInfo>&>(renderInfo.tileRenderInfo.getData()).reserve(10'000'000);
 		static int alternate = 0;
 		alternate++;
-		alternate %= 16;
+		alternate %= 17;
 		switch (alternate) {
 		case 0:
 		{
@@ -23,16 +30,16 @@ namespace game
 			this->everything.run([&](game::Match<GamePosition, GraphicsTile, Test<0>, Test<1>, Test<2>, Test<3>, Test<4>, Test<5>, Test<6>, Test<7>, Test<8>, Test<9>, Test<10>>& e) {
 				//e.get<GamePosition>().pos += glm::ivec2(1, 0);
 				//e.get<GraphicsTile>().blockID++;
-				//renderInfo.tileRenderInfo.addBlitInfo(
-				//	glm::vec4(e.get<GamePosition>().pos, 1, 1),
-				//	0,
-				//	e.get<GraphicsTile>().blockID
-				//);
+				renderInfo.tileRenderInfo.addBlitInfo(
+					glm::vec4(e.get<GamePosition>().pos, 1, 1),
+					0,
+					e.get<GraphicsTile>().blockID
+				);
 				counter++;
 				});
 
 			Locator<misc::Timer>::ref().endTiming("new2");
-			std::cout << "counter " << counter << '\n';
+			std::cout << "new2 counter " << counter << '\n';
 			break;
 		}
 		case 1:
@@ -44,11 +51,11 @@ namespace game
 			view.each([&](auto pos, auto tile, auto, auto, auto, auto, auto, auto, auto, auto, auto, auto, auto) {
 				//pos.pos += glm::ivec2(1, 0);
 				//tile.blockID++;
-				//renderInfo.tileRenderInfo.addBlitInfo(
-				//	glm::vec4(pos.pos, 1, 1),
-				//	0,
-				//	tile.blockID
-				//);
+				renderInfo.tileRenderInfo.addBlitInfo(
+					glm::vec4(pos.pos, 1, 1),
+					0,
+					tile.blockID
+				);
 				counter++;
 				});
 			Locator<misc::Timer>::ref().endTiming("entt10");
@@ -64,11 +71,11 @@ namespace game
 			for (auto entity : view) {
 				//view.get<GamePosition>(entity).pos += glm::ivec2(1, 0);
 				//view.get<GraphicsTile>(entity).blockID++;
-				//renderInfo.tileRenderInfo.addBlitInfo(
-				//	glm::vec4(view.get<GamePosition>(entity).pos, 1, 1),
-				//	0,
-				//	view.get<GraphicsTile>(entity).blockID
-				//);
+				renderInfo.tileRenderInfo.addBlitInfo(
+					glm::vec4(view.get<GamePosition>(entity).pos, 1, 1),
+					0,
+					view.get<GraphicsTile>(entity).blockID
+				);
 				counter++;
 			}
 
@@ -78,33 +85,8 @@ namespace game
 		}
 		case 3:
 		{
-			Locator<misc::Timer>::ref().newTiming("a");
-			auto& g = this->everything.data[Everything::component_index_v<GamePosition>];
-			size_t counter = 0;
-
-			for (size_t i = 0; i < g.index; i++) {
-				//auto& pos = g.get<GamePosition>(i);
-				auto& pos = *reinterpret_cast<GamePosition*>(&g.data[i]);
-				//if (this->everything.has<GraphicsTile>(pos.index)) {
-				//if (this->everything.indirectionMap[0].index[1] != 0) {
-				//if (pos.index != 0){
-				if (this->everything.indirectionMap[pos.index].index[1] != 0) {
-
-					counter++;
-				}
-				//auto& tile = this->everything.get<GraphicsTile>(pos.index);
-
-				//renderInfo.tileRenderInfo.addBlitInfo(
-				//	glm::vec4(pos.pos, 1, 1),
-				//	0,
-				//	tile.blockID
-				//);
-			}
-			Locator<misc::Timer>::ref().endTiming("a");
-			std::cout << "counter " << counter << '\n';
 			break;
 		}
-
 		case 4:
 		{
 			Locator<misc::Timer>::ref().newTiming("entt9");
@@ -114,11 +96,11 @@ namespace game
 			view.each([&](auto pos, auto tile, auto, auto, auto, auto, auto, auto, auto, auto, auto, auto) {
 				//pos.pos += glm::ivec2(1, 0);
 				//tile.blockID++;
-				//renderInfo.tileRenderInfo.addBlitInfo(
-				//	glm::vec4(pos.pos, 1, 1),
-				//	0,
-				//	tile.blockID
-				//);
+				renderInfo.tileRenderInfo.addBlitInfo(
+					glm::vec4(pos.pos, 1, 1),
+					0,
+					tile.blockID
+				);
 				counter++;
 				});
 			Locator<misc::Timer>::ref().endTiming("entt9");
@@ -134,11 +116,11 @@ namespace game
 			view.each([&](auto pos, auto tile, auto, auto, auto, auto, auto, auto, auto, auto, auto) {
 				//pos.pos += glm::ivec2(1, 0);
 				//tile.blockID++;
-				//renderInfo.tileRenderInfo.addBlitInfo(
-				//	glm::vec4(pos.pos, 1, 1),
-				//	0,
-				//	tile.blockID
-				//);
+				renderInfo.tileRenderInfo.addBlitInfo(
+					glm::vec4(pos.pos, 1, 1),
+					0,
+					tile.blockID
+				);
 				counter++;
 				});
 			Locator<misc::Timer>::ref().endTiming("entt8");
@@ -154,11 +136,11 @@ namespace game
 			view.each([&](auto pos, auto tile, auto, auto, auto, auto, auto, auto, auto, auto) {
 				//pos.pos += glm::ivec2(1, 0);
 				//tile.blockID++;
-				//renderInfo.tileRenderInfo.addBlitInfo(
-				//	glm::vec4(pos.pos, 1, 1),
-				//	0,
-				//	tile.blockID
-				//);
+				renderInfo.tileRenderInfo.addBlitInfo(
+					glm::vec4(pos.pos, 1, 1),
+					0,
+					tile.blockID
+				);
 				counter++;
 				});
 			Locator<misc::Timer>::ref().endTiming("entt7");
@@ -174,11 +156,11 @@ namespace game
 			view.each([&](auto pos, auto tile, auto, auto, auto, auto, auto, auto, auto) {
 				//pos.pos += glm::ivec2(1, 0);
 				//tile.blockID++;
-				//renderInfo.tileRenderInfo.addBlitInfo(
-				//	glm::vec4(pos.pos, 1, 1),
-				//	0,
-				//	tile.blockID
-				//);
+				renderInfo.tileRenderInfo.addBlitInfo(
+					glm::vec4(pos.pos, 1, 1),
+					0,
+					tile.blockID
+				);
 				counter++;
 				});
 			Locator<misc::Timer>::ref().endTiming("entt6");
@@ -194,11 +176,11 @@ namespace game
 			view.each([&](auto pos, auto tile, auto, auto, auto, auto, auto, auto) {
 				//pos.pos += glm::ivec2(1, 0);
 				//tile.blockID++;
-				//renderInfo.tileRenderInfo.addBlitInfo(
-				//	glm::vec4(pos.pos, 1, 1),
-				//	0,
-				//	tile.blockID
-				//);
+				renderInfo.tileRenderInfo.addBlitInfo(
+					glm::vec4(pos.pos, 1, 1),
+					0,
+					tile.blockID
+				);
 				counter++;
 				});
 			Locator<misc::Timer>::ref().endTiming("entt5");
@@ -214,11 +196,11 @@ namespace game
 			view.each([&](auto pos, auto tile, auto, auto, auto, auto, auto) {
 				//pos.pos += glm::ivec2(1, 0);
 				//tile.blockID++;
-				//renderInfo.tileRenderInfo.addBlitInfo(
-				//	glm::vec4(pos.pos, 1, 1),
-				//	0,
-				//	tile.blockID
-				//);
+				renderInfo.tileRenderInfo.addBlitInfo(
+					glm::vec4(pos.pos, 1, 1),
+					0,
+					tile.blockID
+				);
 				counter++;
 				});
 			Locator<misc::Timer>::ref().endTiming("entt4");
@@ -234,11 +216,11 @@ namespace game
 			view.each([&](auto pos, auto tile, auto, auto, auto, auto) {
 				//pos.pos += glm::ivec2(1, 0);
 				//tile.blockID++;
-				//renderInfo.tileRenderInfo.addBlitInfo(
-				//	glm::vec4(pos.pos, 1, 1),
-				//	0,
-				//	tile.blockID
-				//);
+				renderInfo.tileRenderInfo.addBlitInfo(
+					glm::vec4(pos.pos, 1, 1),
+					0,
+					tile.blockID
+				);
 				counter++;
 				});
 			Locator<misc::Timer>::ref().endTiming("entt3");
@@ -254,11 +236,11 @@ namespace game
 			view.each([&](auto pos, auto tile, auto, auto, auto) {
 				//pos.pos += glm::ivec2(1, 0);
 				//tile.blockID++;
-				//renderInfo.tileRenderInfo.addBlitInfo(
-				//	glm::vec4(pos.pos, 1, 1),
-				//	0,
-				//	tile.blockID
-				//);
+				renderInfo.tileRenderInfo.addBlitInfo(
+					glm::vec4(pos.pos, 1, 1),
+					0,
+					tile.blockID
+				);
 				counter++;
 				});
 			Locator<misc::Timer>::ref().endTiming("entt2");
@@ -274,11 +256,11 @@ namespace game
 			view.each([&](auto pos, auto tile, auto, auto) {
 				//pos.pos += glm::ivec2(1, 0);
 				//tile.blockID++;
-				//renderInfo.tileRenderInfo.addBlitInfo(
-				//	glm::vec4(pos.pos, 1, 1),
-				//	0,
-				//	tile.blockID
-				//);
+				renderInfo.tileRenderInfo.addBlitInfo(
+					glm::vec4(pos.pos, 1, 1),
+					0,
+					tile.blockID
+				);
 				counter++;
 				});
 			Locator<misc::Timer>::ref().endTiming("entt1");
@@ -294,11 +276,11 @@ namespace game
 			view.each([&](auto pos, auto tile, auto) {
 				//pos.pos += glm::ivec2(1, 0);
 				//tile.blockID++;
-				//renderInfo.tileRenderInfo.addBlitInfo(
-				//	glm::vec4(pos.pos, 1, 1),
-				//	0,
-				//	tile.blockID
-				//);
+				renderInfo.tileRenderInfo.addBlitInfo(
+					glm::vec4(pos.pos, 1, 1),
+					0,
+					tile.blockID
+				);
 				counter++;
 				});
 			Locator<misc::Timer>::ref().endTiming("entt0");
@@ -312,15 +294,35 @@ namespace game
 			this->everything.run([&](game::Match<GamePosition, GraphicsTile>& e) {
 				//e.get<GamePosition>().pos += glm::ivec2(1, 0);
 				//e.get<GraphicsTile>().blockID++;
-				//renderInfo.tileRenderInfo.addBlitInfo(
-				//	glm::vec4(e.get<GamePosition>().pos, 1, 1),
-				//	0,
-				//	e.get<GraphicsTile>().blockID
-				//);
+				renderInfo.tileRenderInfo.addBlitInfo(
+					glm::vec4(e.get<GamePosition>().pos, 1, 1),
+					0,
+					e.get<GraphicsTile>().blockID
+				);
 				counter++;
 				});
 
 			Locator<misc::Timer>::ref().endTiming("double");
+			std::cout << "double counter " << counter << '\n';
+			break;
+		}
+		case 16:
+		{
+			Locator<misc::Timer>::ref().newTiming("entt");
+			auto view = this->registry.view<GamePosition, GraphicsTile>();
+
+			size_t counter = 0;
+			view.each([&](auto pos, auto tile) {
+				//pos.pos += glm::ivec2(1, 0);
+				//tile.blockID++;
+				renderInfo.tileRenderInfo.addBlitInfo(
+					glm::vec4(pos.pos, 1, 1),
+					0,
+					tile.blockID
+				);
+				counter++;
+				});
+			Locator<misc::Timer>::ref().endTiming("entt");
 			std::cout << "counter " << counter << '\n';
 			break;
 		}
@@ -431,8 +433,8 @@ namespace game
 		{
 			{
 				const auto entity = this->registry.create();
-				this->registry.emplace<GamePosition>(entity, 0u, glm::ivec2(5, 5));
-				this->registry.emplace<GraphicsTile>(entity, 0u, Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds"));
+				this->registry.emplace<GamePosition>(entity, glm::ivec2(5, 5));
+				this->registry.emplace<GraphicsTile>(entity, Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds"));
 				this->registry.emplace<Test<0>>(entity);
 				this->registry.emplace<Test<1>>(entity);
 				this->registry.emplace<Test<2>>(entity);
@@ -463,8 +465,8 @@ namespace game
 
 			{
 				//const auto entity = this->registry.create();
-				//this->registry.emplace<GamePosition>(entity, 0u, glm::ivec2(5, 6));
-				//this->registry.emplace<GraphicsTile>(entity, 0u, Locator<render::BlockIDTextures>::ref().getBlockTextureID("s_block.dds"));
+				//this->registry.emplace<GamePosition>(entity, glm::ivec2(5, 6));
+				//this->registry.emplace<GraphicsTile>(entity, Locator<render::BlockIDTextures>::ref().getBlockTextureID("s_block.dds"));
 				//this->registry.emplace<Spawner>(entity);
 				//auto p = this->everything.make();
 
@@ -526,8 +528,8 @@ namespace game
 				p2.add<Test<9>>();
 
 				const auto entity = this->registry.create();
-				this->registry.emplace<GamePosition>(entity, 0u, glm::ivec2(i, j));
-				this->registry.emplace<GraphicsTile>(entity, 0u, Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds"));
+				this->registry.emplace<GamePosition>(entity, glm::ivec2(i, j));
+				this->registry.emplace<GraphicsTile>(entity, Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds"));
 				this->registry.emplace<Test<0>>(entity);
 				this->registry.emplace<Test<1>>(entity);
 				this->registry.emplace<Test<2>>(entity);
@@ -565,8 +567,8 @@ namespace game
 				p2.get<GamePosition>().pos = glm::ivec2(i, j);
 				p2.get<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
 				const auto entity = this->registry.create();
-				this->registry.emplace<GamePosition>(entity, 0u, glm::ivec2(i, j));
-				this->registry.emplace<GraphicsTile>(entity, 0u, Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds"));
+				this->registry.emplace<GamePosition>(entity, glm::ivec2(i, j));
+				this->registry.emplace<GraphicsTile>(entity, Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds"));
 				this->registry.emplace<Test<0>>(entity);
 				this->registry.emplace<Test<1>>(entity);
 				this->registry.emplace<Test<2>>(entity);
@@ -602,8 +604,8 @@ namespace game
 				p2.get<GamePosition>().pos = glm::ivec2(i, j);
 				p2.get<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
 				const auto entity = this->registry.create();
-				this->registry.emplace<GamePosition>(entity, 0u, glm::ivec2(i, j));
-				this->registry.emplace<GraphicsTile>(entity, 0u, Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds"));
+				this->registry.emplace<GamePosition>(entity, glm::ivec2(i, j));
+				this->registry.emplace<GraphicsTile>(entity, Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds"));
 				this->registry.emplace<Test<0>>(entity);
 				this->registry.emplace<Test<1>>(entity);
 				this->registry.emplace<Test<2>>(entity);
@@ -639,8 +641,8 @@ namespace game
 				p2.get<GamePosition>().pos = glm::ivec2(i, j);
 				p2.get<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
 				const auto entity = this->registry.create();
-				this->registry.emplace<GamePosition>(entity, 0u, glm::ivec2(i, j));
-				this->registry.emplace<GraphicsTile>(entity, 0u, Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds"));
+				this->registry.emplace<GamePosition>(entity, glm::ivec2(i, j));
+				this->registry.emplace<GraphicsTile>(entity, Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds"));
 				this->registry.emplace<Test<0>>(entity);
 				this->registry.emplace<Test<1>>(entity);
 				this->registry.emplace<Test<2>>(entity);

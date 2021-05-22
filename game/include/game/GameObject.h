@@ -44,22 +44,16 @@ struct ActionResult
 
 struct GamePosition
 {
-	GAMEOBJECT;
-
 	glm::ivec2 pos;
 };
 
 struct GraphicsTile
 {
-	GAMEOBJECT;
-
 	int32_t blockID;
 };
 
 struct Brain
 {
-	GAMEOBJECT;
-
 	int32_t happiness = 0;
 	int32_t energy = 0;
 
@@ -74,8 +68,6 @@ struct Brain
 
 struct Possession
 {
-	GAMEOBJECT;
-
 	//std::vector<UniqueReference<Object, Object>> inventory{};
 
 	Possession() = default;
@@ -86,23 +78,17 @@ struct Possession
 
 struct Vicinity
 {
-	GAMEOBJECT;
-
 	//std::vector<WeakReference<Object, Object>> vicinity;
 	//std::unique_ptr<GameObject> test;
 };
 
 struct Nutrition
 {
-	GAMEOBJECT;
-
 	int32_t energy = 0;
 };
 
 struct Locomotion
 {
-	GAMEOBJECT;
-
 	int32_t cooldown = 0;
 	int32_t fitness = 60;
 

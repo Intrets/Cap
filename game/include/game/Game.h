@@ -8,15 +8,12 @@
 #include <stack>
 #include <iostream>
 #include <numeric>
+#include <optional>
 
 #include <tepp/tepp.h>
 #include <misc/Misc.h>
 
 using SizeAlias = size_t;
-
-//#define POINTER_INDIRECTION
-
-#define GAMEOBJECT SizeAlias index = 0;
 
 namespace game
 {
@@ -44,10 +41,11 @@ namespace game
 		};
 
 		Everything& parent;
-		SizeAlias size = 0;
+		SizeAlias reservedObjects = 0;
 		SizeAlias index = 0;
 		SizeAlias objectSize = 0;
 		std::vector<std::byte> data{};
+		std::vector<SizeAlias> indices{};
 
 		RawData() = delete;
 		RawData(Everything& p) : parent(p) {};
@@ -57,20 +55,17 @@ namespace game
 		template<class T>
 		inline void remove(SizeAlias i);
 
-		// pair.first: the first sizeof(SizeAlias) bytes of the object stored at i.
-		// index (for indirectionMap) of the object to update
-		inline void* remove_untyped(SizeAlias i);
+		// returns the index of the component owning the object that was moved
+		// or optionally nothing if the last element was removed (no moving needed)
+		inline std::optional<SizeAlias> remove_untyped(SizeAlias i);
 
 		template<class T>
 		inline T& get(SizeAlias i);
 
+		inline SizeAlias getIndex(SizeAlias i);
+
 		template<class T, class... Args>
 		inline std::pair<SizeAlias, T*> add(SizeAlias i, Args&&... args);
-
-#ifdef POINTER_INDIRECTION
-		template<class T>
-		void refreshPointers();
-#endif // POINTER_INDIRECTION
 	};
 
 	struct WeakObject
@@ -115,7 +110,7 @@ namespace game
 			static const inline SignatureType fillSignature() {
 				SignatureType res{};
 				if constexpr (sizeof...(Ms) == 0) {
-					res.set(Everything::component_index<M>.getVal());
+					res.set(Everything::component_index<M>::val);
 				}
 				else {
 					for (auto s : { Everything::component_index<M>::val, Everything::component_index<Ms>::val... }) {
@@ -131,37 +126,11 @@ namespace game
 		template<class... Ms>
 		static inline const SignatureType group_signature_v = group_signature<Ms...>::value;
 
-		struct indirection
-		{
-			Everything* proxy;
-			SignatureType signature{ 0 };
-			std::array<size_t, SIZE> index{};
-
-#ifdef POINTER_INDIRECTION
-			std::array<void*, SIZE> ptrs{};
-#endif // POINTER_INDIRECTION
-
-			template<class T>
-			T& get();
-
-			inline bool contains(SignatureType const& sig) const {
-				return (this->signature & sig) == sig;
-			};
-
-			template<class T>
-			inline bool has() {
-				return this->signature.test(component_index_v<T>);
-			};
-
-			indirection() = default;
-			indirection(Everything* p) : proxy(p) {};
-			~indirection() = default;
-			DEFAULTCOPYMOVE(indirection);
-		};
-
 		std::vector<RawData> data{ SIZE, { *this } };
-		std::vector<indirection> indirectionMap{ {} };
 		std::vector<size_t> freeIndirections{};
+
+		std::vector<SignatureType> signatures{};
+		std::array<std::vector<SizeAlias>, SIZE> dataIndices;
 
 		inline WeakObject make();
 
@@ -176,11 +145,18 @@ namespace game
 		template<class T>
 		inline RawData& gets();
 
-		template<class T>
+		inline RawData& gets(size_t type);
+
+		template<class... Ts>
 		inline bool has(SizeAlias i);
+
+		inline bool has(SizeAlias i, size_t type);
 
 		template<class F>
 		inline void run(F f);
+
+		template<class... Ms>
+		size_t selectPivot();
 
 		Everything() = default;
 		~Everything() = default;
@@ -191,40 +167,33 @@ namespace game
 	template<class M, class... Ms>
 	struct Match
 	{
-		Everything::indirection& proxy;
+		WeakObject obj;
 
 		template<class T>
 		inline T& get() {
 			static_assert(te::contains_v<te::list<M, Ms...>, T>);
-			return proxy.get<T>();
+			return this->obj.get<T>();
 		};
 
 		template<class F, class L, class... Args>
 		static inline void run(Everything& e, F f, Args... args) {
-			size_t end = e.gets<M>().index;
-			auto& g = e.data[Everything::component_index<M>::val];
+			size_t pivot = e.selectPivot<M, Ms...>();
+
+			auto& g = e.gets(pivot);
+			const size_t end = g.index;
 
 			if constexpr (sizeof...(Ms) == 0) {
 				for (SizeAlias i = 0; i < end; i++) {
-					auto& indirection = e.indirectionMap[g.get<M>(i).index];
-					te::Loop::run<Everything, F, L, Match<M, Ms...>, Args...>(e, f, Match<M, Ms...>{ indirection }, args...);
-				}
-			}
-			else if constexpr (sizeof...(Ms) == 1) {
-				for (SizeAlias i = 0; i < end; i++) {
-					auto& indirection = e.indirectionMap[g.get<M>(i).index];
-
-					if (indirection.has<Ms...>()) {
-						te::Loop::run<Everything, F, L, Match<M, Ms...>, Args...>(e, f, Match<M, Ms...>{ indirection }, args...);
-					}
+					auto index = g.getIndex(i);
+					te::Loop::run<Everything, F, L, Match<M, Ms...>, Args...>(e, f, Match<M, Ms...>{ { index, & e } }, args...);
 				}
 			}
 			else {
 				for (SizeAlias i = 0; i < end; i++) {
-					auto& indirection = e.indirectionMap[g.get<M>(i).index];
+					auto index = g.getIndex(i);
 
-					if (indirection.contains(Everything::group_signature_v<M, Ms...>)) {
-						te::Loop::run<Everything, F, L, Match<M, Ms...>, Args...>(e, f, Match<M, Ms...>{ indirection }, args...);
+					if (e.has<Ms...>(index)) {
+						te::Loop::run<Everything, F, L, Match<M, Ms...>, Args...>(e, f, Match<M, Ms...>{ { index, & e } }, args...);
 					}
 				}
 			}
@@ -235,15 +204,27 @@ namespace game
 	template<class T>
 	inline void RawData::remove(SizeAlias i) {
 		assert(this->objectSize == 0 || (this->objectSize == aligned_sizeof<T>::get()));
-		this->get<T>(i) = this->get<T>(--this->index);
+		this->remove_untyped(i);
 	}
 
-	inline void* RawData::remove_untyped(SizeAlias i) {
+	inline std::optional<SizeAlias> RawData::remove_untyped(SizeAlias i) {
+		assert(i < this->index);
+
 		size_t targetOffset = i * this->objectSize;
 		size_t sourceOffset = --this->index * this->objectSize;
-		std::memcpy(&this->data[targetOffset], &this->data[sourceOffset], this->objectSize);
 
-		return &this->data[targetOffset];
+		if (targetOffset == sourceOffset) {
+			this->indices.pop_back();
+			return std::nullopt;
+		}
+		else {
+			std::memcpy(&this->data[targetOffset], &this->data[sourceOffset], this->objectSize);
+			auto changed = this->indices.back();
+			this->indices.pop_back();
+
+			this->indices[i] = changed;
+			return changed;
+		}
 	}
 
 	template<class T>
@@ -252,92 +233,106 @@ namespace game
 		return *reinterpret_cast<T*>(&this->data[aligned_sizeof<T>::get() * i]);
 	}
 
-#ifdef POINTER_INDIRECTION
-	template<class T>
-	inline void RawData::refreshPointers() {
-		for (size_t i = 0; i < this->index; i++) {
-			auto& p = this->get<T>(i);
-			this->parent.indirectionMap[p.index].ptrs[Everything::component_index_v<T>] = &p;
-		}
+	inline SizeAlias RawData::getIndex(SizeAlias i) {
+		return this->indices[i];
 	}
-#endif // POINTER_INDIRECTION
-
 
 	template<class T, class... Args>
 	inline std::pair<SizeAlias, T*> RawData::add(SizeAlias i, Args&&... args) {
 		assert(this->objectSize == 0 || (this->objectSize == aligned_sizeof<T>::get()));
 		this->objectSize = aligned_sizeof<T>::get();
 
-		if (this->size == 0) {
-			this->size = 16;
-			this->data.resize(this->size * aligned_sizeof<T>::get());
-#ifdef POINTER_INDIRECTION
-			this->refreshPointers<T>();
-#endif // POINTER_INDIRECTION
+		if (this->reservedObjects == 0) {
+			this->reservedObjects = 16;
+			this->index = 1;
+			this->indices.push_back(0);
+			this->data.resize(this->reservedObjects * aligned_sizeof<T>::get());
 		}
-		else if (this->index >= this->size) {
-			this->size *= 2;
-			this->data.resize(this->size * aligned_sizeof<T>::get());
-#ifdef POINTER_INDIRECTION
-			this->refreshPointers<T>();
-#endif // POINTER_INDIRECTION
+		else if (this->index >= this->reservedObjects) {
+			this->reservedObjects *= 2;
+			this->data.resize(this->reservedObjects * aligned_sizeof<T>::get());
 		}
+		this->indices.push_back(i);
 
 		auto& obj = this->get<T>(this->index);
 
-		obj = T{ i, std::forward<Args>(args)... };
+		obj = T{ std::forward<Args>(args)... };
 
 		return { this->index++, &obj };
 	}
 
 	inline void Everything::remove(SizeAlias i) {
-		auto& indirection = this->indirectionMap[i];
-		for (size_t type = 0; type < counter::t; type++) {
-			if (indirection.signature.test(type)) {
-				auto ptr = this->data[type].remove_untyped(indirection.index[type]);
-				auto index = *reinterpret_cast<SizeAlias*>(ptr);
-
-				this->indirectionMap[index].index[type] = index;
-
-#ifdef POINTER_INDIRECTION
-				this->indirectionMap[index].ptrs[type] = ptr;
-#endif // POINTER_INDIRECTION
+		for (size_t type = 0; type < SIZE; type++) {
+			if (this->has(i, type)) {
+				auto maybeChanged = this->data[type].remove_untyped(this->dataIndices[type][i]);
+				if (maybeChanged.has_value()) {
+					auto changed = maybeChanged.value();
+					this->dataIndices[type][changed] = this->dataIndices[type][i];
+					this->dataIndices[type][i] = 0;
+				}
 			}
 		}
 
+		this->signatures[i].reset();
+
 		this->freeIndirections.push_back(i);
+	}
+
+	inline RawData& Everything::gets(size_t type) {
+		return this->data[type];
+	}
+
+	inline bool Everything::has(SizeAlias i, size_t type) {
+		return this->dataIndices[type][i] != 0;
 	}
 
 	template<class T, class... Args>
 	inline T& Everything::add(SizeAlias i, Args&&... args) {
 		auto [index, ptr] = this->data[component_index_v<T>].add<T>(i, std::forward<Args>(args)...);
-		this->indirectionMap[i].index[component_index_v<T>] = index;
-		this->indirectionMap[i].signature.set(component_index_v<T>);
-#ifdef POINTER_INDIRECTION
-		this->indirectionMap[i].ptrs[component_index_v<T>] = ptr;
-#endif // POINTER_INDIRECTION
+		this->dataIndices[component_index_v<T>][i] = index;
+		this->signatures[i].set(component_index_v<T>);
 		return *ptr;
 	}
 
 	template<class T>
 	inline T& Everything::get(SizeAlias i) {
-		return this->indirectionMap[i].get<T>();
+		return this->data[component_index_v<T>].get<T>(this->dataIndices[component_index_v<T>][i]);
 	}
 
 	template<class T>
 	inline RawData& Everything::gets() {
-		return this->data[component_index<T>::val];
+		return this->gets(component_index_v<T>);
 	}
 
-	template<class T>
+	template<class... Ts>
 	inline bool Everything::has(SizeAlias i) {
-		return this->indirectionMap[i].index[component_index_v<T>] != 0;
-		//return this->indirectionMap[i].signature.test(component_index_v<T>);
+		if constexpr (sizeof...(Ts) == 1) {
+			return this->has(i, component_index_v<Ts...>);
+		}
+		else {
+			auto const sig = group_signature_v<Ts...>;
+			return (this->signatures[i] & sig) == sig;
+		}
 	}
 
 	template<class F>
 	inline void Everything::run(F f) {
 		te::Loop::run(*this, f);
+	}
+
+	template<class... Ms>
+	inline size_t Everything::selectPivot() {
+		size_t pivot = 0;
+		size_t smallest = std::numeric_limits<size_t>::max();
+		for (auto s : { Everything::component_index<Ms>::val... }) {
+			size_t typeSize = this->data[s].index;
+
+			if (typeSize < smallest) {
+				smallest = typeSize;
+				pivot = s;
+			}
+		}
+		return pivot;
 	}
 
 	template<class T>
@@ -355,27 +350,19 @@ namespace game
 		return this->proxy->has<T>(this->index);
 	}
 
-	template<class T>
-	inline T& Everything::indirection::get() {
-#ifdef POINTER_INDIRECTION
-		return *reinterpret_cast<T*>(this->ptrs[component_index_v<T>]);
-#else
-		return this->proxy->gets<T>().get<T>(this->index[component_index_v<T>]);
-#endif // POINTER_INDIRECTION
-	}
-
 	inline WeakObject Everything::make() {
 		if (!this->freeIndirections.empty()) {
 			size_t i = this->freeIndirections.back();
 			this->freeIndirections.pop_back();
 
-			this->indirectionMap[i] = { this };
-
 			return { i, this };
 		}
 		else {
-			this->indirectionMap.push_back({ this });
-			return { this->indirectionMap.size() - 1, this };
+			this->signatures.push_back(0);
+			for (size_t type = 0; type < SIZE; type++) {
+				this->dataIndices[type].push_back(0);
+			}
+			return { this->signatures.size() - 1, this };
 		}
 	}
 }

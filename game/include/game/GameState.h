@@ -16,12 +16,12 @@
 #include "Game.h"
 #include "entt.h"
 
-constexpr auto WORLD_SIZE = 1'000'000;
+constexpr auto WORLD_SIZE = 1'000;
 
 template<int n>
 struct Test
 {
-	GAMEOBJECT;
+	size_t dummy;
 };
 
 namespace render
@@ -31,7 +31,6 @@ namespace render
 
 struct Spawner
 {
-	GAMEOBJECT;
 };
 
 namespace game
