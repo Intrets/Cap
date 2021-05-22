@@ -9,6 +9,7 @@ set(MODULE_FILES
 	Signature
 	GameObject
 	Game
+	entt
 )
 
 make_module(${MODULE_NAME} "${MODULE_FILES}")

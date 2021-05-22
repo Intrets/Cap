@@ -14,8 +14,15 @@
 #include "GameObject.h"
 #include "Signature.h"
 #include "Game.h"
+#include "entt.h"
 
-constexpr auto WORLD_SIZE = 3;
+constexpr auto WORLD_SIZE = 1'000'000;
+
+template<int n>
+struct Test
+{
+	GAMEOBJECT;
+};
 
 namespace render
 {
@@ -100,6 +107,8 @@ namespace game
 	{
 	private:
 		Everything everything;
+
+		entt::registry registry;
 
 	public:
 		int32_t tick = 0;

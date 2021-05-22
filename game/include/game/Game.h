@@ -15,13 +15,8 @@
 using SizeAlias = size_t;
 
 //#define POINTER_INDIRECTION
-//#define GAMEOBJECT_POINTER_CACHE
 
-#ifdef GAMEOBJECT_POINTER_CACHE
-#define GAMEOBJECT SizeAlias index = 0; game::Everything::indirection* indirectionCache;
-#else
 #define GAMEOBJECT SizeAlias index = 0;
-#endif // GAMEOBJECT_POINTER_CACHE
 
 namespace game
 {
@@ -165,7 +160,7 @@ namespace game
 		};
 
 		std::vector<RawData> data{ SIZE, { *this } };
-		std::vector<indirection> indirectionMap{};
+		std::vector<indirection> indirectionMap{ {} };
 		std::vector<size_t> freeIndirections{};
 
 		inline WeakObject make();
@@ -187,7 +182,7 @@ namespace game
 		template<class F>
 		inline void run(F f);
 
-		Everything();
+		Everything() = default;
 		~Everything() = default;
 
 		NOCOPYMOVE(Everything);
@@ -290,11 +285,7 @@ namespace game
 
 		auto& obj = this->get<T>(this->index);
 
-#ifdef GAMEOBJECT_POINTER_CACHE
-		obj = T{ i, &this->parent.indirectionMap[i], std::forward<Args>(args)... };
-#else
 		obj = T{ i, std::forward<Args>(args)... };
-#endif // GAMEOBJECT_POINTER_CACHE
 
 		return { this->index++, &obj };
 	}
@@ -317,14 +308,6 @@ namespace game
 		this->freeIndirections.push_back(i);
 	}
 
-	inline Everything::Everything() {
-#ifdef GAMEOBJECT_POINTER_CACHE
-		this->indirectionMap.resize(100);
-		this->freeIndirections.resize(100);
-		std::iota(this->freeIndirections.begin(), this->freeIndirections.end(), 0);
-#endif // GAMEOBJECT_POINTER_CACHE
-	}
-
 	template<class T, class... Args>
 	inline T& Everything::add(SizeAlias i, Args&&... args) {
 		auto [index, ptr] = this->data[component_index_v<T>].add<T>(i, std::forward<Args>(args)...);
@@ -333,11 +316,6 @@ namespace game
 #ifdef POINTER_INDIRECTION
 		this->indirectionMap[i].ptrs[component_index_v<T>] = ptr;
 #endif // POINTER_INDIRECTION
-
-#ifdef GAMEOBJECT_POINTER_CACHE
-		assert(ptr->indirectionCache == &this->indirectionMap[i]);
-		ptr->indirectionCache = &this->indirectionMap[i];
-#endif // GAMEOBJECT_POINTER_CACHE
 		return *ptr;
 	}
 
@@ -353,7 +331,8 @@ namespace game
 
 	template<class T>
 	inline bool Everything::has(SizeAlias i) {
-		return this->indirectionMap[i].signature.test(component_index<T>::val);
+		return this->indirectionMap[i].index[component_index_v<T>] != 0;
+		//return this->indirectionMap[i].signature.test(component_index_v<T>);
 	}
 
 	template<class F>
@@ -386,14 +365,6 @@ namespace game
 	}
 
 	inline WeakObject Everything::make() {
-#ifdef GAMEOBJECT_POINTER_CACHE
-		if (this->freeIndirections.empty()) {
-			std::cerr << "fatal error: out of static limit of objects\n";
-			exit(1);
-		}
-#endif // GAMEOBJECT_POINTER_CACHE
-
-
 		if (!this->freeIndirections.empty()) {
 			size_t i = this->freeIndirections.back();
 			this->freeIndirections.pop_back();

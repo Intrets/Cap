@@ -30,7 +30,7 @@ namespace game
 		// Tick info
 		// ---------
 
-		ui::constrainHeight({ ui::SIZETYPE::FH, 16.3f });
+		ui::constrainHeight({ ui::SIZETYPE::FH, 36.3f });
 		ui::background(COLORS::UI::BACKGROUND);
 		auto tickInfo = ui::textDisplayMulti("TODO: add bind");
 
