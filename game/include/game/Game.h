@@ -17,7 +17,7 @@ using SizeAlias = size_t;
 
 namespace game
 {
-	static const size_t SIZE = 64;
+	constexpr size_t SIZE = 64;
 	using SignatureType = std::bitset<SIZE>;
 
 	struct Everything;
@@ -47,8 +47,12 @@ namespace game
 		std::vector<std::byte> data{};
 		std::vector<SizeAlias> indices{};
 
+		void(*objectDestructor)(void*) = nullptr;
+
 		RawData() = delete;
 		RawData(Everything& p) : parent(p) {};
+
+		~RawData();
 
 		DEFAULTCOPYMOVE(RawData);
 
@@ -57,10 +61,12 @@ namespace game
 
 		// returns the index of the component owning the object that was moved
 		// or optionally nothing if the last element was removed (no moving needed)
-		inline std::optional<SizeAlias> remove_untyped(SizeAlias i);
+		inline std::optional<SizeAlias> removeUntyped(SizeAlias i);
 
 		template<class T>
 		inline T& get(SizeAlias i);
+
+		inline void* getUntyped(SizeAlias i);
 
 		inline SizeAlias getIndex(SizeAlias i);
 
@@ -83,15 +89,28 @@ namespace game
 		inline bool has();
 	};
 
+	struct UniqueObject : WeakObject
+	{
+		UniqueObject(WeakObject&& other);
+
+		UniqueObject(UniqueObject&& other);
+		UniqueObject& operator=(UniqueObject&& other);
+
+		UniqueObject() = default;
+		~UniqueObject();
+
+		NOCOPY(UniqueObject);
+	};
+
 	struct Everything
 	{
-		struct counter
+		struct component_counter
 		{
 			static inline size_t t = 0;
 		};
 
 		template<class T>
-		struct component_index : counter
+		struct component_index : component_counter
 		{
 			static inline size_t getVal() {
 				assert(t < SIZE);
@@ -129,10 +148,11 @@ namespace game
 		std::vector<RawData> data{ SIZE, { *this } };
 		std::vector<size_t> freeIndirections{};
 
-		std::vector<SignatureType> signatures{};
+		std::vector<SignatureType> signatures{ 0 };
 		std::array<std::vector<SizeAlias>, SIZE> dataIndices;
 
 		inline WeakObject make();
+		inline UniqueObject makeUnique();
 
 		inline void remove(SizeAlias i);
 
@@ -158,60 +178,73 @@ namespace game
 		template<class... Ms>
 		size_t selectPivot();
 
-		Everything() = default;
+		size_t getTypeCount();
+
+		Everything();
 		~Everything() = default;
 
 		NOCOPYMOVE(Everything);
 	};
 
-	template<class M, class... Ms>
+	template<class... Ms>
 	struct Match
 	{
 		WeakObject obj;
 
 		template<class T>
 		inline T& get() {
-			static_assert(te::contains_v<te::list<M, Ms...>, T>);
+			static_assert(te::contains_v<te::list<Ms...>, T>);
 			return this->obj.get<T>();
 		};
 
 		template<class F, class L, class... Args>
 		static inline void run(Everything& e, F f, Args... args) {
-			size_t pivot = e.selectPivot<M, Ms...>();
+			size_t pivot = e.selectPivot<Ms...>();
 
 			auto& g = e.gets(pivot);
 			const size_t end = g.index;
 
-			if constexpr (sizeof...(Ms) == 0) {
-				for (SizeAlias i = 0; i < end; i++) {
+			if constexpr (sizeof...(Ms) == 1) {
+				for (SizeAlias i = 1; i < end; i++) {
 					auto index = g.getIndex(i);
-					te::Loop::run<Everything, F, L, Match<M, Ms...>, Args...>(e, f, Match<M, Ms...>{ { index, & e } }, args...);
+					te::Loop::run<Everything, F, L, Match<Ms...>, Args...>(e, f, Match<Ms...>{ { index, & e } }, args...);
 				}
 			}
 			else {
-				for (SizeAlias i = 0; i < end; i++) {
+				for (SizeAlias i = 1; i < end; i++) {
 					auto index = g.getIndex(i);
 
 					if (e.has<Ms...>(index)) {
-						te::Loop::run<Everything, F, L, Match<M, Ms...>, Args...>(e, f, Match<M, Ms...>{ { index, & e } }, args...);
+						te::Loop::run<Everything, F, L, Match<Ms...>, Args...>(e, f, Match<Ms...>{ { index, & e } }, args...);
 					}
 				}
 			}
 		};
 	};
 
-
 	template<class T>
 	inline void RawData::remove(SizeAlias i) {
-		assert(this->objectSize == 0 || (this->objectSize == aligned_sizeof<T>::get()));
-		this->remove_untyped(i);
+		assert(i != 0);
+		assert(i < this->index);
+		assert(this->objectSize != 0);
+		assert(this->objectSize == aligned_sizeof<T>::get());
+		this->removeUntyped(i);
 	}
 
-	inline std::optional<SizeAlias> RawData::remove_untyped(SizeAlias i) {
+	inline RawData::~RawData() {
+		for (size_t i = 1; i < this->index; i++) {
+			this->objectDestructor(this->getUntyped(i));
+		}
+	}
+
+	inline std::optional<SizeAlias> RawData::removeUntyped(SizeAlias i) {
+		assert(i != 0);
 		assert(i < this->index);
 
 		size_t targetOffset = i * this->objectSize;
 		size_t sourceOffset = --this->index * this->objectSize;
+
+		this->objectDestructor(&this->data[targetOffset]);
 
 		if (targetOffset == sourceOffset) {
 			this->indices.pop_back();
@@ -229,17 +262,25 @@ namespace game
 
 	template<class T>
 	inline T& RawData::get(SizeAlias i) {
-		assert(this->objectSize == 0 || (this->objectSize == aligned_sizeof<T>::get()));
+		assert(i != 0);
+		assert(i < this->reservedObjects);
 		return *reinterpret_cast<T*>(&this->data[aligned_sizeof<T>::get() * i]);
 	}
 
+	inline void* RawData::getUntyped(SizeAlias i) {
+		assert(i != 0);
+		assert(i < this->reservedObjects);
+		return static_cast<void*>(&this->data[this->objectSize * i]);
+	}
+
 	inline SizeAlias RawData::getIndex(SizeAlias i) {
+		assert(i != 0);
+		assert(i < this->index);
 		return this->indices[i];
 	}
 
 	template<class T, class... Args>
 	inline std::pair<SizeAlias, T*> RawData::add(SizeAlias i, Args&&... args) {
-		assert(this->objectSize == 0 || (this->objectSize == aligned_sizeof<T>::get()));
 		this->objectSize = aligned_sizeof<T>::get();
 
 		if (this->reservedObjects == 0) {
@@ -247,24 +288,36 @@ namespace game
 			this->index = 1;
 			this->indices.push_back(0);
 			this->data.resize(this->reservedObjects * aligned_sizeof<T>::get());
+
+			this->objectDestructor = [](void* obj) {
+				static_cast<T*>(obj)->~T();
+			};
 		}
 		else if (this->index >= this->reservedObjects) {
 			this->reservedObjects *= 2;
 			this->data.resize(this->reservedObjects * aligned_sizeof<T>::get());
 		}
+
+		assert(this->objectSize == aligned_sizeof<T>::get());
+		assert(this->objectSize != 0);
+
 		this->indices.push_back(i);
 
 		auto& obj = this->get<T>(this->index);
 
-		obj = T{ std::forward<Args>(args)... };
+		new (&obj) T{ std::forward<Args>(args)... };
 
 		return { this->index++, &obj };
 	}
 
 	inline void Everything::remove(SizeAlias i) {
-		for (size_t type = 0; type < SIZE; type++) {
+		if (i == 0) {
+			return;
+		}
+
+		for (size_t type = 0; type < this->getTypeCount(); type++) {
 			if (this->has(i, type)) {
-				auto maybeChanged = this->data[type].remove_untyped(this->dataIndices[type][i]);
+				auto maybeChanged = this->data[type].removeUntyped(this->dataIndices[type][i]);
 				if (maybeChanged.has_value()) {
 					auto changed = maybeChanged.value();
 					this->dataIndices[type][changed] = this->dataIndices[type][i];
@@ -284,6 +337,16 @@ namespace game
 
 	inline bool Everything::has(SizeAlias i, size_t type) {
 		return this->dataIndices[type][i] != 0;
+	}
+
+	inline size_t Everything::getTypeCount() {
+		return component_counter::t;
+	}
+
+	inline Everything::Everything() {
+		for (size_t type = 0; type < SIZE; type++) {
+			this->dataIndices[type].push_back(0);
+		}
 	}
 
 	template<class T, class... Args>
@@ -359,10 +422,14 @@ namespace game
 		}
 		else {
 			this->signatures.push_back(0);
-			for (size_t type = 0; type < SIZE; type++) {
+			for (size_t type = 0; type < this->getTypeCount(); type++) {
 				this->dataIndices[type].push_back(0);
 			}
 			return { this->signatures.size() - 1, this };
 		}
+	}
+
+	inline UniqueObject Everything::makeUnique() {
+		return this->make();
 	}
 }

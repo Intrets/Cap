@@ -14,9 +14,16 @@
 #include "GameObject.h"
 #include "Signature.h"
 #include "Game.h"
-#include "entt.h"
 
 constexpr auto WORLD_SIZE = 1'000;
+
+struct D
+{
+	size_t val;
+	~D() {
+		std::cout << "D destructor called: " << val << "\n";
+	}
+};
 
 template<int n>
 struct Test
@@ -106,8 +113,6 @@ namespace game
 	{
 	private:
 		Everything everything;
-
-		entt::registry registry;
 
 	public:
 		int32_t tick = 0;

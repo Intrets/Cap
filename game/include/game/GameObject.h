@@ -14,8 +14,6 @@
 using SizeAlias = size_t;
 
 struct GameObjectProxy;
-struct WeakGameObject;
-struct UniqueGameObject;
 struct GetEnum;
 
 struct ActionResult;
