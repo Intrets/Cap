@@ -15,12 +15,17 @@
 #include "Signature.h"
 #include "Game.h"
 
-constexpr auto WORLD_SIZE = 200000;
+constexpr auto WORLD_SIZE = 3;
 
 namespace render
 {
 	struct RenderInfo;
 }
+
+struct Spawner
+{
+	GAMEOBJECT;
+};
 
 namespace game
 {

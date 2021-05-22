@@ -5,6 +5,9 @@
 #include <bitset>
 #include <array>
 #include <utility>
+#include <stack>
+#include <iostream>
+#include <numeric>
 
 #include <tepp/tepp.h>
 #include <misc/Misc.h>
@@ -13,6 +16,12 @@ using SizeAlias = size_t;
 
 //#define POINTER_INDIRECTION
 //#define GAMEOBJECT_POINTER_CACHE
+
+#ifdef GAMEOBJECT_POINTER_CACHE
+#define GAMEOBJECT SizeAlias index = 0; game::Everything::indirection* indirectionCache;
+#else
+#define GAMEOBJECT SizeAlias index = 0;
+#endif // GAMEOBJECT_POINTER_CACHE
 
 namespace game
 {
@@ -42,6 +51,7 @@ namespace game
 		Everything& parent;
 		SizeAlias size = 0;
 		SizeAlias index = 0;
+		SizeAlias objectSize = 0;
 		std::vector<std::byte> data{};
 
 		RawData() = delete;
@@ -50,10 +60,17 @@ namespace game
 		DEFAULTCOPYMOVE(RawData);
 
 		template<class T>
-		inline T& get(SizeAlias i);
+		inline void remove(SizeAlias i);
+
+		// pair.first: the first sizeof(SizeAlias) bytes of the object stored at i.
+		// index (for indirectionMap) of the object to update
+		inline void* remove_untyped(SizeAlias i);
 
 		template<class T>
-		inline std::pair<SizeAlias, T*> add(SizeAlias i);
+		inline T& get(SizeAlias i);
+
+		template<class T, class... Args>
+		inline std::pair<SizeAlias, T*> add(SizeAlias i, Args&&... args);
 
 #ifdef POINTER_INDIRECTION
 		template<class T>
@@ -69,8 +86,8 @@ namespace game
 		template<class T>
 		inline T& get();
 
-		template<class T>
-		inline void add();
+		template<class T, class... Args>
+		inline T& add(Args&&... args);
 
 		template<class T>
 		inline bool has();
@@ -138,7 +155,7 @@ namespace game
 
 			template<class T>
 			inline bool has() {
-				return this->index[component_index_v<T>] != 0;
+				return this->signature.test(component_index_v<T>);
 			};
 
 			indirection() = default;
@@ -147,19 +164,16 @@ namespace game
 			DEFAULTCOPYMOVE(indirection);
 		};
 
-		std::vector<RawData> data{ SIZE, {*this} };
-
-#ifdef GAMEOBJECT_POINTER_CACHE
-		std::vector<indirection> indirectionMap{ 10'000'000 };
-#else
+		std::vector<RawData> data{ SIZE, { *this } };
 		std::vector<indirection> indirectionMap{};
-#endif // GAMEOBJECT_POINTER_CACHE
-
+		std::vector<size_t> freeIndirections{};
 
 		inline WeakObject make();
 
-		template<class T>
-		inline void add(SizeAlias i);
+		inline void remove(SizeAlias i);
+
+		template<class T, class... Args>
+		inline T& add(SizeAlias i, Args&&... args);
 
 		template<class T>
 		inline T& get(SizeAlias i);
@@ -172,6 +186,11 @@ namespace game
 
 		template<class F>
 		inline void run(F f);
+
+		Everything();
+		~Everything() = default;
+
+		NOCOPYMOVE(Everything);
 	};
 
 	template<class M, class... Ms>
@@ -219,7 +238,22 @@ namespace game
 
 
 	template<class T>
+	inline void RawData::remove(SizeAlias i) {
+		assert(this->objectSize == 0 || (this->objectSize == aligned_sizeof<T>::get()));
+		this->get<T>(i) = this->get<T>(--this->index);
+	}
+
+	inline void* RawData::remove_untyped(SizeAlias i) {
+		size_t targetOffset = i * this->objectSize;
+		size_t sourceOffset = --this->index * this->objectSize;
+		std::memcpy(&this->data[targetOffset], &this->data[sourceOffset], this->objectSize);
+
+		return &this->data[targetOffset];
+	}
+
+	template<class T>
 	inline T& RawData::get(SizeAlias i) {
+		assert(this->objectSize == 0 || (this->objectSize == aligned_sizeof<T>::get()));
 		return *reinterpret_cast<T*>(&this->data[aligned_sizeof<T>::get() * i]);
 	}
 
@@ -230,12 +264,15 @@ namespace game
 			auto& p = this->get<T>(i);
 			this->parent.indirectionMap[p.index].ptrs[Everything::component_index_v<T>] = &p;
 		}
-}
+	}
 #endif // POINTER_INDIRECTION
 
 
-	template<class T>
-	inline std::pair<SizeAlias, T*> RawData::add(SizeAlias i) {
+	template<class T, class... Args>
+	inline std::pair<SizeAlias, T*> RawData::add(SizeAlias i, Args&&... args) {
+		assert(this->objectSize == 0 || (this->objectSize == aligned_sizeof<T>::get()));
+		this->objectSize = aligned_sizeof<T>::get();
+
 		if (this->size == 0) {
 			this->size = 16;
 			this->data.resize(this->size * aligned_sizeof<T>::get());
@@ -253,14 +290,44 @@ namespace game
 
 		auto& obj = this->get<T>(this->index);
 
-		obj = T{};
-		obj.index = i;
+#ifdef GAMEOBJECT_POINTER_CACHE
+		obj = T{ i, &this->parent.indirectionMap[i], std::forward<Args>(args)... };
+#else
+		obj = T{ i, std::forward<Args>(args)... };
+#endif // GAMEOBJECT_POINTER_CACHE
 
 		return { this->index++, &obj };
 	}
-	template<class T>
-	inline void Everything::add(SizeAlias i) {
-		auto [index, ptr] = this->data[component_index_v<T>].add<T>(i);
+
+	inline void Everything::remove(SizeAlias i) {
+		auto& indirection = this->indirectionMap[i];
+		for (size_t type = 0; type < counter::t; type++) {
+			if (indirection.signature.test(type)) {
+				auto ptr = this->data[type].remove_untyped(indirection.index[type]);
+				auto index = *reinterpret_cast<SizeAlias*>(ptr);
+
+				this->indirectionMap[index].index[type] = index;
+
+#ifdef POINTER_INDIRECTION
+				this->indirectionMap[index].ptrs[type] = ptr;
+#endif // POINTER_INDIRECTION
+			}
+		}
+
+		this->freeIndirections.push_back(i);
+	}
+
+	inline Everything::Everything() {
+#ifdef GAMEOBJECT_POINTER_CACHE
+		this->indirectionMap.resize(100);
+		this->freeIndirections.resize(100);
+		std::iota(this->freeIndirections.begin(), this->freeIndirections.end(), 0);
+#endif // GAMEOBJECT_POINTER_CACHE
+	}
+
+	template<class T, class... Args>
+	inline T& Everything::add(SizeAlias i, Args&&... args) {
+		auto [index, ptr] = this->data[component_index_v<T>].add<T>(i, std::forward<Args>(args)...);
 		this->indirectionMap[i].index[component_index_v<T>] = index;
 		this->indirectionMap[i].signature.set(component_index_v<T>);
 #ifdef POINTER_INDIRECTION
@@ -268,37 +335,47 @@ namespace game
 #endif // POINTER_INDIRECTION
 
 #ifdef GAMEOBJECT_POINTER_CACHE
+		assert(ptr->indirectionCache == &this->indirectionMap[i]);
 		ptr->indirectionCache = &this->indirectionMap[i];
 #endif // GAMEOBJECT_POINTER_CACHE
+		return *ptr;
 	}
+
 	template<class T>
 	inline T& Everything::get(SizeAlias i) {
 		return this->indirectionMap[i].get<T>();
 	}
+
 	template<class T>
 	inline RawData& Everything::gets() {
 		return this->data[component_index<T>::val];
 	}
+
 	template<class T>
 	inline bool Everything::has(SizeAlias i) {
 		return this->indirectionMap[i].signature.test(component_index<T>::val);
 	}
+
 	template<class F>
 	inline void Everything::run(F f) {
 		te::Loop::run(*this, f);
 	}
+
 	template<class T>
 	inline T& WeakObject::get() {
 		return this->proxy->get<T>(this->index);
 	}
-	template<class T>
-	inline void WeakObject::add() {
-		this->proxy->add<T>(this->index);
+
+	template<class T, class... Args>
+	inline T& WeakObject::add(Args&&... args) {
+		return this->proxy->add<T>(this->index, std::forward<Args>(args)...);
 	}
+
 	template<class T>
 	inline bool WeakObject::has() {
 		return this->proxy->has<T>(this->index);
 	}
+
 	template<class T>
 	inline T& Everything::indirection::get() {
 #ifdef POINTER_INDIRECTION
@@ -307,14 +384,27 @@ namespace game
 		return this->proxy->gets<T>().get<T>(this->index[component_index_v<T>]);
 #endif // POINTER_INDIRECTION
 	}
-	inline WeakObject Everything::make() {
-		WeakObject res{ this->indirectionMap.size(), this };
 
+	inline WeakObject Everything::make() {
 #ifdef GAMEOBJECT_POINTER_CACHE
-		assert(this->indirectionMap.capacity() > this->indirectionMap.size());
+		if (this->freeIndirections.empty()) {
+			std::cerr << "fatal error: out of static limit of objects\n";
+			exit(1);
+		}
 #endif // GAMEOBJECT_POINTER_CACHE
 
-		this->indirectionMap.push_back({ this });
-		return res;
-	}
+
+		if (!this->freeIndirections.empty()) {
+			size_t i = this->freeIndirections.back();
+			this->freeIndirections.pop_back();
+
+			this->indirectionMap[i] = { this };
+
+			return { i, this };
 		}
+		else {
+			this->indirectionMap.push_back({ this });
+			return { this->indirectionMap.size() - 1, this };
+		}
+	}
+}

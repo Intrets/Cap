@@ -22,7 +22,6 @@ namespace game
 			});
 
 		Locator<misc::Timer>::ref().endTiming("new2");
-
 	}
 
 	void GameState::runTick() {
@@ -36,27 +35,51 @@ namespace game
 			}
 			});
 
+		this->everything.run([&](Match<Spawner, GamePosition>& e) {
+			//auto p = this->everything.make();
+			//p.add<GamePosition>();
+			//p.add<GraphicsTile>();
+
+			//p.get<GamePosition>().pos = e.get<GamePosition>().pos + glm::ivec2(1, 0);
+			//p.get<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
+			});
+
+
 		this->tick++;
 	}
-
-	struct Void {};
 
 	GameState::GameState() {
 		{
 			{
-				auto p = this->everything.make();
-				p.add<Brain>();
-				p.add<Vicinity>();
-				p.add<GraphicsTile>();
-				p.add<Locomotion>();
-				p.add<GamePosition>();
-
-				p.get<GamePosition>().pos = { 5, 5 };
-
-				p.get<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("gnome.dds");
-
-				p.get<Locomotion>().fitness = 10;
+				auto p2 = this->everything.make();
+				p2.add<GamePosition>(glm::ivec2(5, 5));
+				p2.add<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
 			}
+
+			{
+				auto p = this->everything.make();
+				p.add<GamePosition>();
+				p.add<GraphicsTile>();
+				p.add<Spawner>();
+
+				p.get<GamePosition>().pos = glm::ivec2(5, 6);
+				p.get<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("s_block.dds");
+			}
+
+			//{
+			//	auto p = this->everything.make();
+			//	//p.add<Brain>();
+			//	//p.add<Vicinity>();
+			//	p.add<GraphicsTile>();
+			//	//p.add<Locomotion>();
+			//	p.add<GamePosition>();
+
+			//	p.get<GamePosition>().pos = { 5, 5 };
+
+			//	p.get<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("gnome.dds");
+
+			//	//p.get<Locomotion>().fitness = 10;
+			//}
 
 			//Action recallFood;
 			//recallFood.requirements = {};

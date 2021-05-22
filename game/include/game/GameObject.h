@@ -44,30 +44,21 @@ struct ActionResult
 
 struct GamePosition
 {
-	SizeAlias index = 0;
-#ifdef GAMEOBJECT_POINTER_CACHE
-	game::Everything::indirection* indirectionCache;
-#endif // GAMEOBJECT_POINTER_CACHE
+	GAMEOBJECT;
 
 	glm::ivec2 pos;
 };
 
 struct GraphicsTile
 {
-	SizeAlias index = 0;
-#ifdef GAMEOBJECT_POINTER_CACHE
-	game::Everything::indirection* indirectionCache;
-#endif // GAMEOBJECT_POINTER_CACHE
+	GAMEOBJECT;
 
 	int32_t blockID;
 };
 
 struct Brain
 {
-	SizeAlias index = 0;
-#ifdef GAMEOBJECT_POINTER_CACHE
-	game::Everything::indirection* indirectionCache;
-#endif // GAMEOBJECT_POINTER_CACHE
+	GAMEOBJECT;
 
 	int32_t happiness = 0;
 	int32_t energy = 0;
@@ -83,10 +74,7 @@ struct Brain
 
 struct Possession
 {
-	SizeAlias index = 0;
-#ifdef GAMEOBJECT_POINTER_CACHE
-	game::Everything::indirection* indirectionCache;
-#endif // GAMEOBJECT_POINTER_CACHE
+	GAMEOBJECT;
 
 	//std::vector<UniqueReference<Object, Object>> inventory{};
 
@@ -98,10 +86,7 @@ struct Possession
 
 struct Vicinity
 {
-	SizeAlias index = 0;
-#ifdef GAMEOBJECT_POINTER_CACHE
-	game::Everything::indirection* indirectionCache;
-#endif // GAMEOBJECT_POINTER_CACHE
+	GAMEOBJECT;
 
 	//std::vector<WeakReference<Object, Object>> vicinity;
 	//std::unique_ptr<GameObject> test;
@@ -109,20 +94,14 @@ struct Vicinity
 
 struct Nutrition
 {
-	SizeAlias index = 0;
-#ifdef GAMEOBJECT_POINTER_CACHE
-	game::Everything::indirection* indirectionCache;
-#endif // GAMEOBJECT_POINTER_CACHE
+	GAMEOBJECT;
 
 	int32_t energy = 0;
 };
 
 struct Locomotion
 {
-	SizeAlias index = 0;
-#ifdef GAMEOBJECT_POINTER_CACHE
-	game::Everything::indirection* indirectionCache;
-#endif // GAMEOBJECT_POINTER_CACHE
+	GAMEOBJECT;
 
 	int32_t cooldown = 0;
 	int32_t fitness = 60;
