@@ -17,20 +17,6 @@
 
 constexpr auto WORLD_SIZE = 1'000;
 
-struct D
-{
-	size_t val;
-	~D() {
-		std::cout << "D destructor called: " << val << "\n";
-	}
-};
-
-template<int n>
-struct Test
-{
-	size_t dummy;
-};
-
 namespace render
 {
 	struct RenderInfo;

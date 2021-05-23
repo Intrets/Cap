@@ -55,30 +55,10 @@ namespace game
 
 	GameState::GameState() {
 		{
-			auto p = this->everything.makeUnique();
-
-			p.add<D>(123u);
-
-			p = this->everything.make();
-
-			p.add<D>(123u);
-		}
-
-		{
 			{
 				auto p2 = this->everything.make();
 				p2.add<GamePosition>(glm::ivec2(5, 5));
 				p2.add<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
-				p2.add<Test<0>>();
-				p2.add<Test<1>>();
-				p2.add<Test<2>>();
-				p2.add<Test<3>>();
-				p2.add<Test<4>>();
-				p2.add<Test<5>>();
-				p2.add<Test<6>>();
-				p2.add<Test<7>>();
-				p2.add<Test<8>>();
-				p2.add<Test<9>>();
 			}
 
 			{
@@ -130,18 +110,6 @@ namespace game
 
 				p2.get<GamePosition>().pos = glm::ivec2(i, j);
 				p2.get<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
-				p2.add<Test<0>>();
-				p2.add<Test<1>>();
-				p2.add<Test<2>>();
-				p2.add<Test<3>>();
-				p2.add<Test<4>>();
-				p2.add<Test<5>>();
-				p2.add<Test<6>>();
-				p2.add<Test<7>>();
-				p2.add<Test<8>>();
-				p2.add<Test<9>>();
-
-
 				//this->world[i][j] = ref;
 			}
 		}
@@ -153,16 +121,6 @@ namespace game
 				auto p2 = this->everything.make();
 				p2.add<GamePosition>();
 				p2.add<GraphicsTile>();
-				p2.add<Test<0>>();
-				p2.add<Test<1>>();
-				p2.add<Test<2>>();
-				p2.add<Test<3>>();
-				p2.add<Test<4>>();
-				p2.add<Test<5>>();
-				p2.add<Test<6>>();
-				p2.add<Test<7>>();
-				p2.add<Test<8>>();
-				p2.add<Test<9>>();
 
 				p2.get<GamePosition>().pos = glm::ivec2(i, j);
 				p2.get<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
@@ -176,16 +134,6 @@ namespace game
 				auto p2 = this->everything.make();
 				p2.add<GamePosition>();
 				p2.add<GraphicsTile>();
-				p2.add<Test<0>>();
-				p2.add<Test<1>>();
-				p2.add<Test<2>>();
-				p2.add<Test<3>>();
-				p2.add<Test<4>>();
-				p2.add<Test<5>>();
-				p2.add<Test<6>>();
-				p2.add<Test<7>>();
-				p2.add<Test<8>>();
-				p2.add<Test<9>>();
 
 				p2.get<GamePosition>().pos = glm::ivec2(i, j);
 				p2.get<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
@@ -193,7 +141,6 @@ namespace game
 		}
 
 		auto p = this->everything.make();
-		p.add<Test<111>>();
 		p.add<GamePosition>();
 		p.add<GraphicsTile>();
 
@@ -210,16 +157,6 @@ namespace game
 				auto p2 = this->everything.make();
 				p2.add<GamePosition>();
 				p2.add<GraphicsTile>();
-				p2.add<Test<0>>();
-				p2.add<Test<1>>();
-				p2.add<Test<2>>();
-				p2.add<Test<3>>();
-				p2.add<Test<4>>();
-				p2.add<Test<5>>();
-				p2.add<Test<6>>();
-				p2.add<Test<7>>();
-				p2.add<Test<8>>();
-				p2.add<Test<9>>();
 
 				p2.get<GamePosition>().pos = glm::ivec2(i, j);
 				p2.get<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");

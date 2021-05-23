@@ -9,6 +9,7 @@
 #include <iostream>
 #include <numeric>
 #include <optional>
+#include <unordered_map>
 
 #include <tepp/tepp.h>
 #include <misc/Misc.h>
@@ -68,7 +69,7 @@ namespace game
 
 		inline void* getUntyped(SizeAlias i);
 
-		inline SizeAlias getIndex(SizeAlias i);
+		inline SizeAlias getIndex(SizeAlias i) const;
 
 		template<class T, class... Args>
 		inline std::pair<SizeAlias, T*> add(SizeAlias i, Args&&... args);
@@ -79,6 +80,11 @@ namespace game
 		SizeAlias index{ 0 };
 		Everything* proxy{ nullptr };
 
+		void deleteObject();
+
+		bool isNull() const;
+		bool isNotNull() const;
+
 		template<class T>
 		inline T& get();
 
@@ -86,7 +92,7 @@ namespace game
 		inline T& add(Args&&... args);
 
 		template<class T>
-		inline bool has();
+		inline bool has() const;
 	};
 
 	struct UniqueObject : WeakObject
@@ -100,6 +106,21 @@ namespace game
 		~UniqueObject();
 
 		NOCOPY(UniqueObject);
+	};
+
+	struct ManagedObject : WeakObject
+	{
+		void set(WeakObject const& other);
+		void set(UniqueObject const& other);
+
+		void invalidate();
+
+		ManagedObject(WeakObject&& other);
+
+		ManagedObject() = default;
+		~ManagedObject();
+
+		NOCOPYMOVE(ManagedObject);
 	};
 
 	struct Everything
@@ -151,8 +172,17 @@ namespace game
 		std::vector<SignatureType> signatures{ 0 };
 		std::array<std::vector<SizeAlias>, SIZE> dataIndices;
 
+		using ManagedObjects = std::unordered_multimap<SizeAlias, ManagedObject*>;
+
+		ManagedObjects managedObjects;
+
 		inline WeakObject make();
 		inline UniqueObject makeUnique();
+
+		void subscribe(ManagedObject* obj, SizeAlias i);
+		void unsubscribe(ManagedObject* obj, SizeAlias i);
+
+		void invalidateManagedObjects(SizeAlias i);
 
 		inline void remove(SizeAlias i);
 
@@ -168,9 +198,9 @@ namespace game
 		inline RawData& gets(size_t type);
 
 		template<class... Ts>
-		inline bool has(SizeAlias i);
+		inline bool has(SizeAlias i) const;
 
-		inline bool has(SizeAlias i, size_t type);
+		inline bool has(SizeAlias i, size_t type) const;
 
 		template<class F>
 		inline void run(F f);
@@ -273,7 +303,7 @@ namespace game
 		return static_cast<void*>(&this->data[this->objectSize * i]);
 	}
 
-	inline SizeAlias RawData::getIndex(SizeAlias i) {
+	inline SizeAlias RawData::getIndex(SizeAlias i) const {
 		assert(i != 0);
 		assert(i < this->index);
 		return this->indices[i];
@@ -326,6 +356,8 @@ namespace game
 			}
 		}
 
+		this->invalidateManagedObjects(i);
+
 		this->signatures[i].reset();
 
 		this->freeIndirections.push_back(i);
@@ -335,7 +367,7 @@ namespace game
 		return this->data[type];
 	}
 
-	inline bool Everything::has(SizeAlias i, size_t type) {
+	inline bool Everything::has(SizeAlias i, size_t type) const {
 		return this->dataIndices[type][i] != 0;
 	}
 
@@ -368,7 +400,7 @@ namespace game
 	}
 
 	template<class... Ts>
-	inline bool Everything::has(SizeAlias i) {
+	inline bool Everything::has(SizeAlias i) const {
 		if constexpr (sizeof...(Ts) == 1) {
 			return this->has(i, component_index_v<Ts...>);
 		}
@@ -409,7 +441,7 @@ namespace game
 	}
 
 	template<class T>
-	inline bool WeakObject::has() {
+	inline bool WeakObject::has() const {
 		return this->proxy->has<T>(this->index);
 	}
 
