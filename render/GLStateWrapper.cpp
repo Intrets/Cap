@@ -9,7 +9,7 @@ namespace ogs
 		this->setBlendFunc(BLEND_FUNC::SRC_ALPHA__ONE_MINUS_SRC_ALPHA);
 		this->setDepthTest(DEPTH_TEST::ENABLED);
 		this->setDepthFunc(DEPTH_FUNC::LESS);
-		this->setPolygonMode(POLYGON_MODE::FILL, 0.0f);
+		this->setPolygonMode(POLYGON_MODE::FILL);
 
 		glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, &this->MAX_COLOR_ATTACHMENTS);
 	}
@@ -25,7 +25,7 @@ namespace ogs
 			this->setDepthFunc(config.depthFunc);
 		}
 
-		this->setPolygonMode(config.polygonMode, config.pointSize);
+		this->setPolygonMode(config.polygonMode);
 	}
 
 	void State::setBlend(BLEND b) {
@@ -94,8 +94,12 @@ namespace ogs
 		}
 	}
 
-	void ogs::State::setPolygonMode(POLYGON_MODE mode, float pointSize) {
+	void ogs::State::setPolygonMode(POLYGON_MODE mode) {
 		if (this->configuration.polygonMode != mode) {
+			if (this->configuration.polygonMode == POLYGON_MODE::POINT) {
+				glDisable(GL_PROGRAM_POINT_SIZE);
+			}
+
 			this->configuration.polygonMode = mode;
 			switch (mode) {
 				case POLYGON_MODE::FILL:
@@ -106,10 +110,7 @@ namespace ogs
 					break;
 				case POLYGON_MODE::POINT:
 					glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
-					if (this->configuration.pointSize != pointSize) {
-						this->configuration.pointSize = pointSize;
-						glPointSize(pointSize);
-					}
+					glEnable(GL_PROGRAM_POINT_SIZE);
 					break;
 				default:
 					assert(0);

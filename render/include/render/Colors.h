@@ -3,6 +3,21 @@
 #include <wglm/glm.hpp>
 #include <string>
 
+namespace colors
+{
+	struct Color
+	{
+		uint32_t c;
+	};
+
+	static constexpr Color red = { 0xFF0000FF };
+	static constexpr Color green = { 0xFF00FF00 };
+	static constexpr Color blue = { 0xFFFF0000 };
+	static constexpr Color magenta = { 0xFFFF00FF };
+	static constexpr Color yellow = { 0xF00FFFFF };
+	static constexpr Color cyan = { 0xFFFFFF00 };
+}
+
 constexpr uint32_t char_to_hex(const char c) {
 	if (c >= '0' && c <= '9') {
 		return c - '0';
@@ -49,28 +64,27 @@ namespace COLORS
 	glm::vec4 hex(std::string h);
 	glm::vec4 hex(uint32_t h);
 
-	static glm::vec4 NICERED = hex("#ff4747"_hex);
+	static const glm::vec4 NICERED = hex("#ff4747"_hex);
 
 	namespace UI
 	{
-		static glm::vec4 CURSOR = rgb(191, 0, 0);
-		static glm::vec4 RED = rgb(255, 153, 153);
-		static glm::vec4 GREEN = rgb(153, 255, 153);
-		static glm::vec4 WINDOWBACKGROUND = rgb(193, 193, 157);
+		static const glm::vec4 CURSOR = rgb(191, 0, 0);
+		static const glm::vec4 RED = rgb(255, 153, 153);
+		static const glm::vec4 GREEN = rgb(153, 255, 153);
+		static const glm::vec4 WINDOWBACKGROUND = rgb(193, 193, 157);
 
 
-		static glm::vec4 TEXT = hex("#104070"_hex);
-		static glm::vec4 BACKGROUND = hex("#d7d7af"_hex);
-		static glm::vec4 FOREGROUND = hex("#CDCDA5"_hex);
-		static glm::vec4 FOCUSSED = hex("#e0dfbc"_hex);
+		static const glm::vec4 TEXT = hex("#104070"_hex);
+		static const glm::vec4 BACKGROUND = hex("#d7d7af"_hex);
+		static const glm::vec4 FOREGROUND = hex("#CDCDA5"_hex);
+		static const glm::vec4 FOCUSSED = hex("#e0dfbc"_hex);
 	}
 
 	namespace GR
 	{
-		static glm::vec4 SELECTION = rgba(50, 50, 255, 0.5);
-		static glm::vec4 HIGHLIGHT = rgba(50, 255, 50, 0.5);
-		static glm::vec4 HOVER = rgba(255, 255, 255, 0.5);
-		static glm::vec4 BLOCKED = rgba(255, 0, 0, 0.5);
-
+		static const glm::vec4 SELECTION = rgba(50, 50, 255, 0.5);
+		static const glm::vec4 HIGHLIGHT = rgba(50, 255, 50, 0.5);
+		static const glm::vec4 HOVER = rgba(255, 255, 255, 0.5);
+		static const glm::vec4 BLOCKED = rgba(255, 0, 0, 0.5);
 	}
 }

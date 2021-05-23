@@ -95,6 +95,6 @@ namespace ogs
 		void setBlendFunc(BLEND_FUNC func);
 		void setDepthTest(DEPTH_TEST test);
 		void setDepthFunc(DEPTH_FUNC func);
-		void setPolygonMode(POLYGON_MODE mode, float pointSize);
+		void setPolygonMode(POLYGON_MODE mode);
 	};
 }

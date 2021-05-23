@@ -5,6 +5,7 @@
 #include "infos/DebugRenderInfo.h"
 
 #include <mem/Locator.h>
+#include <misc/Option.h>
 
 void render::DebugRenderer::render(
 	DebugRenderInfo const& info,
@@ -15,11 +16,14 @@ void render::DebugRenderer::render(
 	this->VAO.bind();
 	this->program.use();
 
+	float scale = misc::Option<misc::OPTION::CL_VIEWPORTSCALE, float>::getVal();
+
 	if (!info.world.lines.lines.empty()) {
 		auto config = ogs::DebugLineConfiguration();
 		Locator<ogs::State>::ref().setState(config);
 
 		this->VP.set(cameraInfo.VP);
+		this->pointSize.set(1.0f);
 
 		this->points.set(info.world.lines.lines);
 
@@ -37,6 +41,7 @@ void render::DebugRenderer::render(
 		Locator<ogs::State>::ref().setState(config);
 
 		this->VP.set(cameraInfo.VP);
+		this->pointSize.set(50.0f / scale);
 
 		this->points.set(info.world.points.points);
 
@@ -53,6 +58,7 @@ void render::DebugRenderer::render(
 		Locator<ogs::State>::ref().setState(config);
 
 		this->VP.set(glm::mat4(1.0f));
+		this->pointSize.set(1.0f);
 
 		this->points.set(info.screen.lines.lines);
 
@@ -70,6 +76,7 @@ void render::DebugRenderer::render(
 		Locator<ogs::State>::ref().setState(config);
 
 		this->VP.set(glm::mat4(1.0f));
+		this->pointSize.set(1.0f);
 
 		this->points.set(info.screen.points.points);
 

@@ -10,6 +10,8 @@
 
 #include <iostream>
 
+#include "Colors.h"
+
 struct GLFWwindow;
 
 namespace render
@@ -177,6 +179,35 @@ namespace render
 
 				VAO_impl::Attribute++;
 				VAO_impl::Offset += sizeof(float) * size;
+			};
+		};
+
+		template<int32_t size>
+		struct VInfo<colors::Color, size>
+		{
+			static void apply() {
+				// used as a vec4 in shader, makes no sense to have multiple
+				static_assert(size == 1);
+				std::cout << "    color attribute\n";
+				std::cout
+					<< "    attribute: " << VAO_impl::Attribute
+					<< " size: " << size
+					<< " stride: " << VAO_impl::Stride
+					<< " offset: " << VAO_impl::Offset
+					<< " divisor: " << VAO_impl::Divisor << "\n";
+				glVertexAttribPointer(
+					VAO_impl::Attribute,
+					4,
+					GL_UNSIGNED_BYTE,
+					GL_TRUE,
+					VAO_impl::Stride,
+					(void*)VAO_impl::Offset
+				);
+				glVertexAttribDivisor(VAO_impl::Attribute, VAO_impl::Divisor);
+				glEnableVertexAttribArray(VAO_impl::Attribute);
+
+				VAO_impl::Attribute++;
+				VAO_impl::Offset += sizeof(colors::Color) * size;
 			};
 		};
 
