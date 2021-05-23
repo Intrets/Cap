@@ -196,9 +196,9 @@ namespace ui
 
 	void State::addUI(UniqueReference<Base, Base> ref) {
 		ref.get()->addOnHoverBind({ CONTROL::KEY::MOUSE_POS_CHANGED_TOPLEVEL }, [](PlayerInfo& playerInfo, Base* self_) -> CallBackBindResult
-		{
-			return BIND::RESULT::CONSUME;
-		});
+			{
+				return BIND::RESULT::CONSUME;
+			});
 		this->UIsBuffer.push_back(std::move(ref));
 	}
 
@@ -226,9 +226,9 @@ namespace ui
 
 		this->namedUIsBuffer[name] = f();
 		this->namedUIsBuffer[name].get()->addOnHoverBind({ CONTROL::KEY::MOUSE_POS_CHANGED_TOPLEVEL }, [](PlayerInfo& playerInfo, Base* self_) -> CallBackBindResult
-		{
-			return BIND::RESULT::CONSUME;
-		});
+			{
+				return BIND::RESULT::CONSUME;
+			});
 		return true;
 	}
 
@@ -236,9 +236,9 @@ namespace ui
 		this->closeNamedUI(name);
 
 		ref.get()->addOnHoverBind({ CONTROL::KEY::MOUSE_POS_CHANGED_TOPLEVEL }, [](PlayerInfo& playerInfo, Base* self_) -> CallBackBindResult
-		{
-			return BIND::RESULT::CONSUME;
-		});
+			{
+				return BIND::RESULT::CONSUME;
+			});
 
 		this->namedUIsBuffer[name] = std::move(ref);
 	}
@@ -293,11 +293,11 @@ namespace ui
 
 			hideable();
 			window("Inventory",
-				   {0.7f, 0.7f, 1.0f, 1.0f},
-				   WINDOW::TYPE::MINIMISE |
-				   WINDOW::TYPE::MOVE |
-				   WINDOW::TYPE::RESIZE |
-				   WINDOW::TYPE::HIDE);
+				{ 0.7f, 0.7f, 1.0f, 1.0f },
+				WINDOW::TYPE::MINIMISE |
+				WINDOW::TYPE::MOVE |
+				WINDOW::TYPE::RESIZE |
+				WINDOW::TYPE::HIDE);
 
 			constrainHeight({ SIZETYPE::FH, 1.2f });
 			textButton("test button");
@@ -341,47 +341,61 @@ namespace ui
 		//	this->addUI(UIO2::Global::pop());
 		//}
 
+		{
+			UniqueReference<Base, Invisible> someBinds = Global::getManager().makeUniqueRef<Invisible>();
+
+			someBinds.get()->addGlobalBind(
+				{ CONTROL::KEY::TOGGLE_DEBUG_RENDER },
+				[](PlayerInfo& playerInfo, Base* self_) -> CallBackBindResult
+				{
+					misc::Option<misc::OPTION::GR_DEBUG, bool>::toggle();
+					return BIND::RESULT::CONTINUE;
+				});
+
+			this->UIs.push_back(std::move(someBinds));
+		}
+
 		// wasd movement in world
 		{
 			UniqueReference<Base, Invisible> movement = Global::getManager().makeUniqueRef<Invisible>();
 
 			movement.get()->addGlobalBind({ CONTROL::KEY::LEFT, CONTROL::STATE::PRESSED | CONTROL::STATE::DOWN }, [&](PlayerInfo& playerInfo, Base* self_) -> CallBackBindResult
-			{
-				playerInfo.pos.x -= 0.2f;
-				return BIND::RESULT::CONTINUE;
-			});
+				{
+					playerInfo.pos.x -= 0.2f;
+					return BIND::RESULT::CONTINUE;
+				});
 
 			movement.get()->addGlobalBind({ CONTROL::KEY::RIGHT, CONTROL::STATE::PRESSED | CONTROL::STATE::DOWN }, [&](PlayerInfo& playerInfo, Base* self_) -> CallBackBindResult
-			{
-				playerInfo.pos.x += 0.2f;
-				return BIND::RESULT::CONTINUE;
-			});
+				{
+					playerInfo.pos.x += 0.2f;
+					return BIND::RESULT::CONTINUE;
+				});
 
 			movement.get()->addGlobalBind({ CONTROL::KEY::DOWN, CONTROL::STATE::PRESSED | CONTROL::STATE::DOWN }, [&](PlayerInfo& playerInfo, Base* self_) -> CallBackBindResult
-			{
-				playerInfo.pos.y -= 0.2f;
-				return BIND::RESULT::CONTINUE;
-			});
+				{
+					playerInfo.pos.y -= 0.2f;
+					return BIND::RESULT::CONTINUE;
+				});
 
 			movement.get()->addGlobalBind({ CONTROL::KEY::UP, CONTROL::STATE::PRESSED | CONTROL::STATE::DOWN }, [&](PlayerInfo& playerInfo, Base* self_) -> CallBackBindResult
-			{
-				playerInfo.pos.y += 0.2f;
-				return BIND::RESULT::CONTINUE;
-			});
+				{
+					playerInfo.pos.y += 0.2f;
+					return BIND::RESULT::CONTINUE;
+				});
 
 			movement.get()->addGlobalBind({ CONTROL::KEY::SCROLL_UP }, [&](PlayerInfo& playerInfo, Base* self_) -> CallBackBindResult
-			{
-				using viewport = misc::Option<misc::OPTION::CL_VIEWPORTSCALE, float>;
-				viewport::setVal(viewport::getVal() / 1.1f);
-				return BIND::RESULT::CONTINUE;
-			});
+				{
+					using viewport = misc::Option<misc::OPTION::CL_VIEWPORTSCALE, float>;
+					viewport::setVal(viewport::getVal() / 1.1f);
+					return BIND::RESULT::CONTINUE;
+				});
 
 			movement.get()->addGlobalBind({ CONTROL::KEY::SCROLL_DOWN }, [&](PlayerInfo& playerInfo, Base* self_) -> CallBackBindResult
-			{
-				using viewport = misc::Option<misc::OPTION::CL_VIEWPORTSCALE, float>;
-				viewport::setVal(viewport::getVal() * 1.1f);
-				return BIND::RESULT::CONTINUE;
-			});
+				{
+					using viewport = misc::Option<misc::OPTION::CL_VIEWPORTSCALE, float>;
+					viewport::setVal(viewport::getVal() * 1.1f);
+					return BIND::RESULT::CONTINUE;
+				});
 
 			this->UIs.push_back(std::move(movement));
 		}

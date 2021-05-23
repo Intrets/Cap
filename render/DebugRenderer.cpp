@@ -15,7 +15,6 @@ void render::DebugRenderer::render(
 	this->VAO.bind();
 	this->program.use();
 
-	// Draw debug points and lines in world space
 	if (!info.world.lines.lines.empty()) {
 		auto config = ogs::DebugLineConfiguration();
 		Locator<ogs::State>::ref().setState(config);
@@ -49,4 +48,39 @@ void render::DebugRenderer::render(
 			); }
 		);
 	}
+	if (!info.screen.lines.lines.empty()) {
+		auto config = ogs::DebugLineConfiguration();
+		Locator<ogs::State>::ref().setState(config);
+
+		this->VP.set(glm::mat4(1.0f));
+
+		this->points.set(info.screen.lines.lines);
+
+		target.draw(viewport, [&]() {
+			glDrawArrays(
+				GL_LINES,
+				0,
+				info.screen.lines.lines.size()
+			); }
+		);
+	}
+	if (!info.screen.points.points.empty()) {
+		auto config = ogs::DebugPointConfiguration();
+
+		Locator<ogs::State>::ref().setState(config);
+
+		this->VP.set(glm::mat4(1.0f));
+
+		this->points.set(info.screen.points.points);
+
+		target.draw(viewport, [&]() {
+			glDrawArrays(
+				GL_POINTS,
+				0,
+				info.screen.points.points.size()
+			); }
+		);
+	}
+
+	this->VAO.unbind();
 }

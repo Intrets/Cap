@@ -28,6 +28,7 @@ namespace game
 				for (size_t j = 0; j < WORLD_SIZE; j++) {
 					if (this->world->occupied(i, j)) {
 						Locator<render::DebugRenderInfo>::ref().world.addPoint(i + 0.5f, j + 0.5f);
+						Locator<render::DebugRenderInfo>::ref().world.addBox(i, j, i + 1.0f, j + 1.0f);
 					}
 				}
 			}
@@ -92,7 +93,7 @@ namespace game
 				p.add<GraphicsTile>();
 				p.add<Spawner>();
 
-				p.get<GamePosition>().pos = glm::ivec2(5, 6);
+				this->placeInWorld(p, { 5,6 });
 				p.get<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("s_block.dds");
 			}
 
@@ -104,7 +105,7 @@ namespace game
 				p.add<Locomotion>();
 				p.add<GamePosition>();
 
-				p.get<GamePosition>().pos = { 5, 5 };
+				this->placeInWorld(p, { 5,7 });
 
 				p.get<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("gnome.dds");
 
@@ -124,7 +125,7 @@ namespace game
 			////};
 		}
 
-		for (size_t i = 0; i < WORLD_SIZE; i++) {
+		for (size_t i = 1; i < WORLD_SIZE - 1; i++) {
 			//for (size_t j = 0; j < 30; j++) {
 			{
 				size_t j = 0;
@@ -132,13 +133,12 @@ namespace game
 				p2.add<GamePosition>();
 				p2.add<GraphicsTile>();
 
-				p2.get<GamePosition>().pos = glm::ivec2(i, j);
+				this->placeInWorld(p2, { i,j });
 				p2.get<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
-				//this->world[i][j] = ref;
 			}
 		}
 
-		for (size_t i = 0; i < WORLD_SIZE; i++) {
+		for (size_t i = 1; i < WORLD_SIZE - 1; i++) {
 			//for (size_t j = 0; j < 30; j++) {
 			{
 				int j = WORLD_SIZE - 1;
@@ -146,7 +146,7 @@ namespace game
 				p2.add<GamePosition>();
 				p2.add<GraphicsTile>();
 
-				p2.get<GamePosition>().pos = glm::ivec2(i, j);
+				this->placeInWorld(p2, { i,j });
 				p2.get<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
 			}
 		}
@@ -159,7 +159,7 @@ namespace game
 				p2.add<GamePosition>();
 				p2.add<GraphicsTile>();
 
-				p2.get<GamePosition>().pos = glm::ivec2(i, j);
+				this->placeInWorld(p2, { i,j });
 				p2.get<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
 			}
 		}
@@ -172,7 +172,7 @@ namespace game
 				p2.add<GamePosition>();
 				p2.add<GraphicsTile>();
 
-				p2.get<GamePosition>().pos = glm::ivec2(i, j);
+				this->placeInWorld(p2, { i,j });
 				p2.get<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
 			}
 		}

@@ -25,7 +25,7 @@ namespace ui
 		this->keyToControl[GLFW_KEY_LAST + GLFW_MOUSE_BUTTON_3].push_back(CONTROL::KEY::ACTION2);
 		this->keyToControl[GLFW_KEY_F7].push_back(CONTROL::KEY::TEST_SAVE);
 		this->keyToControl[GLFW_KEY_F8].push_back(CONTROL::KEY::TEST_LOAD);
-		this->keyToControl[GLFW_KEY_F9].push_back(CONTROL::KEY::TOGGLE_DEBUG);
+		this->keyToControl[GLFW_KEY_F9].push_back(CONTROL::KEY::TOGGLE_DEBUG_RENDER);
 		this->keyToControl[GLFW_KEY_ESCAPE].push_back(CONTROL::KEY::CANCEL);
 
 		this->keyToControl[GLFW_KEY_UP].push_back(CONTROL::KEY::TEXT_UP);

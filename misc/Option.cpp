@@ -19,6 +19,10 @@ namespace misc
 		initVal<int32_t>(OPTION::GR_FRAMERATE, 60, "gr_framerate", "target framerate");
 	}
 
+	void OptionManager::toggle(OPTION option) {
+		static_cast<OptionValue<bool>*>(this->data[static_cast<size_t>(option)].get())->toggle();
+	}
+
 	void OptionManager::readFromFile() {
 		std::ifstream file;
 

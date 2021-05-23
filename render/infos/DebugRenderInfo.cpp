@@ -35,6 +35,10 @@ void render::DebugRenderInfo::Data::addBox(glm::vec2 u, glm::vec2 d) {
 	this->addLine(d, d.x, u.y);
 }
 
+void render::DebugRenderInfo::Data::addBox(float x1, float y1, float x2, float y2) {
+	this->addBox({ x1,y1 }, { x2,y2 });
+}
+
 void render::DebugRenderInfo::Data::addBox(glm::vec2 p1, glm::vec2 p2, glm::vec2 p3, glm::vec2 p4) {
 	this->addLine(p1, p2);
 	this->addLine(p2, p3);

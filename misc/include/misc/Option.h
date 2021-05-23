@@ -33,6 +33,7 @@ namespace misc
 	public:
 		static T getVal();
 		static void setVal(T val);
+		static void toggle();
 	};
 
 	template<OPTION A, class T>
@@ -43,6 +44,12 @@ namespace misc
 	template<OPTION A, class T>
 	inline void Option<A, T>::setVal(T val) {
 		Locator<OptionManager>::get()->setVal(A, val);
+	}
+
+	template<OPTION A, class T>
+	inline void Option<A, T>::toggle() {
+		static_assert(std::is_same_v<T, bool>);
+		Locator<OptionManager>::get()->toggle(A);
 	}
 
 	class _OptionValueBase
@@ -89,6 +96,11 @@ namespace misc
 			this->val = val_;
 		};
 
+		void toggle() {
+			static_assert(std::is_same_v<T, bool>);
+			this->val = !this->val;
+		}
+
 		virtual std::string set(std::string) override;
 		std::string type();
 
@@ -121,6 +133,8 @@ namespace misc
 
 		template<class T>
 		void setVal(OPTION option, T val);
+
+		void toggle(OPTION option);
 
 		void readFromFile();
 		void writeToFile();

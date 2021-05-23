@@ -15,7 +15,7 @@
 #include "Signature.h"
 #include "Game.h"
 
-constexpr auto WORLD_SIZE = 1'000;
+constexpr auto WORLD_SIZE = 100;
 
 namespace render
 {
