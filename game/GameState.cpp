@@ -30,23 +30,24 @@ namespace game
 	}
 
 	void GameState::runTick() {
-		//this->everything.run([](Match<Locomotion, GamePosition>& e) {
-		//	if (e.get<Locomotion>().cooldown != 0) {
-		//		e.get<Locomotion>().cooldown--;
-		//	}
-		//	else {
-		//		e.get<Locomotion>().cooldown = e.get<Locomotion>().fitness;
-		//		e.get<GamePosition>().pos += glm::ivec2((rand() % 3) - 1, (rand() % 3) - 1);
-		//	}
-		//	});
+		this->everything.run([](Match<Locomotion, GamePosition>& e) {
+			if (e.get<Locomotion>().cooldown != 0) {
+				e.get<Locomotion>().cooldown--;
+			}
+			else {
+				e.get<Locomotion>().cooldown = e.get<Locomotion>().fitness;
+				e.get<GamePosition>().pos += glm::ivec2((rand() % 3) - 1, (rand() % 3) - 1);
+			}
+			});
 
 		//this->everything.run([&](Match<Spawner, GamePosition>& e) {
-		//	//auto p = this->everything.make();
-		//	//p.add<GamePosition>();
-		//	//p.add<GraphicsTile>();
+		//	auto p = this->everything.make();
+		//	p.add<GamePosition>();
+		//	p.add<GraphicsTile>();
+		//	p.add<Locomotion>();
 
-		//	//p.get<GamePosition>().pos = e.get<GamePosition>().pos + glm::ivec2(1, 0);
-		//	//p.get<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
+		//	p.get<GamePosition>().pos = e.get<GamePosition>().pos + glm::ivec2(1, 0);
+		//	p.get<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
 		//	});
 
 
@@ -62,30 +63,30 @@ namespace game
 			}
 
 			{
-				//auto p = this->everything.make();
+				auto p = this->everything.make();
 
-				//p.add<GamePosition>();
-				//p.add<GraphicsTile>();
-				//p.add<Spawner>();
+				p.add<GamePosition>();
+				p.add<GraphicsTile>();
+				p.add<Spawner>();
 
-				//p.get<GamePosition>().pos = glm::ivec2(5, 6);
-				//p.get<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("s_block.dds");
+				p.get<GamePosition>().pos = glm::ivec2(5, 6);
+				p.get<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("s_block.dds");
 			}
 
-			//{
-			//	auto p = this->everything.make();
-			//	//p.add<Brain>();
-			//	//p.add<Vicinity>();
-			//	p.add<GraphicsTile>();
-			//	//p.add<Locomotion>();
-			//	p.add<GamePosition>();
+			{
+				auto p = this->everything.make();
+				//p.add<Brain>();
+				//p.add<Vicinity>();
+				p.add<GraphicsTile>();
+				p.add<Locomotion>();
+				p.add<GamePosition>();
 
-			//	p.get<GamePosition>().pos = { 5, 5 };
+				p.get<GamePosition>().pos = { 5, 5 };
 
-			//	p.get<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("gnome.dds");
+				p.get<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("gnome.dds");
 
-			//	//p.get<Locomotion>().fitness = 10;
-			//}
+				//p.get<Locomotion>().fitness = 10;
+			}
 
 			//Action recallFood;
 			//recallFood.requirements = {};
@@ -139,16 +140,6 @@ namespace game
 				p2.get<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
 			}
 		}
-
-		auto p = this->everything.make();
-		p.add<GamePosition>();
-		p.add<GraphicsTile>();
-
-
-		this->everything.remove(10);
-		this->everything.remove(11);
-		this->everything.remove(12);
-		this->everything.remove(13);
 
 		//for (size_t i = 0; i < 30; i++) {
 		{

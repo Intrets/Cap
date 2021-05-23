@@ -176,8 +176,8 @@ namespace game
 
 		ManagedObjects managedObjects;
 
-		inline WeakObject make();
-		inline UniqueObject makeUnique();
+		WeakObject make();
+		UniqueObject makeUnique();
 
 		void subscribe(ManagedObject* obj, SizeAlias i);
 		void unsubscribe(ManagedObject* obj, SizeAlias i);
@@ -443,25 +443,5 @@ namespace game
 	template<class T>
 	inline bool WeakObject::has() const {
 		return this->proxy->has<T>(this->index);
-	}
-
-	inline WeakObject Everything::make() {
-		if (!this->freeIndirections.empty()) {
-			size_t i = this->freeIndirections.back();
-			this->freeIndirections.pop_back();
-
-			return { i, this };
-		}
-		else {
-			this->signatures.push_back(0);
-			for (size_t type = 0; type < this->getTypeCount(); type++) {
-				this->dataIndices[type].push_back(0);
-			}
-			return { this->signatures.size() - 1, this };
-		}
-	}
-
-	inline UniqueObject Everything::makeUnique() {
-		return this->make();
 	}
 }
