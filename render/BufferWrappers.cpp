@@ -286,7 +286,7 @@ namespace render
 			0,
 			GL_RGBA,
 			GL_UNSIGNED_BYTE,
-			(void*) 0
+			(void*)0
 		};
 
 		return res;
@@ -348,7 +348,7 @@ namespace render
 			0,
 			GL_RGBA,
 			GL_UNSIGNED_BYTE,
-			(void*) 0
+			(void*)0
 		};
 		return res;
 	}

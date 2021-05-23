@@ -5,15 +5,17 @@
 
 namespace render
 {
-	void BlitRenderer::render(ogs::Configuration const& config,
-							  BlitRenderInfo const& blitInfos,
-							  bwo::FrameBuffer& target,
-							  glm::ivec4 viewport,
-							  bwo::Texture2D const& texture,
-							  std::optional<float> depth_,
-							  bool flipUVvertical,
-							  glm::vec2 offset_,
-							  std::optional<glm::vec4> maybeColor) {
+	void BlitRenderer::render(
+		ogs::Configuration const& config,
+		BlitRenderInfo const& blitInfos,
+		bwo::FrameBuffer& target,
+		glm::ivec4 viewport,
+		bwo::Texture2D const& texture,
+		std::optional<float> depth_,
+		bool flipUVvertical,
+		glm::vec2 offset_,
+		std::optional<glm::vec4> maybeColor) {
+
 		if (blitInfos.getData().size() == 0) {
 			return;
 		}
@@ -53,21 +55,23 @@ namespace render
 		target.draw(
 			viewport,
 			[&]()
-		{
-			glDrawArraysInstanced(GL_TRIANGLES, 0, 6, static_cast<GLsizei>(blitInfos.getData().size()));
-		});
+			{
+				glDrawArraysInstanced(GL_TRIANGLES, 0, 6, static_cast<GLsizei>(blitInfos.getData().size()));
+			});
 
 		this->VAO.unbind();
 	}
 
-	void BlitRenderer::render(ogs::Configuration const& config,
-							  SingleBlitRenderInfo const& info,
-							  bwo::FrameBuffer& target,
-							  glm::ivec4 viewport,
-							  bwo::Texture2D const& texture,
-							  std::optional<float> depth_,
-							  bool flipUVvertical,
-							  std::optional<glm::vec4> maybeColor) {
+	void BlitRenderer::render(
+		ogs::Configuration const& config,
+		SingleBlitRenderInfo const& info,
+		bwo::FrameBuffer& target,
+		glm::ivec4 viewport,
+		bwo::Texture2D const& texture,
+		std::optional<float> depth_,
+		bool flipUVvertical,
+		std::optional<glm::vec4> maybeColor) {
+
 		BlitRenderInfo infos;
 		infos.addBlitInfo(info);
 		this->render(config, infos, target, viewport, texture, depth_, flipUVvertical, glm::vec2(0.0f), maybeColor);

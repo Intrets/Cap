@@ -45,24 +45,26 @@ namespace render
 	public:
 		int32_t const MAX_BATCH_SIZE = 5000;
 
-		void render(ogs::Configuration const& config,
-					BlitRenderInfo const& blitInfos,
-					bwo::FrameBuffer& target,
-					glm::ivec4 viewport,
-					bwo::Texture2D const& texture,
-					std::optional<float> depth_,
-					bool flipUVvertical,
-					glm::vec2 offset,
-					std::optional<glm::vec4> color = std::nullopt);
+		void render(
+			ogs::Configuration const& config,
+			BlitRenderInfo const& blitInfos,
+			bwo::FrameBuffer& target,
+			glm::ivec4 viewport,
+			bwo::Texture2D const& texture,
+			std::optional<float> depth_,
+			bool flipUVvertical,
+			glm::vec2 offset,
+			std::optional<glm::vec4> color = std::nullopt);
 
-		void render(ogs::Configuration const&,
-					SingleBlitRenderInfo const& blitInfo,
-					bwo::FrameBuffer& target,
-					glm::ivec4 viewport,
-					bwo::Texture2D const& texture,
-					std::optional<float> depth_,
-					bool fromTexture,
-					std::optional<glm::vec4> color = std::nullopt);
+		void render(
+			ogs::Configuration const&,
+			SingleBlitRenderInfo const& blitInfo,
+			bwo::FrameBuffer& target,
+			glm::ivec4 viewport,
+			bwo::Texture2D const& texture,
+			std::optional<float> depth_,
+			bool fromTexture,
+			std::optional<glm::vec4> color = std::nullopt);
 
 		BlitRenderer();
 		~BlitRenderer();

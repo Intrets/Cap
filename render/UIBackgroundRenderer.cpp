@@ -7,9 +7,11 @@
 
 namespace render
 {
-	void UIBackgroundRenderer::render(UIRenderInfo const& renderInfo,
-									  GLuint target,
-									  CameraInfo const& cameraInfo) {
+	void UIBackgroundRenderer::render(
+		UIRenderInfo const& renderInfo,
+		GLuint target,
+		CameraInfo const& cameraInfo) {
+
 		if (renderInfo.getData().empty()) {
 			return;
 		}

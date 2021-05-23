@@ -143,7 +143,7 @@ namespace render
 					size,
 					GL_INT,
 					VAO_impl::Stride,
-					(void*) VAO_impl::Offset
+					(void*)VAO_impl::Offset
 				);
 				glVertexAttribDivisor(VAO_impl::Attribute, VAO_impl::Divisor);
 				glEnableVertexAttribArray(VAO_impl::Attribute);
@@ -170,7 +170,7 @@ namespace render
 					GL_FLOAT,
 					GL_FALSE,
 					VAO_impl::Stride,
-					(void*) VAO_impl::Offset
+					(void*)VAO_impl::Offset
 				);
 				glVertexAttribDivisor(VAO_impl::Attribute, VAO_impl::Divisor);
 				glEnableVertexAttribArray(VAO_impl::Attribute);
