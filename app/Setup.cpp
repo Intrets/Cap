@@ -17,15 +17,18 @@
 #include <render/BlitRendererArray.h>
 #include <render/textures/BlockIDTextures.h>
 #include <render/GLStateWrapper.h>
+#include <render/infos/DebugRenderInfo.h>
 
 static void GLAPIENTRY
-MessageCallback(GLenum source,
-				GLenum type,
-				GLuint id,
-				GLenum severity,
-				GLsizei length,
-				const GLchar* message,
-				const void* userParam) {
+MessageCallback(
+	GLenum source,
+	GLenum type,
+	GLuint id,
+	GLenum severity,
+	GLsizei length,
+	const GLchar* message,
+	const void* userParam) {
+
 	static int32_t highCount = 0;
 	static int32_t mediumCount = 0;
 	static int32_t lowCount = 0;
@@ -52,12 +55,12 @@ MessageCallback(GLenum source,
 			sourceMessage = "DEBUG_SOURCE_OTHER";
 			break;
 		default:
-			{
-				std::stringstream mes;
-				mes << "0x" << std::hex << severity;
-				sourceMessage = mes.str();
-				break;
-			}
+		{
+			std::stringstream mes;
+			mes << "0x" << std::hex << severity;
+			sourceMessage = mes.str();
+			break;
+		}
 	}
 
 	std::string severityMessage;
@@ -79,13 +82,13 @@ MessageCallback(GLenum source,
 			notificationCount++;
 			break;
 		default:
-			{
-				otherCount++;
-				std::stringstream mes;
-				mes << "0x" << std::hex << severity;
-				severityMessage = mes.str();
-				break;
-			}
+		{
+			otherCount++;
+			std::stringstream mes;
+			mes << "0x" << std::hex << severity;
+			severityMessage = mes.str();
+			break;
+		}
 	}
 
 	std::string typeMessage;
@@ -109,23 +112,23 @@ MessageCallback(GLenum source,
 			typeMessage = "DEBUG_TYPE_OTHER";
 			break;
 		default:
-			{
-				std::stringstream mes;
-				mes << "0x" << std::hex << type;
-				severityMessage = mes.str();
-				break;
-			}
+		{
+			std::stringstream mes;
+			mes << "0x" << std::hex << type;
+			severityMessage = mes.str();
 			break;
+		}
+		break;
 	}
 
 	fprintf(stderr,
-			"--- GL DEBUG CALLBACK --- %d %d %d %d\nsource: %s\ntype: %s\nseverity: %s\nid: %d\nmessage: %s\n\n",
-			highCount, mediumCount, lowCount, notificationCount,
-			sourceMessage.c_str(),
-			typeMessage.c_str(),
-			severityMessage.c_str(),
-			id,
-			message
+		"--- GL DEBUG CALLBACK --- %d %d %d %d\nsource: %s\ntype: %s\nseverity: %s\nid: %d\nmessage: %s\n\n",
+		highCount, mediumCount, lowCount, notificationCount,
+		sourceMessage.c_str(),
+		typeMessage.c_str(),
+		severityMessage.c_str(),
+		id,
+		message
 	);
 }
 
@@ -193,6 +196,7 @@ void initManagers(std::string const& resourceRootPath) {
 
 	Locator<render::BlitRenderer>::init();
 	Locator<render::BlitRendererArrayTexture>::init();
+	Locator<render::DebugRenderInfo>::init();
 
 	Locator<render::BlockIDTextures>::init();
 

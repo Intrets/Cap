@@ -1,16 +1,24 @@
 #include "BlitRendererArray.h"
 
+#include <mem/Locator.h>
+
+#include "GLStateWrapper.h"
+
 namespace render
 {
-	void BlitRendererArrayTexture::render(ogs::Configuration const& config,
-										  BlitArrayRenderInfo const& blitInfos,
-										  bwo::FrameBuffer& target,
-										  glm::ivec4 viewport,
-										  bwo::Texture2DArray const& texture,
-										  std::optional<float> depth_,
-										  glm::mat4 VP_) {
+	void BlitRendererArrayTexture::render(
+		ogs::Configuration const& config,
+		BlitArrayRenderInfo const& blitInfos,
+		bwo::FrameBuffer& target,
+		glm::ivec4 viewport,
+		bwo::Texture2DArray const& texture,
+		std::optional<float> depth_,
+		glm::mat4 VP_) {
+
 		this->VAO.bind();
 		this->program.use();
+
+		Locator<ogs::State>::ref().setState(config);
 
 		if (depth_.has_value()) {
 			this->depth.set(depth_.value());
@@ -27,9 +35,9 @@ namespace render
 		target.draw(
 			viewport,
 			[&]()
-		{
-			glDrawArraysInstanced(GL_TRIANGLES, 0, 6, static_cast<GLsizei>(blitInfos.getData().size()));
-		});
+			{
+				glDrawArraysInstanced(GL_TRIANGLES, 0, 6, static_cast<GLsizei>(blitInfos.getData().size()));
+			});
 
 		this->VAO.unbind();
 	}

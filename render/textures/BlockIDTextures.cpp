@@ -3,10 +3,10 @@
 #include <wglm/glm.hpp>
 
 #include <mem/Locator.h>
-
 #include <misc/PathManager.h>
 
 #include "BlitRenderer.h"
+#include "GLStateWrapper.h"
 
 namespace render
 {

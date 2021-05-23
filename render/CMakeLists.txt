@@ -14,6 +14,7 @@ set(MODULE_FILES
 	Renderer
 	UIBackgroundRenderer
 	TextRenderer
+	DebugRenderer
 	BlitRendererArray
 	infos/RenderInfo
 	infos/TextRenderInfo
@@ -22,6 +23,7 @@ set(MODULE_FILES
 	infos/TileRenderInfo
 	infos/BlitArrayRenderInfo
 	infos/BlitRenderInfo
+	infos/DebugRenderInfo
 	Fonts
 	textures/BlockIDTextures
 	GLStateWrapper
@@ -31,6 +33,7 @@ set(SHADER_FILES
 	Blit
 	UIBackground
 	BlitArray
+	Debug
 )
 
 foreach(SHADER ${SHADER_FILES})

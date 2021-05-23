@@ -3,6 +3,7 @@
 #include <wglm/glm.hpp>
 #include <mem/Locator.h>
 
+#include "GLStateWrapper.h"
 #include "infos/TextRenderInfo.h"
 #include "BufferWrappers.h"
 #include "BlitRenderer.h"

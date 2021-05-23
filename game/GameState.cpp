@@ -1,6 +1,7 @@
 #include "GameState.h"
 
 #include <render/infos/RenderInfo.h>
+#include <render/infos/DebugRenderInfo.h>
 
 #include <mem/Locator.h>
 #include <render/textures/BlockIDTextures.h>
@@ -12,12 +13,6 @@
 namespace game
 {
 	void GameState::addRenderInfo(render::RenderInfo& renderInfo) {
-		renderInfo.tileRenderInfo.addBlitInfo(
-			glm::vec4(0),
-			0,
-			0
-		);
-
 		this->everything.run([&](game::Match<GamePosition, GraphicsTile>& e) {
 			//e.get<GamePosition>().pos += glm::ivec2(1, 0);
 			//e.get<GraphicsTile>().blockID++;
@@ -27,6 +22,16 @@ namespace game
 				e.get<GraphicsTile>().blockID
 			);
 			});
+
+		if (misc::Option<misc::OPTION::GR_DEBUG, bool>::getVal()) {
+			for (size_t i = 0; i < WORLD_SIZE; i++) {
+				for (size_t j = 0; j < WORLD_SIZE; j++) {
+					if (this->world->occupied(i, j)) {
+						Locator<render::DebugRenderInfo>::ref().world.addPoint(i + 0.5f, j + 0.5f);
+					}
+				}
+			}
+		}
 	}
 
 	void GameState::runTick() {
@@ -54,11 +59,29 @@ namespace game
 		this->tick++;
 	}
 
+	void GameState::placeInWorld(SizeAlias index, glm::ivec2 pos) {
+		assert(this->world->grid[pos.x][pos.y] == 0);
+		this->everything.add<GamePosition>(index, pos);
+		this->world->place(index, pos);
+	}
+
+	void GameState::placeInWorld(WeakObject& obj, glm::ivec2 pos) {
+		this->placeInWorld(obj.index, pos);
+	}
+
+	void GameState::placeInWorld(UniqueObject& obj, glm::ivec2 pos) {
+		this->placeInWorld(obj.index, pos);
+	}
+
+	void GameState::placeInWorld(ManagedObject& obj, glm::ivec2 pos) {
+		this->placeInWorld(obj.index, pos);
+	}
+
 	GameState::GameState() {
 		{
 			{
 				auto p2 = this->everything.make();
-				p2.add<GamePosition>(glm::ivec2(5, 5));
+				this->placeInWorld(p2, glm::ivec2(5, 5));
 				p2.add<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
 			}
 
@@ -165,6 +188,39 @@ namespace game
 	//		}
 	//	}
 
-	//	return result;
-	//}
+	SizeAlias WorldGrid::get(int32_t x, int32_t y) {
+		return this->grid[x][y];
+	}
+
+	SizeAlias WorldGrid::get(glm::ivec2 pos) {
+		return this->grid[pos.x][pos.y];
+	}
+
+	void WorldGrid::place(SizeAlias index, int32_t x, int32_t y) {
+		this->grid[x][y] = index;
+	}
+
+	void WorldGrid::place(SizeAlias index, glm::ivec2 pos) {
+		this->grid[pos.x][pos.y] = index;
+	}
+
+	void WorldGrid::remove(int32_t x, int32_t y) {
+		this->grid[x][y] = 0;
+	}
+
+	void WorldGrid::remove(glm::ivec2 pos) {
+		this->grid[pos.x][pos.y] = 0;
+	}
+
+	bool WorldGrid::occupied(int32_t x, int32_t y) {
+		return this->get(x, y) != 0;
+	}
+
+	bool WorldGrid::occupied(glm::ivec2 pos) {
+		return this->get(pos) != 0;
+	}
+
+	bool WorldGrid::empty(glm::ivec2 pos) {
+		return this->get(pos) == 0;
+	}
 }

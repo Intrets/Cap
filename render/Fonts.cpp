@@ -1,5 +1,7 @@
 #include "Fonts.h"
 
+#include "GLStateWrapper.h"
+
 #include <mem/Locator.h>
 
 #include <misc/PathManager.h>

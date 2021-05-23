@@ -1,6 +1,7 @@
 #include "BlitRenderer.h"
 
 #include <mem/Locator.h>
+#include "GLStateWrapper.h"
 
 namespace render
 {

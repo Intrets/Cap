@@ -95,19 +95,42 @@ namespace game
 	//	float value(SignatureAlias const& signature);
 	//};
 
+	struct WorldGrid
+	{
+		std::array<std::array<SizeAlias, WORLD_SIZE>, WORLD_SIZE> grid;
+
+		SizeAlias get(int32_t x, int32_t y);
+		SizeAlias get(glm::ivec2 pos);
+
+		void place(SizeAlias index, int32_t x, int32_t y);
+		void place(SizeAlias index, glm::ivec2 pos);
+
+		void remove(int32_t x, int32_t y);
+		void remove(glm::ivec2 pos);
+
+		bool occupied(int32_t x, int32_t y);
+		bool occupied(glm::ivec2 pos);
+		bool empty(glm::ivec2 pos);
+	};
+
 	class GameState
 	{
 	private:
 		Everything everything;
 
+		std::unique_ptr<WorldGrid> world = std::make_unique<WorldGrid>();
+
 	public:
 		int32_t tick = 0;
-
-		//std::array<std::array<WeakReference<Object, Object>, WORLD_SIZE>, WORLD_SIZE> world;
 
 		void addRenderInfo(render::RenderInfo& renderInfo);
 
 		void runTick();
+
+		void placeInWorld(SizeAlias index, glm::ivec2 pos);
+		void placeInWorld(WeakObject& obj, glm::ivec2 pos);
+		void placeInWorld(UniqueObject& obj, glm::ivec2 pos);
+		void placeInWorld(ManagedObject& obj, glm::ivec2 pos);
 
 		GameState();
 		~GameState() = default;

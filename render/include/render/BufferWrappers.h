@@ -249,7 +249,7 @@ namespace render
 				VAO_impl::Stride = 0;
 				VAO_impl::Divisor = 0;
 
-				TFor<Args...>(std::forward<ArrayBuffer<typename Args::GroupType>>(args)...);
+				TFor<Args...>(args...);
 
 				glBindVertexArray(0);
 			};

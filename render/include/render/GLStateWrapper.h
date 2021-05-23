@@ -55,13 +55,15 @@ namespace ogs
 		DEPTH_TEST depthTest = DEPTH_TEST::UNSET;
 		DEPTH_FUNC depthFunc = DEPTH_FUNC::UNSET;
 		POLYGON_MODE polygonMode = POLYGON_MODE::UNSET;
+		float pointSize = 0.0f;
 
 		Configuration(
 			BLEND blend,
 			BLEND_FUNC blendFunc,
 			DEPTH_TEST depthTest,
 			DEPTH_FUNC depthFunc,
-			POLYGON_MODE polygonMode
+			POLYGON_MODE polygonMode,
+			float pointSize
 		);
 
 	private:
@@ -75,6 +77,8 @@ namespace ogs
 	Configuration FontAtlasConfiguration();
 	Configuration WorldTileConfiguration();
 	Configuration BlockIDConfiguration();
+	Configuration DebugPointConfiguration();
+	Configuration DebugLineConfiguration();
 
 	class State
 	{
@@ -91,6 +95,6 @@ namespace ogs
 		void setBlendFunc(BLEND_FUNC func);
 		void setDepthTest(DEPTH_TEST test);
 		void setDepthFunc(DEPTH_FUNC func);
-		void setPolygonMode(POLYGON_MODE mode);
+		void setPolygonMode(POLYGON_MODE mode, float pointSize);
 	};
 }

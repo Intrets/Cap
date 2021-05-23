@@ -5,13 +5,19 @@
 
 #include "BufferWrappers.h"
 #include "infos/BlitRenderInfo.h"
-#include "GLStateWrapper.h"
 
 #include "../shaders/Blit.vert.inc"
 #include "../shaders/Blit.frag.inc"
 
+namespace ogs
+{
+	class Configuration;
+}
+
 namespace render
 {
+	struct BlitRenderInfo;
+
 	class BlitRenderer
 	{
 	private:
