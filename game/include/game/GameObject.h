@@ -64,6 +64,11 @@ struct Brain
 	void merge(std::vector<Action>& other);
 };
 
+struct Target
+{
+	glm::ivec2 pos;
+};
+
 struct Possession
 {
 	//std::vector<UniqueReference<Object, Object>> inventory{};
@@ -88,7 +93,7 @@ struct Nutrition
 struct Locomotion
 {
 	int32_t cooldown = 0;
-	int32_t fitness = 60;
+	int32_t fitness = 10;
 
 	std::optional<glm::ivec2> target;
 };

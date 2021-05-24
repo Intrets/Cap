@@ -14,8 +14,6 @@ namespace game
 {
 	void GameState::addRenderInfo(render::RenderInfo& renderInfo) {
 		this->everything.run([&](game::Match<GamePosition, GraphicsTile>& e) {
-			//e.get<GamePosition>().pos += glm::ivec2(1, 0);
-			//e.get<GraphicsTile>().blockID++;
 			renderInfo.tileRenderInfo.addBlitInfo(
 				glm::vec4(e.get<GamePosition>().pos, 1, 1),
 				0,
@@ -24,25 +22,48 @@ namespace game
 			});
 
 		if (misc::Option<misc::OPTION::GR_DEBUG, bool>::getVal()) {
-			for (size_t i = 0; i < WORLD_SIZE; i++) {
-				for (size_t j = 0; j < WORLD_SIZE; j++) {
-					if (this->world->occupied(i, j)) {
-						Locator<render::DebugRenderInfo>::ref().world.addPoint(i + 0.5f, j + 0.5f);
-						Locator<render::DebugRenderInfo>::ref().world.addBox(i, j, i + 1.0f, j + 1.0f);
-					}
-				}
-			}
+			//for (size_t i = 0; i < WORLD_SIZE; i++) {
+			//	for (size_t j = 0; j < WORLD_SIZE; j++) {
+			//		if (this->world->occupied(i, j)) {
+			//			Locator<render::DebugRenderInfo>::ref().world.addPoint(i + 0.5f, j + 0.5f);
+			//			Locator<render::DebugRenderInfo>::ref().world.addBox(i, j, i + 1.0f, j + 1.0f);
+			//		}
+			//	}
+			//}
+
+			this->everything.run([&](game::Match<GamePosition, Target>& e) {
+				Locator<render::DebugRenderInfo>::ref().world.addLine(e.get<GamePosition>().pos, e.get<Target>().pos);
+				});
 		}
+
 	}
 
 	void GameState::runTick() {
-		this->everything.run([](Match<Locomotion, GamePosition>& e) {
+		this->everything.run([&](Match<Locomotion, GamePosition, Target>& e) {
 			if (e.get<Locomotion>().cooldown != 0) {
 				e.get<Locomotion>().cooldown--;
 			}
 			else {
 				e.get<Locomotion>().cooldown = e.get<Locomotion>().fitness;
-				e.get<GamePosition>().pos += glm::ivec2((rand() % 3) - 1, (rand() % 3) - 1);
+				auto& pos = e.get<GamePosition>().pos;
+
+				glm::vec2 diff = e.get<Target>().pos - pos;
+				float D = glm::max(diff.x, diff.y);
+
+				if (D == 0.0f) {
+					this->everything.removeComponent<Target>(e.obj.index);
+					return;
+				}
+
+				glm::ivec2 m = diff / D;
+
+				auto newPos = pos + m;
+
+				if (this->empty(newPos)) {
+					this->removeFromWorld(e.get<GamePosition>().pos);
+					e.get<GamePosition>().pos = newPos;
+					this->placeInWorld(e.obj, newPos);
+				}
 			}
 			});
 
@@ -58,6 +79,14 @@ namespace game
 
 
 		this->tick++;
+	}
+
+	bool GameState::empty(glm::ivec2 p) {
+		return this->world->empty(p);
+	}
+
+	void GameState::removeFromWorld(glm::ivec2 pos) {
+		this->world->remove(pos);
 	}
 
 	void GameState::placeInWorld(SizeAlias index, glm::ivec2 pos) {
@@ -80,49 +109,16 @@ namespace game
 
 	GameState::GameState() {
 		{
-			{
-				auto p2 = this->everything.make();
-				this->placeInWorld(p2, glm::ivec2(5, 5));
-				p2.add<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
-			}
+			auto p = this->everything.make();
+			p.add<GraphicsTile>();
+			p.add<Locomotion>();
+			p.add<GamePosition>();
+			p.add<Brain>();
+			p.add<Target>(glm::ivec2(50, 20));
 
-			{
-				auto p = this->everything.make();
+			this->placeInWorld(p, { 2, 2 });
 
-				p.add<GamePosition>();
-				p.add<GraphicsTile>();
-				p.add<Spawner>();
-
-				this->placeInWorld(p, { 5,6 });
-				p.get<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("s_block.dds");
-			}
-
-			{
-				auto p = this->everything.make();
-				//p.add<Brain>();
-				//p.add<Vicinity>();
-				p.add<GraphicsTile>();
-				p.add<Locomotion>();
-				p.add<GamePosition>();
-
-				this->placeInWorld(p, { 5,7 });
-
-				p.get<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("gnome.dds");
-
-				//p.get<Locomotion>().fitness = 10;
-			}
-
-			//Action recallFood;
-			//recallFood.requirements = {};
-			//SignatureAlias foodSignature;
-			//foodSignature.set(GAMEOBJECT_COMPONENT::NUTRITION).set(GAMEOBJECT_COMPONENT::GAMEPOSITION);
-			//recallFood.results = { foodSignature };
-			////recallFood.runFunction = [](Object* obj) -> ActionResult
-			////{
-			////	ActionResult result{};
-
-			////	return result;
-			////};
+			p.get<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("gnome.dds");
 		}
 
 		for (size_t i = 1; i < WORLD_SIZE - 1; i++) {

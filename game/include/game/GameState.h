@@ -127,6 +127,10 @@ namespace game
 
 		void runTick();
 
+		bool empty(glm::ivec2 p);
+
+		void removeFromWorld(glm::ivec2 pos);
+
 		void placeInWorld(SizeAlias index, glm::ivec2 pos);
 		void placeInWorld(WeakObject& obj, glm::ivec2 pos);
 		void placeInWorld(UniqueObject& obj, glm::ivec2 pos);

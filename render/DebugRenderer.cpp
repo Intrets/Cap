@@ -75,7 +75,7 @@ void render::DebugRenderer::render(
 
 		Locator<ogs::State>::ref().setState(config);
 
-		this->VP.set(glm::mat4(1.0f));
+		this->VP.set(glm::mat4(10.0f));
 		this->pointSize.set(1.0f);
 
 		this->points.set(info.screen.points.points);

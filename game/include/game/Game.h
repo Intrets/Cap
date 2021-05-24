@@ -186,6 +186,11 @@ namespace game
 
 		inline void remove(SizeAlias i);
 
+		template<class T>
+		inline void removeComponent(SizeAlias i);
+
+		inline void removeComponent(SizeAlias i, size_t type);
+
 		template<class T, class... Args>
 		inline T& add(SizeAlias i, Args&&... args);
 
@@ -216,28 +221,28 @@ namespace game
 		NOCOPYMOVE(Everything);
 	};
 
-	template<class... Ms>
+	template<class M, class... Ms>
 	struct Match
 	{
 		WeakObject obj;
 
 		template<class T>
 		inline T& get() {
-			static_assert(te::contains_v<te::list<Ms...>, T>);
+			static_assert(te::contains_v<te::list<M, Ms...>, T>);
 			return this->obj.get<T>();
 		};
 
 		template<class F, class L, class... Args>
 		static inline void run(Everything& e, F f, Args... args) {
-			size_t pivot = e.selectPivot<Ms...>();
+			size_t pivot = e.selectPivot<M, Ms...>();
 
 			auto& g = e.gets(pivot);
 			const size_t end = g.index;
 
-			if constexpr (sizeof...(Ms) == 1) {
+			if constexpr (sizeof...(Ms) == 0) {
 				for (SizeAlias i = 1; i < end; i++) {
 					auto index = g.getIndex(i);
-					te::Loop::run<Everything, F, L, Match<Ms...>, Args...>(e, f, Match<Ms...>{ { index, & e } }, args...);
+					te::Loop::run<Everything, F, L, Match<M, Ms...>, Args...>(e, f, Match<M, Ms...>{ { index, & e } }, args...);
 				}
 			}
 			else {
@@ -245,7 +250,7 @@ namespace game
 					auto index = g.getIndex(i);
 
 					if (e.has<Ms...>(index)) {
-						te::Loop::run<Everything, F, L, Match<Ms...>, Args...>(e, f, Match<Ms...>{ { index, & e } }, args...);
+						te::Loop::run<Everything, F, L, Match<M, Ms...>, Args...>(e, f, Match<M, Ms...>{ { index, & e } }, args...);
 					}
 				}
 			}
@@ -347,12 +352,7 @@ namespace game
 
 		for (size_t type = 0; type < this->getTypeCount(); type++) {
 			if (this->has(i, type)) {
-				auto maybeChanged = this->data[type].removeUntyped(this->dataIndices[type][i]);
-				if (maybeChanged.has_value()) {
-					auto changed = maybeChanged.value();
-					this->dataIndices[type][changed] = this->dataIndices[type][i];
-					this->dataIndices[type][i] = 0;
-				}
+				this->removeComponent(i, type);
 			}
 		}
 
@@ -361,6 +361,15 @@ namespace game
 		this->signatures[i].reset();
 
 		this->freeIndirections.push_back(i);
+	}
+
+	inline void Everything::removeComponent(SizeAlias i, size_t type) {
+		auto maybeChanged = this->data[type].removeUntyped(this->dataIndices[type][i]);
+		if (maybeChanged.has_value()) {
+			auto changed = maybeChanged.value();
+			this->dataIndices[type][changed] = this->dataIndices[type][i];
+			this->dataIndices[type][i] = 0;
+		}
 	}
 
 	inline RawData& Everything::gets(size_t type) {
@@ -379,6 +388,11 @@ namespace game
 		for (size_t type = 0; type < SIZE; type++) {
 			this->dataIndices[type].push_back(0);
 		}
+	}
+
+	template<class T>
+	inline void Everything::removeComponent(SizeAlias i) {
+		this->removeComponent(i, component_index_v<T>);
 	}
 
 	template<class T, class... Args>
