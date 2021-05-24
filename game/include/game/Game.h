@@ -20,6 +20,7 @@ namespace game
 {
 	constexpr size_t SIZE = 64;
 	using SignatureType = std::bitset<SIZE>;
+	using Qualifier = size_t;
 
 	struct Everything;
 
@@ -48,6 +49,16 @@ namespace game
 		std::vector<std::byte> data{};
 		std::vector<SizeAlias> indices{};
 
+		std::vector<SizeAlias> deletions{};
+
+		struct DeletedInfo
+		{
+			SizeAlias i;
+			SizeAlias changed;
+		};
+
+		std::vector<DeletedInfo> packDeletions();
+
 		void(*objectDestructor)(void*) = nullptr;
 
 		RawData() = delete;
@@ -60,9 +71,7 @@ namespace game
 		template<class T>
 		inline void remove(SizeAlias i);
 
-		// returns the index of the component owning the object that was moved
-		// or optionally nothing if the last element was removed (no moving needed)
-		inline std::optional<SizeAlias> removeUntyped(SizeAlias i);
+		inline void removeUntyped(SizeAlias i);
 
 		template<class T>
 		inline T& get(SizeAlias i);
@@ -97,6 +106,8 @@ namespace game
 
 	struct UniqueObject : WeakObject
 	{
+		operator WeakObject() const;
+
 		UniqueObject(WeakObject&& other);
 
 		UniqueObject(UniqueObject&& other);
@@ -108,19 +119,25 @@ namespace game
 		NOCOPY(UniqueObject);
 	};
 
-	struct ManagedObject : WeakObject
+	struct QualifiedObject
 	{
-		void set(WeakObject const& other);
-		void set(UniqueObject const& other);
+		WeakObject object;
 
-		void invalidate();
+		Qualifier qualifier = 0;
 
-		ManagedObject(WeakObject&& other);
+		void set(WeakObject obj);
 
-		ManagedObject() = default;
-		~ManagedObject();
+		bool isQualified() const;
 
-		NOCOPYMOVE(ManagedObject);
+		WeakObject* operator->();
+
+		QualifiedObject& operator=(WeakObject const& other);
+		QualifiedObject(WeakObject const& other);
+
+		QualifiedObject() = default;
+		~QualifiedObject() = default;
+
+		DEFAULTCOPYMOVE(QualifiedObject);
 	};
 
 	struct Everything
@@ -169,22 +186,24 @@ namespace game
 		std::vector<RawData> data{ SIZE, { *this } };
 		std::vector<size_t> freeIndirections{};
 
+		std::vector<Qualifier> qualifiers{ 0 };
+		Qualifier qualifier = 1;
+
 		std::vector<SignatureType> signatures{ 0 };
 		std::array<std::vector<SizeAlias>, SIZE> dataIndices;
 
-		using ManagedObjects = std::unordered_multimap<SizeAlias, ManagedObject*>;
-
-		ManagedObjects managedObjects;
+		std::vector<SizeAlias> removed{};
 
 		WeakObject make();
 		UniqueObject makeUnique();
 
-		void subscribe(ManagedObject* obj, SizeAlias i);
-		void unsubscribe(ManagedObject* obj, SizeAlias i);
-
-		void invalidateManagedObjects(SizeAlias i);
+		Qualifier getNextQualifier();
+		bool isQualified(SizeAlias i, Qualifier q) const;
+		Qualifier getQualifier(SizeAlias i) const;
 
 		inline void remove(SizeAlias i);
+
+		void collectRemoved();
 
 		template<class T>
 		inline void removeComponent(SizeAlias i);
@@ -205,7 +224,7 @@ namespace game
 		template<class... Ts>
 		inline bool has(SizeAlias i) const;
 
-		inline bool has(SizeAlias i, size_t type) const;
+		inline bool has(SizeAlias i, size_t type);
 
 		template<class F>
 		inline void run(F f);
@@ -266,33 +285,46 @@ namespace game
 		this->removeUntyped(i);
 	}
 
+	inline std::vector<RawData::DeletedInfo> RawData::packDeletions() {
+		std::vector<RawData::DeletedInfo> res;
+
+		for (auto i : this->deletions) {
+			size_t targetOffset = i * this->objectSize;
+			size_t sourceOffset = --this->index * this->objectSize;
+
+			if (targetOffset == sourceOffset) {
+				this->indices.pop_back();
+				continue;
+			}
+			else {
+				std::memcpy(&this->data[targetOffset], &this->data[sourceOffset], this->objectSize);
+				auto changed = this->indices.back();
+				this->indices.pop_back();
+
+				res.push_back({ i, changed });
+			}
+		}
+
+		this->deletions.clear();
+
+		return res;
+	}
+
 	inline RawData::~RawData() {
 		for (size_t i = 1; i < this->index; i++) {
 			this->objectDestructor(this->getUntyped(i));
 		}
 	}
 
-	inline std::optional<SizeAlias> RawData::removeUntyped(SizeAlias i) {
+	inline void RawData::removeUntyped(SizeAlias i) {
 		assert(i != 0);
 		assert(i < this->index);
 
 		size_t targetOffset = i * this->objectSize;
-		size_t sourceOffset = --this->index * this->objectSize;
 
 		this->objectDestructor(&this->data[targetOffset]);
 
-		if (targetOffset == sourceOffset) {
-			this->indices.pop_back();
-			return std::nullopt;
-		}
-		else {
-			std::memcpy(&this->data[targetOffset], &this->data[sourceOffset], this->objectSize);
-			auto changed = this->indices.back();
-			this->indices.pop_back();
-
-			this->indices[i] = changed;
-			return changed;
-		}
+		this->deletions.push_back(i);
 	}
 
 	template<class T>
@@ -352,32 +384,48 @@ namespace game
 
 		for (size_t type = 0; type < this->getTypeCount(); type++) {
 			if (this->has(i, type)) {
-				this->removeComponent(i, type);
+				this->data[type].removeUntyped(this->dataIndices[type][i]);
 			}
 		}
 
-		this->invalidateManagedObjects(i);
-
 		this->signatures[i].reset();
 
-		this->freeIndirections.push_back(i);
+		this->qualifiers[i] = this->getNextQualifier();
+
+		this->removed.push_back(i);
+	}
+
+	inline void Everything::collectRemoved() {
+		for (size_t type = 0; type < this->getTypeCount(); type++) {
+			for (auto const& d : this->data[type].packDeletions()) {
+				this->dataIndices[type][d.changed] = this->dataIndices[type][d.i];
+				this->dataIndices[type][d.i] = 0;
+			}
+		}
+
+		for (auto i : this->removed) {
+			assert(this->signatures[i].none());
+			for (size_t type = 0; type < this->getTypeCount(); type++) {
+				assert(this->dataIndices[type][i] == 0);
+			}
+			this->freeIndirections.push_back(i);
+		}
+
+		this->removed.clear();
 	}
 
 	inline void Everything::removeComponent(SizeAlias i, size_t type) {
-		auto maybeChanged = this->data[type].removeUntyped(this->dataIndices[type][i]);
-		if (maybeChanged.has_value()) {
-			auto changed = maybeChanged.value();
-			this->dataIndices[type][changed] = this->dataIndices[type][i];
-			this->dataIndices[type][i] = 0;
-		}
+		assert(this->signatures[i].test(type));
+		this->data[type].removeUntyped(this->dataIndices[type][i]);
+		this->signatures[i].reset(type);
 	}
 
 	inline RawData& Everything::gets(size_t type) {
 		return this->data[type];
 	}
 
-	inline bool Everything::has(SizeAlias i, size_t type) const {
-		return this->dataIndices[type][i] != 0;
+	inline bool Everything::has(SizeAlias i, size_t type) {
+		return this->signatures[i].test(type);
 	}
 
 	inline size_t Everything::getTypeCount() {
@@ -415,13 +463,8 @@ namespace game
 
 	template<class... Ts>
 	inline bool Everything::has(SizeAlias i) const {
-		if constexpr (sizeof...(Ts) == 1) {
-			return this->has(i, component_index_v<Ts...>);
-		}
-		else {
-			auto const sig = group_signature_v<Ts...>;
-			return (this->signatures[i] & sig) == sig;
-		}
+		auto const sig = group_signature_v<Ts...>;
+		return (this->signatures[i] & sig) == sig;
 	}
 
 	template<class F>

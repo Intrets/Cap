@@ -78,6 +78,8 @@ namespace game
 		//	});
 
 
+		this->everything.collectRemoved();
+
 		this->tick++;
 	}
 
@@ -100,10 +102,6 @@ namespace game
 	}
 
 	void GameState::placeInWorld(UniqueObject& obj, glm::ivec2 pos) {
-		this->placeInWorld(obj.index, pos);
-	}
-
-	void GameState::placeInWorld(ManagedObject& obj, glm::ivec2 pos) {
 		this->placeInWorld(obj.index, pos);
 	}
 

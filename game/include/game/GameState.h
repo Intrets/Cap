@@ -134,7 +134,6 @@ namespace game
 		void placeInWorld(SizeAlias index, glm::ivec2 pos);
 		void placeInWorld(WeakObject& obj, glm::ivec2 pos);
 		void placeInWorld(UniqueObject& obj, glm::ivec2 pos);
-		void placeInWorld(ManagedObject& obj, glm::ivec2 pos);
 
 		GameState();
 		~GameState() = default;
