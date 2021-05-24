@@ -301,6 +301,8 @@ namespace game
 				auto changed = this->indices.back();
 				this->indices.pop_back();
 
+				this->indices[i] = changed;
+
 				res.push_back({ i, changed });
 			}
 		}
@@ -445,6 +447,7 @@ namespace game
 
 	template<class T, class... Args>
 	inline T& Everything::add(SizeAlias i, Args&&... args) {
+		assert(!this->has<T>(i));
 		auto [index, ptr] = this->data[component_index_v<T>].add<T>(i, std::forward<Args>(args)...);
 		this->dataIndices[component_index_v<T>][i] = index;
 		this->signatures[i].set(component_index_v<T>);

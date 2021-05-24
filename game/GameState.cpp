@@ -22,14 +22,14 @@ namespace game
 			});
 
 		if (misc::Option<misc::OPTION::GR_DEBUG, bool>::getVal()) {
-			//for (size_t i = 0; i < WORLD_SIZE; i++) {
-			//	for (size_t j = 0; j < WORLD_SIZE; j++) {
-			//		if (this->world->occupied(i, j)) {
-			//			Locator<render::DebugRenderInfo>::ref().world.addPoint(i + 0.5f, j + 0.5f);
-			//			Locator<render::DebugRenderInfo>::ref().world.addBox(i, j, i + 1.0f, j + 1.0f);
-			//		}
-			//	}
-			//}
+			for (size_t i = 0; i < WORLD_SIZE; i++) {
+				for (size_t j = 0; j < WORLD_SIZE; j++) {
+					if (this->world->occupied(i, j)) {
+						Locator<render::DebugRenderInfo>::ref().world.addPoint(i + 0.5f, j + 0.5f);
+						Locator<render::DebugRenderInfo>::ref().world.addBox(i, j, i + 1.0f, j + 1.0f);
+					}
+				}
+			}
 
 			this->everything.run([&](game::Match<GamePosition, Target>& e) {
 				Locator<render::DebugRenderInfo>::ref().world.addLine(e.get<GamePosition>().pos, e.get<Target>().pos);
@@ -60,9 +60,8 @@ namespace game
 				auto newPos = pos + m;
 
 				if (this->empty(newPos)) {
-					this->removeFromWorld(e.get<GamePosition>().pos);
+					this->moveInWorld(e.get<GamePosition>().pos, newPos);
 					e.get<GamePosition>().pos = newPos;
-					this->placeInWorld(e.obj, newPos);
 				}
 			}
 			});
@@ -91,6 +90,13 @@ namespace game
 		this->world->remove(pos);
 	}
 
+	void GameState::moveInWorld(glm::ivec2 from, glm::ivec2 to) {
+		assert(this->world->grid[to.x][to.y] == 0);
+
+		this->world->grid[to.x][to.y] = this->world->grid[from.x][from.y];
+		this->world->grid[from.x][from.y] = 0;
+	}
+
 	void GameState::placeInWorld(SizeAlias index, glm::ivec2 pos) {
 		assert(this->world->grid[pos.x][pos.y] == 0);
 		this->everything.add<GamePosition>(index, pos);
@@ -107,10 +113,13 @@ namespace game
 
 	GameState::GameState() {
 		{
+
+
+		}
+		{
 			auto p = this->everything.make();
 			p.add<GraphicsTile>();
 			p.add<Locomotion>();
-			p.add<GamePosition>();
 			p.add<Brain>();
 			p.add<Target>(glm::ivec2(50, 20));
 
@@ -119,15 +128,14 @@ namespace game
 			p.get<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("gnome.dds");
 		}
 
-		for (size_t i = 1; i < WORLD_SIZE - 1; i++) {
+		for (size_t i = 1; i < (WORLD_SIZE - 1) / 2; i++) {
 			//for (size_t j = 0; j < 30; j++) {
 			{
 				size_t j = 0;
-				auto p2 = this->everything.make();
-				p2.add<GamePosition>();
+				auto p2 = this->everything.makeUnique();
 				p2.add<GraphicsTile>();
-
 				this->placeInWorld(p2, { i,j });
+
 				p2.get<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
 			}
 		}
@@ -137,10 +145,9 @@ namespace game
 			{
 				int j = WORLD_SIZE - 1;
 				auto p2 = this->everything.make();
-				p2.add<GamePosition>();
+				this->placeInWorld(p2, { i,j });
 				p2.add<GraphicsTile>();
 
-				this->placeInWorld(p2, { i,j });
 				p2.get<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
 			}
 		}
@@ -150,10 +157,9 @@ namespace game
 			size_t i = 0;
 			for (size_t j = 0; j < WORLD_SIZE; j++) {
 				auto p2 = this->everything.make();
-				p2.add<GamePosition>();
+				this->placeInWorld(p2, { i,j });
 				p2.add<GraphicsTile>();
 
-				this->placeInWorld(p2, { i,j });
 				p2.get<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
 			}
 		}
@@ -163,10 +169,9 @@ namespace game
 			int i = WORLD_SIZE - 1;
 			for (size_t j = 0; j < WORLD_SIZE; j++) {
 				auto p2 = this->everything.make();
-				p2.add<GamePosition>();
+				this->placeInWorld(p2, { i,j });
 				p2.add<GraphicsTile>();
 
-				this->placeInWorld(p2, { i,j });
 				p2.get<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
 			}
 		}

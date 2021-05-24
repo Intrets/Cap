@@ -15,7 +15,7 @@
 #include "Signature.h"
 #include "Game.h"
 
-constexpr auto WORLD_SIZE = 100;
+constexpr auto WORLD_SIZE = 6;
 
 namespace render
 {
@@ -130,6 +130,7 @@ namespace game
 		bool empty(glm::ivec2 p);
 
 		void removeFromWorld(glm::ivec2 pos);
+		void moveInWorld(glm::ivec2 from, glm::ivec2 to);
 
 		void placeInWorld(SizeAlias index, glm::ivec2 pos);
 		void placeInWorld(WeakObject& obj, glm::ivec2 pos);
