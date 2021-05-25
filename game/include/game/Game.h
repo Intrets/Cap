@@ -16,6 +16,8 @@
 
 using SizeAlias = size_t;
 
+constexpr auto WORLD_SIZE = 60;
+
 namespace game
 {
 	constexpr size_t SIZE = 64;
@@ -95,6 +97,9 @@ namespace game
 		bool isNotNull() const;
 
 		template<class T>
+		inline void remove();
+
+		template<class T>
 		inline T& get();
 
 		template<class T, class... Args>
@@ -110,8 +115,8 @@ namespace game
 
 		UniqueObject(WeakObject&& other);
 
-		UniqueObject(UniqueObject&& other);
-		UniqueObject& operator=(UniqueObject&& other);
+		UniqueObject& operator=(UniqueObject&& other) noexcept;
+		UniqueObject(UniqueObject&& other) noexcept;
 
 		UniqueObject() = default;
 		~UniqueObject();
@@ -131,8 +136,8 @@ namespace game
 
 		WeakObject* operator->();
 
-		QualifiedObject& operator=(WeakObject const& other);
-		QualifiedObject(WeakObject const& other);
+		QualifiedObject& operator=(WeakObject const& other) noexcept;
+		QualifiedObject(WeakObject const& other) noexcept;
 
 		QualifiedObject() = default;
 		~QualifiedObject() = default;
@@ -249,6 +254,12 @@ namespace game
 		inline T& get() {
 			static_assert(te::contains_v<te::list<M, Ms...>, T>);
 			return this->obj.get<T>();
+		};
+
+		template<class T>
+		inline void remove() {
+			static_assert(te::contains_v<te::list<M, Ms...>, T>);
+			this->obj.remove<T>();
 		};
 
 		template<class F, class L, class... Args>
@@ -488,6 +499,12 @@ namespace game
 			}
 		}
 		return pivot;
+	}
+
+	template<class T>
+	inline void WeakObject::remove() {
+		assert(this->isNotNull());
+		this->proxy->removeComponent<T>(this->index);
 	}
 
 	template<class T>

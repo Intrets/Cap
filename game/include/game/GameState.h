@@ -15,8 +15,6 @@
 #include "Signature.h"
 #include "Game.h"
 
-constexpr auto WORLD_SIZE = 6;
-
 namespace render
 {
 	struct RenderInfo;
@@ -118,9 +116,9 @@ namespace game
 	private:
 		Everything everything;
 
+	public:
 		std::unique_ptr<WorldGrid> world = std::make_unique<WorldGrid>();
 
-	public:
 		int32_t tick = 0;
 
 		void addRenderInfo(render::RenderInfo& renderInfo);

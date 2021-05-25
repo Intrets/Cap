@@ -15,14 +15,14 @@ namespace game
 		this->proxy = other.proxy;
 	}
 
-	UniqueObject::UniqueObject(UniqueObject&& other) {
+	UniqueObject::UniqueObject(UniqueObject&& other) noexcept {
 		this->index = other.index;
 		this->proxy = other.proxy;
 		other.index = 0;
 		other.proxy = nullptr;
 	}
 
-	UniqueObject& UniqueObject::operator=(UniqueObject&& other) {
+	UniqueObject& UniqueObject::operator=(UniqueObject&& other) noexcept {
 		if (this->proxy != nullptr) {
 			this->proxy->remove(this->index);
 		}
@@ -102,13 +102,13 @@ namespace game
 
 		return &this->object;
 	}
-	QualifiedObject& QualifiedObject::operator=(WeakObject const& other) {
+	QualifiedObject& QualifiedObject::operator=(WeakObject const& other) noexcept {
 		this->set(other);
 
 		return *this;
 	}
 
-	QualifiedObject::QualifiedObject(WeakObject const& other) {
+	QualifiedObject::QualifiedObject(WeakObject const& other) noexcept {
 		this->set(other);
 	}
 }

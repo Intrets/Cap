@@ -5,6 +5,8 @@
 #include <vector>
 #include <optional>
 #include <functional>
+#include <deque>
+#include <map>
 
 #include <wglm/glm.hpp>
 #include <misc/Misc.h>
@@ -20,6 +22,11 @@ struct ActionResult;
 struct GameObject;
 struct Possession;
 
+namespace game
+{
+	struct WorldGrid;
+}
+
 class Action
 {
 public:
@@ -30,6 +37,25 @@ public:
 
 	// obj should be the object which has access to the requirements in its possession
 	//ActionResult run(GameObject* obj);
+};
+
+struct PathFinding
+{
+	glm::ivec2 target;
+	glm::ivec2 current;
+
+	glm::ivec2 extentPosition{ 0,0 };
+	glm::ivec2 extendSize{ WORLD_SIZE, WORLD_SIZE };
+
+	std::map<uint64_t, int32_t> visited{};
+
+	std::vector<glm::vec2> path{};
+
+	glm::ivec2 previousDirection = { 1, 1 };
+
+	uint32_t i = 0;
+
+	bool step(game::WorldGrid& grid);
 };
 
 struct ActionResult
@@ -66,7 +92,7 @@ struct Brain
 
 struct Target
 {
-	glm::ivec2 pos;
+	std::deque<glm::ivec2> path;
 };
 
 struct Possession
@@ -93,7 +119,7 @@ struct Nutrition
 struct Locomotion
 {
 	int32_t cooldown = 0;
-	int32_t fitness = 10;
+	int32_t fitness = 60;
 
 	std::optional<glm::ivec2> target;
 };
