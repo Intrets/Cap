@@ -94,9 +94,25 @@ namespace game
 						p + 0.8f,
 						colors::green
 					);
+				}
 
+				float size = 0.9f;
+				for (auto p : e.get<PathFinding>().searched) {
+					Locator<render::DebugRenderInfo>::ref().world.addBox(
+						p + size,
+						p + 1.0f - size,
+						colors::yellow
+					);
+					size -= 0.05f;
+				}
 
-
+				size = 1.0f;
+				for (auto p : e.get<PathFinding>().waypoints) {
+					Locator<render::DebugRenderInfo>::ref().world.addBox(
+						p + size,
+						p + 1.0f - size,
+						colors::blue
+					);
 				}
 				});
 
@@ -193,7 +209,12 @@ namespace game
 			auto const placeWall = [&](glm::ivec2 from, glm::ivec2 to) {
 				glm::vec2 diff = to - from;
 
-				float D = glm::max(diff.x, diff.y);
+				if (diff.x < 0 || diff.y < 0) {
+					std::swap(from, to);
+					diff = to - from;
+				}
+
+				float D = glm::max(glm::abs(diff.x), glm::abs(diff.y));
 
 				glm::vec2 step = diff / D;
 
@@ -209,7 +230,14 @@ namespace game
 
 			placeWall({ 3, 6 }, { 3, 10 });
 
-			placeWall({ 2, 1 }, { 10, 1 });
+			placeWall({ 1, 1 }, { 10, 1 });
+
+			placeWall({ 30, 32 }, { 30, 40 });
+			placeWall({ 30, 40 }, { WORLD_SIZE - 2, 40 });
+			placeWall({ 40, 30 }, { 40, 40 });
+			placeWall({ 40, 30 }, { 32, 30 });
+
+
 
 		}
 		{
@@ -239,7 +267,7 @@ namespace game
 			p.get<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("gnome.dds");
 		}
 
-		for (size_t i = 1; i < (WORLD_SIZE - 1) / 2; i++) {
+		for (size_t i = 1; i < WORLD_SIZE - 1; i++) {
 			//for (size_t j = 0; j < 30; j++) {
 			{
 				size_t j = 0;

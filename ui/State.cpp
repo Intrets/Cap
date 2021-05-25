@@ -289,20 +289,20 @@ namespace ui
 
 		// Test window
 		{
-			Global::push();
+			//Global::push();
 
-			hideable();
-			window("Inventory",
-				{ 0.7f, 0.7f, 1.0f, 1.0f },
-				WINDOW::TYPE::MINIMISE |
-				WINDOW::TYPE::MOVE |
-				WINDOW::TYPE::RESIZE |
-				WINDOW::TYPE::HIDE);
+			//hideable();
+			//window("Inventory",
+			//	{ 0.7f, 0.7f, 1.0f, 1.0f },
+			//	WINDOW::TYPE::MINIMISE |
+			//	WINDOW::TYPE::MOVE |
+			//	WINDOW::TYPE::RESIZE |
+			//	WINDOW::TYPE::HIDE);
 
-			constrainHeight({ SIZETYPE::FH, 1.2f });
-			textButton("test button");
+			//constrainHeight({ SIZETYPE::FH, 1.2f });
+			//textButton("test button");
 
-			this->UIs.push_back(Global::pop());
+			//this->UIs.push_back(Global::pop());
 		}
 
 		//// Inventory

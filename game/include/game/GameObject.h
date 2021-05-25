@@ -50,10 +50,17 @@ struct PathFinding
 	std::map<uint64_t, int32_t> visited{};
 
 	std::vector<glm::vec2> path{};
+	std::vector<glm::vec2> searched{};
 
-	glm::ivec2 previousDirection = { 1, 1 };
+	std::vector<glm::vec2> waypoints{};
 
-	uint32_t i = 0;
+	bool collided = false;
+	size_t direction = 0;
+	bool previousClockWise = false;
+
+	int32_t winding = 0;
+
+	uint32_t tick = 0;
 
 	bool step(game::WorldGrid& grid);
 };
