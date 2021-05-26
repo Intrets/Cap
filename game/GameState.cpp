@@ -31,88 +31,163 @@ namespace game
 			//	}
 			//}
 
-			this->everything.run([&](game::Match<GamePosition, Target>& e) {
-				glm::vec2 lastPoint = e.get<GamePosition>().pos;
-				lastPoint += 0.5f;
-
-				Locator<render::DebugRenderInfo>::ref().world.addPoint(lastPoint, colors::green);
-
-				for (glm::vec2 p : e.get<Target>().path) {
-					p += 0.5f;
-
-					Locator<render::DebugRenderInfo>::ref().world.addLine(
-						lastPoint,
-						p,
-						colors::magenta
-					);
-
-					lastPoint = p;
-
-					Locator<render::DebugRenderInfo>::ref().world.addPoint(
-						lastPoint,
-						colors::green
-					);
-				}
-				});
-
 			this->everything.run([](Match<PathFinding>& e) {
-				if (e.get<PathFinding>().path.empty()) {
-					return;
-				}
+				switch (e.get<PathFinding>().stage) {
+					case 0:
+					{
+						for (auto [k, v] : e.get<PathFinding>().visited) {
+							auto kk = k;
+							glm::vec2 p = *reinterpret_cast<glm::ivec2*>(&kk);
 
-				glm::vec2 lastPoint = e.get<PathFinding>().path.front();
-				lastPoint += 0.5f;
+							Locator<render::DebugRenderInfo>::ref().world.addBox(
+								p + 0.2f,
+								p + 0.8f,
+								colors::green
+							);
+						}
 
-				for (glm::vec2 p : e.get<PathFinding>().path) {
-					p += 0.5f;
+						float size = 0.9f;
+						for (auto p : e.get<PathFinding>().searched) {
+							Locator<render::DebugRenderInfo>::ref().world.addBox(
+								p + size,
+								p + 1.0f - size,
+								colors::yellow
+							);
+							size -= 0.05f;
+						}
 
-					Locator<render::DebugRenderInfo>::ref().world.addLine(
-						lastPoint,
-						p,
-						colors::magenta
-					);
+						size = 1.0f;
+						for (glm::vec2 p : e.get<PathFinding>().waypoints) {
+							Locator<render::DebugRenderInfo>::ref().world.addBox(
+								p + size,
+								p + 1.0f - size,
+								colors::blue
+							);
+						}
+						break;
+					}
+					case 1:
+					{
+						for (glm::vec2 p : e.get<PathFinding>().path) {
 
-					lastPoint = p;
+							Locator<render::DebugRenderInfo>::ref().world.addBox(
+								p + 0.2f,
+								p + 0.8f,
+								colors::green
+							);
+						}
 
-					Locator<render::DebugRenderInfo>::ref().world.addPoint(
-						lastPoint,
-						colors::green
-					);
-				}
+						for (glm::vec2 p : e.get<PathFinding>().prunedPath) {
+							Locator<render::DebugRenderInfo>::ref().world.addBox(
+								p + 0.2f,
+								p + 0.8f,
+								colors::cyan
+							);
+						}
 
-				Locator<render::DebugRenderInfo>::ref().world.addPoint(
-					glm::vec2(e.get<PathFinding>().current) + glm::vec2(0.5f),
-					colors::yellow
-				);
+						float size = 1.0f;
+						for (glm::vec2 p : e.get<PathFinding>().waypoints) {
+							Locator<render::DebugRenderInfo>::ref().world.addBox(
+								p + size,
+								p + 1.0f - size,
+								colors::blue
+							);
+						}
 
-				for (auto [k, v] : e.get<PathFinding>().visited) {
-					auto kk = k;
-					glm::vec2 p = *reinterpret_cast<glm::ivec2*>(&kk);
+						{
+							if (!e.get<PathFinding>().waypoints.empty()) {
+								glm::vec2 p = e.get<PathFinding>().waypoints.back();
+								Locator<render::DebugRenderInfo>::ref().world.addBox(
+									p + size,
+									p + 1.0f - size,
+									colors::yellow
+								);
+							}
+						}
 
-					Locator<render::DebugRenderInfo>::ref().world.addBox(
-						p + 0.2f,
-						p + 0.8f,
-						colors::green
-					);
-				}
 
-				float size = 0.9f;
-				for (auto p : e.get<PathFinding>().searched) {
-					Locator<render::DebugRenderInfo>::ref().world.addBox(
-						p + size,
-						p + 1.0f - size,
-						colors::yellow
-					);
-					size -= 0.05f;
-				}
 
-				size = 1.0f;
-				for (auto p : e.get<PathFinding>().waypoints) {
-					Locator<render::DebugRenderInfo>::ref().world.addBox(
-						p + size,
-						p + 1.0f - size,
-						colors::blue
-					);
+						size = 0.2f;
+						for (glm::vec2 p : e.get<PathFinding>().newWaypoints) {
+							Locator<render::DebugRenderInfo>::ref().world.addBox(
+								p + size,
+								p + 1.0f - size,
+								colors::red
+							);
+						}
+
+						break;
+					}
+					case 2:
+					{
+						float size = 0.7f;
+						for (glm::vec2 p : e.get<PathFinding>().finalPath) {
+							Locator<render::DebugRenderInfo>::ref().world.addBox(
+								p + size,
+								p + 1.0f - size,
+								colors::red
+							);
+						}
+						size = 0.2f;
+						for (glm::vec2 p : e.get<PathFinding>().newWaypoints) {
+							Locator<render::DebugRenderInfo>::ref().world.addBox(
+								p + size,
+								p + 1.0f - size,
+								colors::red
+							);
+						}
+
+
+						if (e.get<PathFinding>().F.get() != nullptr) {
+							for (auto [k, v] : e.get<PathFinding>().F->visited) {
+								auto kk = k;
+								glm::vec2 p = *reinterpret_cast<glm::ivec2*>(&kk);
+
+								Locator<render::DebugRenderInfo>::ref().world.addBox(
+									p + 0.2f,
+									p + 0.8f,
+									colors::green
+								);
+							}
+
+							size = 0.9f;
+							for (auto p : e.get<PathFinding>().F->searched) {
+								Locator<render::DebugRenderInfo>::ref().world.addBox(
+									p + size,
+									p + 1.0f - size,
+									colors::yellow
+								);
+								size -= 0.05f;
+							}
+
+							size = 1.0f;
+							for (glm::vec2 p : e.get<PathFinding>().F->waypoints) {
+								Locator<render::DebugRenderInfo>::ref().world.addBox(
+									p + size,
+									p + 1.0f - size,
+									colors::blue
+								);
+							}
+
+							glm::vec2 p1 = e.get<PathFinding>().highlight1;
+
+							Locator<render::DebugRenderInfo>::ref().world.addPoint(
+								p1 + 0.5f,
+								colors::green
+							);
+
+							glm::vec2 p2 = e.get<PathFinding>().highlight2;
+
+							Locator<render::DebugRenderInfo>::ref().world.addPoint(
+								p2 + 0.5f,
+								colors::green
+							);
+
+						}
+						break;
+					}
+					default:
+						break;
 				}
 				});
 
@@ -225,17 +300,24 @@ namespace game
 				}
 			};
 
-			placeWall({ 1, 10 }, { 10, 10 });
+			placeWall({ 2, 10 }, { 10, 10 });
 			placeWall({ 10, 3 }, { 10, 10 });
 
-			placeWall({ 3, 6 }, { 3, 10 });
+			placeWall({ 2, 6 }, { 2, WORLD_SIZE - 2 });
 
 			placeWall({ 1, 1 }, { 10, 1 });
 
-			placeWall({ 30, 32 }, { 30, 40 });
+			placeWall({ 30, 33 }, { 30, 40 });
 			placeWall({ 30, 40 }, { WORLD_SIZE - 2, 40 });
 			placeWall({ 40, 30 }, { 40, 40 });
-			placeWall({ 40, 30 }, { 32, 30 });
+			placeWall({ 40, 30 }, { 33, 30 });
+
+			placeWall({ 1, 20 }, { WORLD_SIZE - 4, 20 });
+
+			placeWall({ 1, 35 }, { 10, 35 });
+			placeWall({ 12, 35 }, { 35, 35 });
+
+			place(41, 30);
 
 
 
@@ -247,8 +329,16 @@ namespace game
 			p.add<Brain>();
 			p.add<PathFinding>();
 
-			p.get<PathFinding>().current = { 2, 2 };
-			p.get<PathFinding>().target = { WORLD_SIZE - 3, WORLD_SIZE - 3 };
+			//glm::ivec2 target = { WORLD_SIZE - 3, WORLD_SIZE - 3 };
+			glm::ivec2 target = { WORLD_SIZE - 3, WORLD_SIZE - 3 };
+			glm::ivec2 start = { 2,2 };
+
+			//p.get<PathFinding>().current = { 2, 2 };
+			PathFinding::Front F{ start };
+			F.waypoints.push_back(start);
+			p.get<PathFinding>().front.push(F);
+			p.get<PathFinding>().target = target;
+			p.get<PathFinding>().start = start;
 
 			//p.add<Target>(std::deque<glm::ivec2>{
 			//	glm::ivec2(10, 2),
@@ -262,7 +352,7 @@ namespace game
 			//		glm::ivec2(10, 6)
 			//});
 
-			this->placeInWorld(p, { 2, 2 });
+			//this->placeInWorld(p, { 2, 2 });
 
 			p.get<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("gnome.dds");
 		}

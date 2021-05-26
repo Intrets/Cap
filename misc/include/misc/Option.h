@@ -15,6 +15,8 @@
 
 namespace misc
 {
+	class OptionManager;
+
 	enum class OPTION
 	{
 		LO_TICKSPERSECOND,

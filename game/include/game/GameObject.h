@@ -7,6 +7,7 @@
 #include <functional>
 #include <deque>
 #include <map>
+#include <queue>
 
 #include <wglm/glm.hpp>
 #include <misc/Misc.h>
@@ -41,28 +42,70 @@ public:
 
 struct PathFinding
 {
+	int stage = 0;
+
+	struct Front
+	{
+		glm::ivec2 current;
+		bool collided = false;
+		size_t direction = 0;
+		int32_t winding = 0;
+		bool clockwise = false;
+		std::vector<glm::ivec2> path{};
+		std::vector<glm::ivec2> waypoints{};
+	};
+	std::queue<Front> front;
+
 	glm::ivec2 target;
-	glm::ivec2 current;
+	glm::ivec2 start;
+	bool found = false;
+	//glm::ivec2 current;
 
 	glm::ivec2 extentPosition{ 0,0 };
 	glm::ivec2 extendSize{ WORLD_SIZE, WORLD_SIZE };
 
 	std::map<uint64_t, int32_t> visited{};
 
-	std::vector<glm::vec2> path{};
+	//std::vector<glm::vec2> path{};
 	std::vector<glm::vec2> searched{};
 
-	std::vector<glm::vec2> waypoints{};
 
-	bool collided = false;
-	size_t direction = 0;
-	bool previousClockWise = false;
+	//bool collided = false;
+	//size_t direction = 0;
+	//bool previousClockWise = false;
 
-	int32_t winding = 0;
+	//int32_t winding = 0;
 
 	uint32_t tick = 0;
 
+	int32_t count = 0;
+
+	// --------
+
+	std::vector<glm::ivec2> path{};
+	std::vector<glm::ivec2> prunedPath{};
+	std::vector<glm::ivec2> waypoints{};
+	std::deque<glm::ivec2> newWaypoints{};
+	glm::ivec2 lastP = { 0,0 };
+	bool cutoff = false;
+
+	int32_t lastD = 999999;
+
+	// --------
+
+	std::vector<glm::ivec2> finalPath{};
+
+	glm::ivec2 highlight1;
+	glm::ivec2 highlight2;
+
+	std::unique_ptr<PathFinding> F;
+
+
 	bool step(game::WorldGrid& grid);
+
+	bool stage1(game::WorldGrid& grid);
+	bool stage2(game::WorldGrid& grid);
+	bool stage3(game::WorldGrid& grid);
 };
 
 struct ActionResult
