@@ -40,20 +40,22 @@ public:
 	//ActionResult run(GameObject* obj);
 };
 
+struct Front
+{
+	glm::ivec2 current;
+	uint32_t D = 9999999;
+	bool collided = false;
+	size_t direction = 0;
+	int32_t winding = 0;
+	bool clockwise = false;
+	std::vector<glm::ivec2> path{};
+	std::vector<glm::ivec2> waypoints{};
+};
+
 struct PathFinding
 {
 	int stage = 0;
 
-	struct Front
-	{
-		glm::ivec2 current;
-		bool collided = false;
-		size_t direction = 0;
-		int32_t winding = 0;
-		bool clockwise = false;
-		std::vector<glm::ivec2> path{};
-		std::vector<glm::ivec2> waypoints{};
-	};
 	std::queue<Front> front;
 
 	glm::ivec2 target;

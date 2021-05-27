@@ -317,7 +317,17 @@ namespace game
 			placeWall({ 1, 35 }, { 10, 35 });
 			placeWall({ 12, 35 }, { 35, 35 });
 
+			placeWall({ 20, 35 }, { 20, 23 });
+
 			place(41, 30);
+
+			//for (size_t i = 0; i < 200; i++) {
+			//	int x = 1 + rand() % (WORLD_SIZE - 5);
+			//	int y = 1 + rand() % (WORLD_SIZE - 5);
+
+			//	place(x, y);
+
+			//}
 
 
 
@@ -334,7 +344,7 @@ namespace game
 			glm::ivec2 start = { 2,2 };
 
 			//p.get<PathFinding>().current = { 2, 2 };
-			PathFinding::Front F{ start };
+			Front F{ start };
 			F.waypoints.push_back(start);
 			p.get<PathFinding>().front.push(F);
 			p.get<PathFinding>().target = target;

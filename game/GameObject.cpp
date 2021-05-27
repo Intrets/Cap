@@ -63,7 +63,12 @@ bool PathFinding::stage1(game::WorldGrid& grid) {
 	}
 
 	auto F = front.front();
+	//auto F = front.top();
 	front.pop();
+
+	if (glm::abs(F.winding) > 20) {
+		return false;
+	}
 
 	auto D = target - F.current;
 	auto Dabs = glm::abs(D);
@@ -74,7 +79,7 @@ bool PathFinding::stage1(game::WorldGrid& grid) {
 		this->stage++;
 		this->path = F.path;
 		this->waypoints = F.waypoints;
-		this->newWaypoints.push_back(this->target);
+		//this->newWaypoints.push_back(this->target);
 		return true;
 	}
 
@@ -127,12 +132,14 @@ bool PathFinding::stage1(game::WorldGrid& grid) {
 			auto w = F.winding;
 			//this->direction = dir;
 			//this->collided = true;
+			F.D = norm2(this->target - p);
 			F.clockwise = true;
 			F.collided = true;
 			F.direction = prev(prev(dir));
 			F.winding = w + 2;
 			this->front.push(F);
 
+			F.D = norm2(this->target - p);
 			F.clockwise = false;
 			F.winding = w + 2;
 			F.direction = next(next(dir));
@@ -161,6 +168,7 @@ bool PathFinding::stage1(game::WorldGrid& grid) {
 			F.collided = false;
 			F.path.push_back(p);
 			F.current = p;
+			F.D = norm2(this->target - p);
 
 			this->front.push(F);
 
@@ -183,7 +191,7 @@ bool PathFinding::stage1(game::WorldGrid& grid) {
 
 	auto dec = F.clockwise ? next : prev;
 	auto inc = F.clockwise ? prev : next;
-	size_t index = inc(inc(inc(flip(F.direction))));
+	size_t index = (inc(inc(flip(F.direction))));
 	for (size_t i = 0; i < 8; i++) {
 		p = F.current + order[index];
 		this->searched.push_back(p);
@@ -197,9 +205,10 @@ bool PathFinding::stage1(game::WorldGrid& grid) {
 			//this->direction = index;
 
 			F.direction = index;
-			F.winding += i - 1;
+			F.winding += i - 2;
 			F.path.push_back(p);
 			F.current = p;
+			F.D = norm2(this->target - p);
 			this->front.push(F);
 
 			Locator<misc::Log>::ref().putStreamLine(std::stringstream() << "winding: " << F.winding << " i: " << i);
@@ -269,7 +278,40 @@ bool PathFinding::stage2(game::WorldGrid& grid) {
 	}
 	else {
 		this->stage++;
+
+		this->newWaypoints.erase(std::remove_if(
+			this->newWaypoints.begin(),
+			this->newWaypoints.end(),
+			[&](glm::ivec2 p) {
+				size_t count = 0;
+				for (size_t i = 0; i < 11; i++) {
+					static const std::vector<glm::ivec2> order = {
+						{1,1},
+						{1,0},
+						{1, -1},
+						{0,-1},
+						{-1,-1},
+						{-1,0},
+						{-1,1},
+						{0,1},
+					};
+
+					if (grid.occupied(p + order[i % 8])) {
+						if (count++ > 2) {
+							return true;
+						}
+					}
+					else {
+						count = 0;
+					}
+
+				}
+				return false;
+			}
+		), this->newWaypoints.end());
+
 		this->newWaypoints.push_back(this->start);
+		this->newWaypoints.insert(this->newWaypoints.begin(), this->target);
 		return true;
 	}
 

@@ -62,6 +62,10 @@ inline float norm2(glm::vec2 v) {
 	return v.x * v.x + v.y * v.y;
 }
 
+inline int32_t norm2(glm::ivec2 v) {
+	return v.x * v.x + v.y * v.y;
+}
+
 inline std::streamoff getSize(std::basic_stringstream<char>& b) {
 	return b.tellp() - b.tellg();
 }
