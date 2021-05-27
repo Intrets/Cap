@@ -7,6 +7,9 @@
 #include <mem/Locator.h>
 #include <misc/Log.h>
 
+#include <render/infos/DebugRenderInfo.h>
+#include <render/Colors.h>
+
 static auto next(size_t i) {
 	return (i + 1) % 8;
 }
@@ -28,6 +31,167 @@ static void updateOrInsert(std::map<K, V>& map, K key, V value, std::function<V(
 	else {
 		map[key] = value;
 	}
+}
+
+void PathFinding::debugRender() {
+	switch (this->stage) {
+		case 0:
+		{
+			for (auto [k, v] : this->visited) {
+				auto kk = k;
+				glm::vec2 p = *reinterpret_cast<glm::ivec2*>(&kk);
+
+				Locator<render::DebugRenderInfo>::ref().world.addBox(
+					p + 0.2f,
+					p + 0.8f,
+					colors::green
+				);
+			}
+
+			float size = 0.9f;
+			for (auto p : this->searched) {
+				Locator<render::DebugRenderInfo>::ref().world.addBox(
+					p + size,
+					p + 1.0f - size,
+					colors::yellow
+				);
+				size -= 0.05f;
+			}
+
+			size = 1.0f;
+			for (glm::vec2 p : this->waypoints) {
+				Locator<render::DebugRenderInfo>::ref().world.addBox(
+					p + size,
+					p + 1.0f - size,
+					colors::blue
+				);
+			}
+			break;
+		}
+		case 1:
+		{
+			for (glm::vec2 p : this->path) {
+
+				Locator<render::DebugRenderInfo>::ref().world.addBox(
+					p + 0.2f,
+					p + 0.8f,
+					colors::green
+				);
+			}
+
+			for (glm::vec2 p : this->prunedPath) {
+				Locator<render::DebugRenderInfo>::ref().world.addBox(
+					p + 0.2f,
+					p + 0.8f,
+					colors::cyan
+				);
+			}
+
+			float size = 1.0f;
+			for (glm::vec2 p : this->waypoints) {
+				Locator<render::DebugRenderInfo>::ref().world.addBox(
+					p + size,
+					p + 1.0f - size,
+					colors::blue
+				);
+			}
+
+			{
+				if (!this->waypoints.empty()) {
+					glm::vec2 p = this->waypoints.back();
+					Locator<render::DebugRenderInfo>::ref().world.addBox(
+						p + size,
+						p + 1.0f - size,
+						colors::yellow
+					);
+				}
+			}
+
+
+
+			size = 0.2f;
+			for (glm::vec2 p : this->newWaypoints) {
+				Locator<render::DebugRenderInfo>::ref().world.addBox(
+					p + size,
+					p + 1.0f - size,
+					colors::red
+				);
+			}
+
+			break;
+		}
+		case 2:
+		{
+			float size = 0.7f;
+			for (glm::vec2 p : this->finalPath) {
+				Locator<render::DebugRenderInfo>::ref().world.addBox(
+					p + size,
+					p + 1.0f - size,
+					colors::red
+				);
+			}
+			size = 0.2f;
+			for (glm::vec2 p : this->newWaypoints) {
+				Locator<render::DebugRenderInfo>::ref().world.addBox(
+					p + size,
+					p + 1.0f - size,
+					colors::red
+				);
+			}
+
+
+			if (this->F.get() != nullptr) {
+				for (auto [k, v] : this->F->visited) {
+					auto kk = k;
+					glm::vec2 p = *reinterpret_cast<glm::ivec2*>(&kk);
+
+					Locator<render::DebugRenderInfo>::ref().world.addBox(
+						p + 0.2f,
+						p + 0.8f,
+						colors::green
+					);
+				}
+
+				size = 0.9f;
+				for (auto p : this->F->searched) {
+					Locator<render::DebugRenderInfo>::ref().world.addBox(
+						p + size,
+						p + 1.0f - size,
+						colors::yellow
+					);
+					size -= 0.05f;
+				}
+
+				size = 1.0f;
+				for (glm::vec2 p : this->F->waypoints) {
+					Locator<render::DebugRenderInfo>::ref().world.addBox(
+						p + size,
+						p + 1.0f - size,
+						colors::blue
+					);
+				}
+
+				glm::vec2 p1 = this->highlight1;
+
+				Locator<render::DebugRenderInfo>::ref().world.addPoint(
+					p1 + 0.5f,
+					colors::green
+				);
+
+				glm::vec2 p2 = this->highlight2;
+
+				Locator<render::DebugRenderInfo>::ref().world.addPoint(
+					p2 + 0.5f,
+					colors::green
+				);
+
+			}
+			break;
+		}
+		default:
+			break;
+	}
+
 }
 
 bool PathFinding::step(game::WorldGrid& grid) {
@@ -66,7 +230,7 @@ bool PathFinding::stage1(game::WorldGrid& grid) {
 	//auto F = front.top();
 	front.pop();
 
-	if (glm::abs(F.winding) > 20) {
+	if (glm::abs(F.winding) > 10) {
 		return false;
 	}
 
@@ -149,7 +313,6 @@ bool PathFinding::stage1(game::WorldGrid& grid) {
 	}
 
 	if (glm::abs(F.winding) < 2) {
-		auto it = this->visited.find(1);
 		if (!grid.occupied(p.x, p.y) && !this->visited.count(*reinterpret_cast<uint64_t*>(&p))) {
 			F.waypoints.push_back(p);
 
@@ -312,6 +475,8 @@ bool PathFinding::stage2(game::WorldGrid& grid) {
 
 		this->newWaypoints.push_back(this->start);
 		this->newWaypoints.insert(this->newWaypoints.begin(), this->target);
+
+		std::reverse(this->newWaypoints.begin(), this->newWaypoints.end());
 		return true;
 	}
 

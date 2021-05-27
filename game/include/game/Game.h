@@ -16,7 +16,7 @@
 
 using SizeAlias = size_t;
 
-constexpr auto WORLD_SIZE = 60;
+constexpr auto WORLD_SIZE = 200;
 
 namespace game
 {

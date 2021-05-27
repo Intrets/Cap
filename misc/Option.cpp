@@ -10,7 +10,7 @@
 namespace misc
 {
 	void OptionManager::defaultValues() {
-		initVal(OPTION::CL_VIEWPORTSCALE, 35.0f, "cl_viewportscale", "");
+		initVal(OPTION::CL_VIEWPORTSCALE, 100.0f, "cl_viewportscale", "");
 		initVal(OPTION::GR_DEBUG, true, "gr_debug", "");
 		initVal<int32_t>(OPTION::GR_FRAMESYNCMODE, 0, "gr_framesyncmode", "");
 		initVal(OPTION::UI_SCALE, 1.0f, "ui_scale", "");

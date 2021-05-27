@@ -102,12 +102,12 @@ struct PathFinding
 
 	std::unique_ptr<PathFinding> F;
 
-
-	bool step(game::WorldGrid& grid);
-
 	bool stage1(game::WorldGrid& grid);
 	bool stage2(game::WorldGrid& grid);
 	bool stage3(game::WorldGrid& grid);
+
+	bool step(game::WorldGrid& grid);
+	void debugRender();
 };
 
 struct ActionResult
