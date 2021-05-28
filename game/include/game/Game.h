@@ -234,6 +234,9 @@ namespace game
 		template<class F>
 		inline void run(F f);
 
+		template<class F>
+		inline void match(F f);
+
 		template<class... Ms>
 		size_t selectPivot();
 
@@ -243,6 +246,26 @@ namespace game
 		~Everything() = default;
 
 		NOCOPYMOVE(Everything);
+	};
+
+	struct Loop
+	{
+		template<class E, class F>
+		static inline void run(E& e, F f) {
+			using A = te::reverse_t<te::arguments_list_t<F>>;
+			Loop::run<E, F, A>(e, f);
+		}
+
+		template<class E, class F, class L, class... Args>
+		static inline void run(E& e, F f, Args... args) {
+			if constexpr (L::is_empty) {
+				f(args...);
+			}
+			else {
+				using head_stripped_ref = std::remove_reference_t<L::head>;
+				head_stripped_ref::template run<F, typename L::tail, Args...>(e, f, args...);
+			}
+		}
 	};
 
 	template<class M, class... Ms>
@@ -272,7 +295,7 @@ namespace game
 			if constexpr (sizeof...(Ms) == 0) {
 				for (SizeAlias i = 1; i < end; i++) {
 					auto index = g.getIndex(i);
-					te::Loop::run<Everything, F, L, Match<M, Ms...>, Args...>(e, f, Match<M, Ms...>{ { index, & e } }, args...);
+					Loop::run<Everything, F, L, Match<M, Ms...>, Args...>(e, f, Match<M, Ms...>{ { index, & e } }, args...);
 				}
 			}
 			else {
@@ -280,7 +303,39 @@ namespace game
 					auto index = g.getIndex(i);
 
 					if (e.has<Ms...>(index)) {
-						te::Loop::run<Everything, F, L, Match<M, Ms...>, Args...>(e, f, Match<M, Ms...>{ { index, & e } }, args...);
+						Loop::run<Everything, F, L, Match<M, Ms...>, Args...>(e, f, Match<M, Ms...>{ { index, & e } }, args...);
+					}
+				}
+			}
+		};
+	};
+
+	template<class L>
+	struct MatchExpanded;
+
+	template<class M, class... Ms>
+	struct MatchExpanded<te::list<M, Ms... >>
+	{
+		WeakObject obj;
+
+		template<class F>
+		static inline void run(Everything& e, F f) {
+			size_t pivot = e.selectPivot<M, Ms...>();
+
+			auto& g = e.gets(pivot);
+			const size_t end = g.index;
+
+			if constexpr (sizeof...(Ms) == 0) {
+				for (SizeAlias i = 1; i < end; i++) {
+					f(g.get<M>(i));
+				}
+			}
+			else {
+				for (SizeAlias i = 1; i < end; i++) {
+					auto index = g.getIndex(i);
+
+					if (e.has<Ms...>(index)) {
+						f(e.get<M>(index), e.get<Ms>(index)...);
 					}
 				}
 			}
@@ -483,7 +538,13 @@ namespace game
 
 	template<class F>
 	inline void Everything::run(F f) {
-		te::Loop::run(*this, f);
+		Loop::run(*this, f);
+	}
+
+	template<class F>
+	inline void Everything::match(F f) {
+		using arguments_list = typename te::remove_ref_and_const_t<te::arguments_list_t<F>>;
+		MatchExpanded<arguments_list>::run(*this, f);
 	}
 
 	template<class... Ms>
