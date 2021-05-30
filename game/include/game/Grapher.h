@@ -33,15 +33,16 @@ struct Grapher
 
 	int32_t currentDepth = 0;
 
-	int32_t blockSize = std::numeric_limits<int32_t>::max();
-	//int32_t blockSize = 20;
+	//int32_t blockSize = std::numeric_limits<int32_t>::max();
+	int32_t blockSize = 30;
 	glm::ivec2 currentBlock;
 
 	glm::ivec2 lastPos;
 	int32_t lastGroup = 0;
 
-	std::vector<glm::ivec2> group;
 	std::vector<Front> fronts;
+
+	std::vector<glm::ivec2> groups;
 
 	bool incrementLastPos();
 

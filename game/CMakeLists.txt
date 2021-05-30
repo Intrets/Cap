@@ -11,6 +11,7 @@ set(MODULE_FILES
 	Game
 	Grapher
 	WorldGrid
+	Merger
 )
 
 make_module(${MODULE_NAME} "${MODULE_FILES}")

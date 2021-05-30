@@ -6,16 +6,20 @@
 #include <mem/Locator.h>
 
 bool Grapher::incrementLastPos() {
-	this->lastPos.x++;
-	if (this->lastPos.x >= this->region.top.x) {
-		this->lastPos.x = 0;
-		this->lastPos.y++;
+	//this->lastPos.x++;
+	//if (this->lastPos.x >= this->region.top.x) {
+	//	this->lastPos.x = 0;
+	//	this->lastPos.y++;
 
-		if (this->lastPos.y >= this->region.top.y) {
-			return false;
-		}
-	}
-	return true;
+	//	if (this->lastPos.y >= this->region.top.y) {
+	//		return false;
+	//	}
+	//}
+	//return true;
+	static int32_t count = 0;
+	count++;
+	this->lastPos = { rand() % WORLD_SIZE, rand() % WORLD_SIZE };
+	return count < WORLD_SIZE* WORLD_SIZE * 10;
 }
 
 void Grapher::debugRender() {
@@ -44,7 +48,7 @@ bool Grapher::step(game::WorldGrid& grid) {
 
 			if (isValid(this->lastPos)) {
 				grid.setGroup(this->lastPos, ++this->lastGroup);
-				this->group.push_back(this->lastPos);
+				this->groups.push_back(this->lastPos);
 				for (size_t i = 0; i < 4; i++) {
 					Front f;
 					f.max = lastPos;
@@ -102,10 +106,26 @@ bool Grapher::step(game::WorldGrid& grid) {
 			//	front.size = 0;
 			//	continue;
 			//}
-			if (endi - starti < currentDepth/2 - 2) {
-				front.size = 0;
+			if (endi - starti < 5 && endi - starti < currentDepth / 2) {
+				//front.size = 0;
 				continue;
 			}
+			if (endi - starti < 2 && currentDepth > 5) {
+				//front.size = 0;
+				continue;
+			}
+			if (endi - starti < 2 && currentDepth > 2) {
+				//front.size = 0;
+				continue;
+			}
+			//if (endi - starti < 2 && currentDepth > 2) {
+			//	//front.size = 0;
+			//	continue;
+			//}
+			//if (endi - starti < 3 && currentDepth > 3) {
+			//	//front.size = 0;
+			//	continue;
+			//}
 			if (i != end) {
 				front.size = 0;
 				continue;

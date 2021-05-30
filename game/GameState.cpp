@@ -189,14 +189,14 @@ namespace game
 
 			place(41, 30);
 
-			for (size_t i = 0; i < 200; i++) {
-				int x = 1 + rand() % (WORLD_SIZE - 5);
-				int y = 1 + rand() % (WORLD_SIZE - 5);
-				if (x < 30 && y < 30) {
-					continue;
-				}
-				place(x, y);
-			}
+			//for (size_t i = 0; i < 400; i++) {
+			//	int x = 1 + rand() % (WORLD_SIZE - 5);
+			//	int y = 1 + rand() % (WORLD_SIZE - 5);
+			//	if (x < 30 && y < 30) {
+			//		continue;
+			//	}
+			//	place(x, y);
+			//}
 
 			for (size_t i = 5; i < 20; i++) {
 				place(10 + i, 20 - i);
