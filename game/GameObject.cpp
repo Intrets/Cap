@@ -10,6 +10,8 @@
 #include <render/infos/DebugRenderInfo.h>
 #include <render/Colors.h>
 
+#include "WorldGrid.h"
+
 static auto next(size_t i) {
 	return (i + 1) % 8;
 }

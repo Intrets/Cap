@@ -9,6 +9,8 @@ set(MODULE_FILES
 	Signature
 	GameObject
 	Game
+	Grapher
+	WorldGrid
 )
 
 make_module(${MODULE_NAME} "${MODULE_FILES}")

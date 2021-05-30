@@ -16,6 +16,11 @@ namespace colors
 	static constexpr Color magenta = { 0xFFFF00FF };
 	static constexpr Color yellow = { 0xF00FFFFF };
 	static constexpr Color cyan = { 0xFFFFFF00 };
+
+	template<class T>
+	Color uniqueColor(T val) {
+		return { static_cast<uint32_t>(std::hash<T>{}(val)) | 0xFF000000 };
+	}
 }
 
 constexpr uint32_t char_to_hex(const char c) {

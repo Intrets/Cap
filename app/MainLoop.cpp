@@ -79,7 +79,7 @@ void mainLoop(GLFWwindow* window) {
 
 	render::Renderer renderer;
 
-	PlayerInfo playerInfo{ { 100, 100 }, gameState, controlState, uiState };
+	PlayerInfo playerInfo{ { 35, 35 }, gameState, controlState, uiState };
 
 	glfwSetCharCallback(window, char_callback);
 	glfwSetKeyCallback(window, key_callback);

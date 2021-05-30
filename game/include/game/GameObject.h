@@ -13,6 +13,7 @@
 #include <misc/Misc.h>
 
 #include "Game.h"
+#include "WorldGrid.h"
 
 using SizeAlias = size_t;
 

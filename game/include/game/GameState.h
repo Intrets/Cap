@@ -14,6 +14,7 @@
 #include "GameObject.h"
 #include "Signature.h"
 #include "Game.h"
+#include "WorldGrid.h"
 
 namespace render
 {
@@ -92,24 +93,6 @@ namespace game
 
 	//	float value(SignatureAlias const& signature);
 	//};
-
-	struct WorldGrid
-	{
-		std::array<std::array<SizeAlias, WORLD_SIZE>, WORLD_SIZE> grid;
-
-		SizeAlias get(int32_t x, int32_t y);
-		SizeAlias get(glm::ivec2 pos);
-
-		void place(SizeAlias index, int32_t x, int32_t y);
-		void place(SizeAlias index, glm::ivec2 pos);
-
-		void remove(int32_t x, int32_t y);
-		void remove(glm::ivec2 pos);
-
-		bool occupied(int32_t x, int32_t y);
-		bool occupied(glm::ivec2 pos);
-		bool empty(glm::ivec2 pos);
-	};
 
 	class GameState
 	{

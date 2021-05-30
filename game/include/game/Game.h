@@ -16,7 +16,6 @@
 
 using SizeAlias = size_t;
 
-constexpr auto WORLD_SIZE = 200;
 
 namespace game
 {
@@ -316,8 +315,6 @@ namespace game
 	template<class M, class... Ms>
 	struct MatchExpanded<te::list<M, Ms... >>
 	{
-		WeakObject obj;
-
 		template<class F>
 		static inline void run(Everything& e, F f) {
 			size_t pivot = e.selectPivot<M, Ms...>();

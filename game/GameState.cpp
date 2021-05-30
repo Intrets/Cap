@@ -10,27 +10,48 @@
 
 #include <misc/Timer.h>
 
+#include "Grapher.h"
+
 namespace game
 {
 	void GameState::addRenderInfo(render::RenderInfo& renderInfo) {
-		this->everything.run([&](game::Match<GamePosition, GraphicsTile>& e) {
+		this->everything.match([&](GamePosition const& pos, GraphicsTile const& tile) {
 			renderInfo.tileRenderInfo.addBlitInfo(
-				glm::vec4(e.get<GamePosition>().pos, 1, 1),
+				glm::vec4(pos.pos, 1, 1),
 				0,
-				e.get<GraphicsTile>().blockID
+				tile.blockID
 			);
 			});
 
-		if (misc::Option<misc::OPTION::GR_DEBUG, bool>::getVal()) {
-			//for (size_t i = 0; i < WORLD_SIZE; i++) {
-			//	for (size_t j = 0; j < WORLD_SIZE; j++) {
-			//		if (this->world->occupied(i, j)) {
-			//			Locator<render::DebugRenderInfo>::ref().world.addPoint(i + 0.5f, j + 0.5f);
-			//			Locator<render::DebugRenderInfo>::ref().world.addBox(i, j, i + 1.0f, j + 1.0f);
-			//		}
-			//	}
-			//}
+		auto& debugRender = Locator<render::DebugRenderInfo>::ref();
 
+		if (misc::Option<misc::OPTION::GR_DEBUG, bool>::getVal()) {
+			for (size_t i = 0; i < WORLD_SIZE; i++) {
+				for (size_t j = 0; j < WORLD_SIZE; j++) {
+					if (this->world->isGrouped({ i,j })) {
+						float size = 0.1f;
+						glm::vec2 min{ i + size, j + size };
+						glm::vec2 max{ i + 1 - size, j + 1 - size };
+
+						auto c1 = colors::uniqueColor(this->world->getGroup({ i,j }));
+						auto c2 = colors::uniqueColor(183874 - this->world->getGroup({ i,j }));
+
+						debugRender.world.addBox(min, max, c1);
+						size = 0.2f;
+						min = { i + size, j + size };
+						max = { i + 1 - size, j + 1 - size };
+						debugRender.world.addBox(min, max, c2);
+					}
+					//if (this->world->occupied(i, j)) {
+					//	Locator<render::DebugRenderInfo>::ref().world.addPoint(i + 0.5f, j + 0.5f);
+					//	Locator<render::DebugRenderInfo>::ref().world.addBox(i, j, i + 1.0f, j + 1.0f);
+					//}
+				}
+			}
+
+			this->everything.run([&](Match<Grapher>& e) {
+				e.get<Grapher>().debugRender();
+				});
 		}
 
 	}
@@ -59,6 +80,12 @@ namespace game
 				}
 			}
 			});
+
+		if (this->tick % 1 == 0) {
+			this->everything.match([&](Grapher& grapher) {
+				grapher.step(*this->world);
+				});
+		}
 
 		//this->everything.run([&](Match<Spawner, GamePosition>& e) {
 		//	auto p = this->everything.make();
@@ -106,6 +133,11 @@ namespace game
 	}
 
 	GameState::GameState() {
+		{
+
+			auto p = this->everything.make();
+			p.add<Grapher>().region = { {0,0}, {WORLD_SIZE - 1, WORLD_SIZE - 1} };
+		}
 		{
 			auto const place = [&](int i, int j) {
 				if (this->world->occupied(i, j)) {
@@ -157,16 +189,19 @@ namespace game
 
 			place(41, 30);
 
-			//for (size_t i = 0; i < 200; i++) {
-			//	int x = 1 + rand() % (WORLD_SIZE - 5);
-			//	int y = 1 + rand() % (WORLD_SIZE - 5);
+			for (size_t i = 0; i < 200; i++) {
+				int x = 1 + rand() % (WORLD_SIZE - 5);
+				int y = 1 + rand() % (WORLD_SIZE - 5);
+				if (x < 30 && y < 30) {
+					continue;
+				}
+				place(x, y);
+			}
 
-			//	place(x, y);
+			for (size_t i = 5; i < 20; i++) {
+				place(10 + i, 20 - i);
 
-			//}
-
-
-
+			}
 		}
 		{
 			auto p = this->everything.make();
@@ -262,39 +297,4 @@ namespace game
 	//		}
 	//	}
 
-	SizeAlias WorldGrid::get(int32_t x, int32_t y) {
-		return this->grid[x][y];
-	}
-
-	SizeAlias WorldGrid::get(glm::ivec2 pos) {
-		return this->grid[pos.x][pos.y];
-	}
-
-	void WorldGrid::place(SizeAlias index, int32_t x, int32_t y) {
-		this->grid[x][y] = index;
-	}
-
-	void WorldGrid::place(SizeAlias index, glm::ivec2 pos) {
-		this->grid[pos.x][pos.y] = index;
-	}
-
-	void WorldGrid::remove(int32_t x, int32_t y) {
-		this->grid[x][y] = 0;
-	}
-
-	void WorldGrid::remove(glm::ivec2 pos) {
-		this->grid[pos.x][pos.y] = 0;
-	}
-
-	bool WorldGrid::occupied(int32_t x, int32_t y) {
-		return this->get(x, y) != 0;
-	}
-
-	bool WorldGrid::occupied(glm::ivec2 pos) {
-		return this->get(pos) != 0;
-	}
-
-	bool WorldGrid::empty(glm::ivec2 pos) {
-		return this->get(pos) == 0;
-	}
 }
