@@ -252,7 +252,7 @@ namespace render
 		void TFor(ArrayBuffer<typename Arg::GroupType>& arg, ArrayBuffer<typename Args::GroupType>& ...args) {
 			Arg::apply(arg);
 			if constexpr (sizeof...(Args) != 0) {
-				TFor<Args...>(std::forward<ArrayBuffer<typename Args::GroupType>>(args)...);
+				TFor<Args...>(args...);
 			}
 		};
 
