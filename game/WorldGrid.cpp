@@ -1,7 +1,38 @@
 #include "WorldGrid.h"
 
+#include <queue>
+
 namespace game
 {
+	void WorldGrid::replaceGroup(glm::ivec2 p, int32_t replace, int32_t with) {
+		assert(this->getGroup(p) == replace);
+
+		std::vector<glm::ivec2> open;
+		this->setGroup(p, with);
+		open.push_back(p);
+
+		while (!open.empty()) {
+			auto point = open.back();
+			open.pop_back();
+
+			const std::array<glm::ivec2, 4> D{
+				glm::ivec2(1,0),
+				glm::ivec2(0,1),
+				glm::ivec2(-1,0),
+				glm::ivec2(0,-1)
+			};
+
+			for (auto d : D) {
+				auto point2 = point + d;
+
+				if (this->getGroup(point2) == replace) {
+					this->setGroup(point2, with);
+					open.push_back(point2);
+				}
+			}
+		}
+	}
+
 	bool WorldGrid::isGrouped(glm::ivec2 pos) {
 		return this->group[pos.x][pos.y] != 0;
 	}

@@ -34,7 +34,7 @@ struct Grapher
 	int32_t currentDepth = 0;
 
 	//int32_t blockSize = std::numeric_limits<int32_t>::max();
-	int32_t blockSize = 30;
+	int32_t blockSize = 13;
 	glm::ivec2 currentBlock;
 
 	glm::ivec2 lastPos;

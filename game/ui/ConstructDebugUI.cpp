@@ -30,7 +30,7 @@ namespace game
 		// Tick info
 		// ---------
 
-		ui::constrainHeight({ ui::SIZETYPE::FH, 36.3f });
+		ui::constrainHeight({ ui::SIZETYPE::FH, 16.3f });
 		ui::background(COLORS::UI::BACKGROUND);
 		auto tickInfo = ui::textDisplayMulti("TODO: add bind");
 
@@ -93,12 +93,10 @@ namespace game
 
 
 		ui::constrainHeight({ ui::SIZETYPE::FH, 1.2f });
-		ui::menu("Info", std::nullopt, []()
-		{
+		ui::menu("Info", std::nullopt, []() {
 			ui::startList(ui::DIR::DOWN);
 			ui::constrainHeight({ ui::SIZETYPE::FH, 1.2f });
-			ui::menu("Info", { { ui::SIZETYPE::FH, 20.0f } }, []()
-			{
+			ui::menu("Info", { { ui::SIZETYPE::FH, 20.0f } }, []() {
 				//ui::constrainHeight({ ui::SIZETYPE::FH, 20.0f });
 				ui::startList(ui::DIR::DOWN);
 
@@ -108,9 +106,9 @@ namespace game
 				//ui::constrainHeight({ ui::SIZETYPE::FH, 1.2f });
 				//ui::textButton("test");
 				ui::endList();
-			});
+				});
 			ui::endList();
-		});
+			});
 
 
 		ui::constrainHeight({ ui::SIZETYPE::STATIC_PX, 4 });
@@ -137,48 +135,48 @@ namespace game
 		tickInfo.get()->addGlobalBind(
 			{ ui::CONTROL::KEY::EVERY_TICK, static_cast<int32_t>(ui::CONTROL::STATE::PRESSED) },
 			[](PlayerInfo& playerInfo, ui::Base* self_) -> ui::CallBackBindResult
-		{
-			auto self = static_cast<ui::TextDisplay*>(self_);
-			self->setText(Locator<misc::Timer>::ref().print());
-			return ui::BIND::RESULT::CONTINUE;
-		});
+			{
+				auto self = static_cast<ui::TextDisplay*>(self_);
+				self->setText(Locator<misc::Timer>::ref().print());
+				return ui::BIND::RESULT::CONTINUE;
+			});
 
 		debugButton.get()->setOnRelease([](PlayerInfo& playerInfo, ui::Base* self_) -> ui::CallBackBindResult
-		{
-			misc::Option<misc::OPTION::GR_DEBUG, bool>::setVal(!misc::Option<misc::OPTION::GR_DEBUG, bool>::getVal());
-			auto self = static_cast<ui::Button*>(self_);
-			self->setColor(misc::Option<misc::OPTION::GR_DEBUG, bool>::getVal() ? COLORS::UI::GREEN : COLORS::UI::RED);
-			return ui::BIND::RESULT::CONTINUE;
-		});
+			{
+				misc::Option<misc::OPTION::GR_DEBUG, bool>::setVal(!misc::Option<misc::OPTION::GR_DEBUG, bool>::getVal());
+				auto self = static_cast<ui::Button*>(self_);
+				self->setColor(misc::Option<misc::OPTION::GR_DEBUG, bool>::getVal() ? COLORS::UI::GREEN : COLORS::UI::RED);
+				return ui::BIND::RESULT::CONTINUE;
+			});
 		debugButton.get()->setColor(misc::Option<misc::OPTION::GR_DEBUG, bool>::getVal() ? COLORS::UI::GREEN : COLORS::UI::RED);
 
 		renderThread.get()->setOnRelease([](PlayerInfo& playerInfo, ui::Base* self_) -> ui::CallBackBindResult
-		{
-			misc::Option<misc::OPTION::GR_RENDERTHREAD, bool>::setVal(!misc::Option<misc::OPTION::GR_RENDERTHREAD, bool>::getVal());
-			auto self = static_cast<ui::Button*>(self_);
-			self->setColor(misc::Option<misc::OPTION::GR_RENDERTHREAD, bool>::getVal() ? COLORS::UI::GREEN : COLORS::UI::RED);
-			return ui::BIND::RESULT::CONTINUE;
-		});
+			{
+				misc::Option<misc::OPTION::GR_RENDERTHREAD, bool>::setVal(!misc::Option<misc::OPTION::GR_RENDERTHREAD, bool>::getVal());
+				auto self = static_cast<ui::Button*>(self_);
+				self->setColor(misc::Option<misc::OPTION::GR_RENDERTHREAD, bool>::getVal() ? COLORS::UI::GREEN : COLORS::UI::RED);
+				return ui::BIND::RESULT::CONTINUE;
+			});
 		renderThread.get()->setColor(misc::Option<misc::OPTION::GR_RENDERTHREAD, bool>::getVal() ? COLORS::UI::GREEN : COLORS::UI::RED);
 
 		logOutput.get()->addGlobalBind({ ui::CONTROL::KEY::EVERY_TICK, static_cast<int32_t>(ui::CONTROL::STATE::PRESSED) }, [](PlayerInfo& playerInfo, ui::Base* self_) -> ui::CallBackBindResult
-		{
-			auto self = static_cast<ui::TextDisplay*>(self_);
+			{
+				auto self = static_cast<ui::TextDisplay*>(self_);
 
-			auto& vec = self->text.getLinesMutable();
-			if (vec.size() > 100) {
-				vec.erase(vec.begin(), vec.begin() + 50);
-			}
+				auto& vec = self->text.getLinesMutable();
+				if (vec.size() > 100) {
+					vec.erase(vec.begin(), vec.begin() + 50);
+				}
 
-			auto newLines = Locator<misc::Log>::ref().getLines();
-			for (auto& newLine : newLines) {
-				self->text.addLine(newLine);
-			}
-			if (newLines.size() != 0) {
-				self->text.moveCursor(glm::ivec2(100000, newLines.size()));
-			}
-			return ui::BIND::RESULT::CONTINUE;
-		});
+				auto newLines = Locator<misc::Log>::ref().getLines();
+				for (auto& newLine : newLines) {
+					self->text.addLine(newLine);
+				}
+				if (newLines.size() != 0) {
+					self->text.moveCursor(glm::ivec2(100000, newLines.size()));
+				}
+				return ui::BIND::RESULT::CONTINUE;
+			});
 
 		return mainList;
 	}

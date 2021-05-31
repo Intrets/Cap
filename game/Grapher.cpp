@@ -150,6 +150,10 @@ bool Grapher::step(game::WorldGrid& grid) {
 				//	this->fronts.clear();
 				//	break;
 				//}
+				//if (this->currentDepth > 10) {
+				//	this->fronts.clear();
+				//	break;
+				//}
 			}
 		}
 

@@ -1,14 +1,16 @@
 #include "GameState.h"
 
+#include <format>
+#include <cstdlib>
+
 #include <render/infos/RenderInfo.h>
 #include <render/infos/DebugRenderInfo.h>
 
 #include <mem/Locator.h>
 #include <render/textures/BlockIDTextures.h>
 
-#include <cstdlib>
-
 #include <misc/Timer.h>
+#include <misc/Log.h>
 
 #include "Grapher.h"
 #include "Merger.h"
@@ -95,8 +97,32 @@ namespace game
 			auto& grapher = this->everything.gets<Grapher>().get<Grapher>(1);
 			Locator<misc::Timer>::ref().newTiming("Merge");
 			if (grapher.finished) {
-				merger.initialize(grapher.groups, *this->world);
-				grapher.groups.clear();
+				if (!grapher.groups.empty()) {
+					merger.initialize(grapher.groups, *this->world);
+					auto& log = Locator<misc::Log>::ref();
+					log.putLine(std::format("number of regions: {}", merger.groups.size()));
+					int32_t smallCount = 0;
+					for (auto& group : merger.groups) {
+						if (group.neighbours.size() < 5) {
+							smallCount++;
+						}
+						else {
+							log.putLine(std::format("group {}, neighbour count {}", group.group, group.neighbours.size()));
+						}
+					}
+					if (smallCount == merger.groups.size()) {
+						log.putLine("all groups have less than 5 neighbours");
+					}
+					else {
+						log.putLine(std::format("... and {} groups with less than 5 neighbours", smallCount));
+					}
+					grapher.groups.clear();
+				}
+				else {
+					//if (this->tick % 60 == 0) {
+					//	merger.mergeStep(*this->world);
+					//}
+				}
 			}
 			Locator<misc::Timer>::ref().endTiming("Merge");
 			});
@@ -203,14 +229,14 @@ namespace game
 
 			place(41, 30);
 
-			//for (size_t i = 0; i < 400; i++) {
-			//	int x = 1 + rand() % (WORLD_SIZE - 5);
-			//	int y = 1 + rand() % (WORLD_SIZE - 5);
-			//	if (x < 30 && y < 30) {
-			//		continue;
-			//	}
-			//	place(x, y);
-			//}
+			for (size_t i = 0; i < 100; i++) {
+				int x = 1 + rand() % (WORLD_SIZE - 5);
+				int y = 1 + rand() % (WORLD_SIZE - 5);
+				if (x < 30 && y < 30) {
+					continue;
+				}
+				place(x, y);
+			}
 
 			for (size_t i = 5; i < 20; i++) {
 				place(10 + i, 20 - i);

@@ -16,6 +16,7 @@ namespace colors
 	static constexpr Color magenta = { 0xFFFF00FF };
 	static constexpr Color yellow = { 0xF00FFFFF };
 	static constexpr Color cyan = { 0xFFFFFF00 };
+	static constexpr Color white = { 0xFFFFFFFF };
 
 	template<class T>
 	Color uniqueColor(T val) {

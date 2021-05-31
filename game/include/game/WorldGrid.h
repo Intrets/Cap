@@ -29,6 +29,8 @@ namespace game
 		std::array<std::array<int32_t, WORLD_SIZE>, WORLD_SIZE> group;
 		std::array<std::array<Directions, WORLD_SIZE>, WORLD_SIZE> directions;
 
+		void replaceGroup(glm::ivec2 p, int32_t replace, int32_t with);
+
 		bool isGrouped(glm::ivec2 pos);
 		void setGroup(glm::ivec2 pos, int32_t g);
 		int32_t getGroup(glm::ivec2 pos) const;
