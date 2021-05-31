@@ -24,5 +24,8 @@ struct Merger
 		std::vector<Neighbour> neighbours;
 	};
 
+	std::vector<Group> groups;
+
 	void initialize(std::vector<glm::ivec2>& seedPoints, game::WorldGrid& grid);
+	void debugRender();
 };

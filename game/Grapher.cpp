@@ -165,6 +165,7 @@ bool Grapher::step(game::WorldGrid& grid) {
 			this->fronts.clear();
 		}
 	}
+	return false;
 }
 
 void Grapher::Front::tryExpand(glm::ivec2 p) {

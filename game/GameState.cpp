@@ -11,6 +11,7 @@
 #include <misc/Timer.h>
 
 #include "Grapher.h"
+#include "Merger.h"
 
 namespace game
 {
@@ -34,13 +35,13 @@ namespace game
 						glm::vec2 max{ i + 1 - size, j + 1 - size };
 
 						auto c1 = colors::uniqueColor(this->world->getGroup({ i,j }));
-						auto c2 = colors::uniqueColor(183874 - this->world->getGroup({ i,j }));
+						//auto c2 = colors::uniqueColor(183874 - this->world->getGroup({ i,j }));
 
 						debugRender.world.addBox(min, max, c1);
-						size = 0.2f;
-						min = { i + size, j + size };
-						max = { i + 1 - size, j + 1 - size };
-						debugRender.world.addBox(min, max, c2);
+						//size = 0.2f;
+						//min = { i + size, j + size };
+						//max = { i + 1 - size, j + 1 - size };
+						//debugRender.world.addBox(min, max, c2);
 					}
 					//if (this->world->occupied(i, j)) {
 					//	Locator<render::DebugRenderInfo>::ref().world.addPoint(i + 0.5f, j + 0.5f);
@@ -52,8 +53,11 @@ namespace game
 			this->everything.run([&](Match<Grapher>& e) {
 				e.get<Grapher>().debugRender();
 				});
-		}
 
+			this->everything.match([](Merger& merger) {
+				merger.debugRender();
+				});
+		}
 	}
 
 	void GameState::runTick() {
@@ -83,9 +87,19 @@ namespace game
 
 		if (this->tick % 1 == 0) {
 			this->everything.match([&](Grapher& grapher) {
-				grapher.step(*this->world);
+				while (!grapher.step(*this->world));
 				});
 		}
+
+		this->everything.match([&](Merger& merger) {
+			auto& grapher = this->everything.gets<Grapher>().get<Grapher>(1);
+			Locator<misc::Timer>::ref().newTiming("Merge");
+			if (grapher.finished) {
+				merger.initialize(grapher.groups, *this->world);
+				grapher.groups.clear();
+			}
+			Locator<misc::Timer>::ref().endTiming("Merge");
+			});
 
 		//this->everything.run([&](Match<Spawner, GamePosition>& e) {
 		//	auto p = this->everything.make();
@@ -202,6 +216,10 @@ namespace game
 				place(10 + i, 20 - i);
 
 			}
+		}
+		{
+			auto p = this->everything.make();
+			p.add<Merger>();
 		}
 		{
 			auto p = this->everything.make();

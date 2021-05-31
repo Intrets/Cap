@@ -41,7 +41,7 @@ void render::DebugRenderer::render(
 		Locator<ogs::State>::ref().setState(config);
 
 		this->VP.set(cameraInfo.VP);
-		this->pointSize.set(50.0f / scale);
+		this->pointSize.set(200.0f / scale);
 
 		this->points.set(info.world.points.points);
 

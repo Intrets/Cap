@@ -31,7 +31,7 @@ namespace game
 
 		bool isGrouped(glm::ivec2 pos);
 		void setGroup(glm::ivec2 pos, int32_t g);
-		int32_t getGroup(glm::ivec2 pos);
+		int32_t getGroup(glm::ivec2 pos) const;
 
 		SizeAlias get(int32_t x, int32_t y);
 		SizeAlias get(glm::ivec2 pos);

@@ -10,7 +10,7 @@ namespace game
 		this->group[pos.x][pos.y] = g;
 	}
 
-	int32_t WorldGrid::getGroup(glm::ivec2 pos) {
+	int32_t WorldGrid::getGroup(glm::ivec2 pos) const {
 		return this->group[pos.x][pos.y];
 	}
 
