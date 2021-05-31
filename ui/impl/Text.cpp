@@ -431,7 +431,7 @@ namespace ui
 				return;
 			}
 
-			float height = this->lastScreenRectangle.getHeight() / 2.0f * this->lastScreenRectangle.getPixelSize().y;
+			float height = this->lastScreenRectangle.getHeight();
 
 			float lineHeight = 2.0f * static_cast<float>(pxHeight) / height;
 
