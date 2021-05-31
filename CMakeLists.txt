@@ -10,6 +10,10 @@ FIND_PACKAGE(GLI REQUIRED)
 
 PROJECT(game_thing LANGUAGES CXX)
 
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED YES)
+set(CMAKE_CXX_EXTENSIONS NO)
+
 add_subdirectory(ui)
 add_subdirectory(mem)
 add_subdirectory(misc)
