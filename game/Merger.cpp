@@ -4,6 +4,7 @@
 #include <queue>
 #include <map>
 #include <unordered_set>
+#include <array>
 
 #include "WorldGrid.h"
 
@@ -107,6 +108,10 @@ void Merger::initialize(std::vector<glm::ivec2>& seedPoints, game::WorldGrid& gr
 		}
 
 		this->groups[g].approximation = total / static_cast<float>(count);
+	}
+
+	for (auto g : this->nonEmptyGroups) {
+		this->fillPaths(grid, g);
 	}
 }
 
@@ -260,5 +265,33 @@ void Merger::debugRender() {
 				colors::white
 			);
 		}
+	}
+}
+
+void Merger::fillPaths(game::WorldGrid& grid, int32_t g) {
+	auto& group = this->groups[g];
+
+	int32_t index = 0;
+
+	for (auto& neighbour : group.neighbours) {
+		std::queue<glm::ivec2> open;
+		for (auto p : neighbour.front) {
+			open.push(p);
+		}
+
+		while (!open.empty()) {
+			auto point = open.front();
+			open.pop();
+
+			for (size_t i = 0; i < 8; i++) {
+				auto p = point + game::getDirectionFromIndex(i);
+
+				if (grid.empty(p) && grid.getGroup(p) == g && !grid.hasDirection(p, index)) {
+					grid.setDirection(p, index, (i + 4) % 8);
+					open.push(p);
+				}
+			}
+		}
+		index++;
 	}
 }

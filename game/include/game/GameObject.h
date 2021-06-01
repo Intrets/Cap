@@ -21,7 +21,6 @@ struct GameObjectProxy;
 struct GetEnum;
 
 struct ActionResult;
-struct GameObject;
 struct Possession;
 
 namespace game

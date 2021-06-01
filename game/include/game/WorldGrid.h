@@ -15,12 +15,13 @@ namespace game
 
 	struct Directions
 	{
-		//uint32_t data;
-		std::array<uint16_t, 4> data;
+		std::array<uint16_t, 8> data;
 
-		glm::ivec2 getDirection(uint32_t neighbour) const;
-		void setDirection(uint32_t neighbour, uint32_t direction);
-		void setDirection(uint32_t neighbour, glm::ivec2 direction);
+		glm::ivec2 getDirection(int32_t index) const;
+		void setDirection(int32_t index, int32_t direction);
+		void setDirection(int32_t index, glm::ivec2 direction);
+
+		bool hasDirection(int32_t index);
 	};
 
 	struct WorldGrid
@@ -28,6 +29,12 @@ namespace game
 		std::array<std::array<SizeAlias, WORLD_SIZE>, WORLD_SIZE> grid;
 		std::array<std::array<int32_t, WORLD_SIZE>, WORLD_SIZE> group;
 		std::array<std::array<Directions, WORLD_SIZE>, WORLD_SIZE> directions;
+
+		bool hasDirection(glm::ivec2 p, int32_t index);
+		void setDirection(glm::ivec2 p, int32_t index, int32_t direction);
+		void setDirection(glm::ivec2 p, int32_t index, glm::ivec2 direction);
+		glm::ivec2 getDirection(glm::ivec2 p, int32_t index);
+
 
 		void replaceGroup(glm::ivec2 p, int32_t replace, int32_t with);
 

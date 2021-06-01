@@ -32,6 +32,8 @@ struct Merger
 
 	std::vector<int32_t> nonEmptyGroups;
 
+	void fillPaths(game::WorldGrid& grid, int32_t group);
+
 	bool hasNeighbour(int32_t group, int32_t neighbour);
 	int32_t getNeighbourCount(int32_t group);
 

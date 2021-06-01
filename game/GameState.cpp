@@ -59,10 +59,47 @@ namespace game
 			this->everything.match([](Merger& merger) {
 				merger.debugRender();
 				});
+
+			this->everything.match([&](RandomWalker& walker, GamePosition& pos) {
+				auto& merger = this->everything.gets<Merger>().get<Merger>(1);
+				auto p = merger.groups[walker.groupTarget].approximation;
+
+				debugRender.world.addLine(
+					p + 0.5f,
+					glm::vec2(pos.pos) + 0.5f
+				);
+				});
+
 		}
 	}
 
 	void GameState::runTick() {
+		if (this->tick == 30) {
+			this->everything.match([&](RandomWalker& walker, GamePosition& pos) {
+				auto currentGroup = this->world->getGroup(pos.pos);
+				walker.groupTarget = currentGroup;
+				walker.indexTarget = 0;
+				});
+		}
+		if (this->tick > 30 && this->tick % 10 == 0) {
+			this->everything.match([&](RandomWalker& walker, GamePosition& pos) {
+				auto& merger = this->everything.gets<Merger>().get<Merger>(1);
+				auto currentGroup = this->world->getGroup(pos.pos);
+
+				if (currentGroup == walker.groupTarget) {
+					auto targets = merger.groups[currentGroup].neighbours.size();
+					auto target = rand() % targets;
+
+					walker.groupTarget = merger.groups[currentGroup].neighbours[target].group;
+					walker.indexTarget = target;
+				}
+
+				auto d = this->world->getDirection(pos.pos, walker.indexTarget);
+
+				pos.pos += d;
+				});
+		}
+
 		this->everything.run([&](Match<Locomotion, GamePosition, Target>& e) {
 			if (e.get<Locomotion>().cooldown != 0) {
 				e.get<Locomotion>().cooldown--;
@@ -247,37 +284,11 @@ namespace game
 			auto p = this->everything.make();
 			p.add<Merger>();
 		}
-		{
+		for (size_t i = 0; i < 1; i++) {
 			auto p = this->everything.make();
 			p.add<GraphicsTile>();
-			p.add<Locomotion>();
-			p.add<Brain>();
-			p.add<PathFinding>();
-
-			//glm::ivec2 target = { WORLD_SIZE - 3, WORLD_SIZE - 3 };
-			glm::ivec2 target = { WORLD_SIZE - 3, WORLD_SIZE - 3 };
-			glm::ivec2 start = { 2,2 };
-
-			//p.get<PathFinding>().current = { 2, 2 };
-			Front F{ start };
-			F.waypoints.push_back(start);
-			p.get<PathFinding>().front.push(F);
-			p.get<PathFinding>().target = target;
-			p.get<PathFinding>().start = start;
-
-			//p.add<Target>(std::deque<glm::ivec2>{
-			//	glm::ivec2(10, 2),
-			//		glm::ivec2(10, 3),
-			//		glm::ivec2(10, 4),
-			//		glm::ivec2(10, 5),
-			//		glm::ivec2(10, 6),
-			//		glm::ivec2(11, 6),
-			//		glm::ivec2(12, 5),
-			//		glm::ivec2(11, 5),
-			//		glm::ivec2(10, 6)
-			//});
-
-			//this->placeInWorld(p, { 2, 2 });
+			p.add<GamePosition>(glm::ivec2(2, 2));
+			p.add<RandomWalker>();
 
 			p.get<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("gnome.dds");
 		}

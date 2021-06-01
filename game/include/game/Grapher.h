@@ -51,3 +51,8 @@ struct Grapher
 	bool step(game::WorldGrid& grid);
 };
 
+struct RandomWalker
+{
+	int32_t indexTarget;
+	int32_t groupTarget;
+};

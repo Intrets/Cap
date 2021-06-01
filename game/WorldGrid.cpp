@@ -1,9 +1,30 @@
 #include "WorldGrid.h"
 
 #include <queue>
+#include <cstdint>
 
 namespace game
 {
+	bool Directions::hasDirection(int32_t index) {
+		return this->data[index] & 0x10;
+	}
+
+	bool WorldGrid::hasDirection(glm::ivec2 p, int32_t index) {
+		return this->directions[p.x][p.y].hasDirection(index);
+	}
+
+	void WorldGrid::setDirection(glm::ivec2 p, int32_t index, int32_t direction) {
+		this->directions[p.x][p.y].setDirection(index, direction);
+	}
+
+	void WorldGrid::setDirection(glm::ivec2 p, int32_t index, glm::ivec2 direction) {
+		this->directions[p.x][p.y].setDirection(index, direction);
+	}
+
+	glm::ivec2 WorldGrid::getDirection(glm::ivec2 p, int32_t index) {
+		return this->directions[p.x][p.y].getDirection(index);
+	}
+
 	void WorldGrid::replaceGroup(glm::ivec2 p, int32_t replace, int32_t with) {
 		assert(this->getGroup(p) == replace);
 
@@ -81,16 +102,16 @@ namespace game
 		return this->get(pos) == 0;
 	}
 
-	glm::ivec2 Directions::getDirection(uint32_t neighbour) const {
-		return getDirectionFromIndex(this->data[neighbour]);
+	glm::ivec2 Directions::getDirection(int32_t index) const {
+		return getDirectionFromIndex(this->data[index] & 0x0F);
 	}
 
-	void Directions::setDirection(uint32_t neighbour, uint32_t direction) {
-		this->data[neighbour] = direction;
+	void Directions::setDirection(int32_t index, int32_t direction) {
+		this->data[index] = direction | 0x10;
 	}
 
-	void Directions::setDirection(uint32_t neighbour, glm::ivec2 direction) {
-		this->data[neighbour] = getIndexFromDirection(direction);
+	void Directions::setDirection(int32_t index, glm::ivec2 direction) {
+		this->data[index] = getIndexFromDirection(direction) | 0x10;
 	}
 
 	glm::ivec2 getDirectionFromIndex(uint32_t index) {
