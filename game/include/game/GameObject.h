@@ -15,6 +15,8 @@
 #include "Game.h"
 #include "WorldGrid.h"
 
+#include <serial/Serializer.h>
+
 using SizeAlias = size_t;
 
 struct GameObjectProxy;
@@ -43,13 +45,31 @@ public:
 struct Front
 {
 	glm::ivec2 current;
-	uint32_t D = 9999999;
+	int32_t D = 9999999;
 	bool collided = false;
 	size_t direction = 0;
 	int32_t winding = 0;
 	bool clockwise = false;
 	std::vector<glm::ivec2> path{};
 	std::vector<glm::ivec2> waypoints{};
+};
+
+template<>
+struct Serializable<Front>
+{
+	template<class Selector, class T>
+	static bool run(Serializer& serializer, T front) {
+		return serializer.runAll<Selector>(
+			front.current,
+			front.D,
+			front.collided,
+			front.direction,
+			front.winding,
+			front.clockwise,
+			front.path,
+			front.waypoints
+			);
+	}
 };
 
 struct PathFinding

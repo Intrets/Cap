@@ -21,6 +21,7 @@ add_subdirectory(game)
 add_subdirectory(render)
 add_subdirectory(wrapped_glm)
 add_subdirectory(tepp)
+add_subdirectory(serial)
 
 add_subdirectory(app)
 
