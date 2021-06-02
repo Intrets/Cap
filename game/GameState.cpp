@@ -247,7 +247,6 @@ namespace game
 			file.close();
 		}
 
-		assert(front == front2);
 
 		rand();
 
