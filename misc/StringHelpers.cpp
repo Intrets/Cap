@@ -57,4 +57,10 @@ namespace misc
 
 		return out.str();
 	}
+
+	std::string_view trim(std::string_view in, std::string_view c) {
+		auto start = in.find_first_not_of(c);
+		auto end = in.find_last_not_of(c);
+		return in.substr(start, end - start);
+	}
 }

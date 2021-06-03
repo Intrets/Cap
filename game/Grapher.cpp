@@ -193,6 +193,3 @@ void Grapher::Front::tryExpand(glm::ivec2 p) {
 	}
 }
 
-bool Grapher::Region::contains(glm::ivec2 p) {
-	return bot.x <= p.x && p.x <= top.x && bot.y <= p.y && p.y <= top.y;
-}

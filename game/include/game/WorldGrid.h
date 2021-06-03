@@ -1,9 +1,11 @@
 #pragma once
 
-#include <wglm/glm.hpp>
-
 #include <array>
 #include <cstdint>
+
+#include <wglm/glm.hpp>
+
+#include <serial/Serializer.h>
 
 constexpr auto WORLD_SIZE = 70;
 using SizeAlias = size_t;
@@ -35,7 +37,6 @@ namespace game
 		void setDirection(glm::ivec2 p, int32_t index, glm::ivec2 direction);
 		glm::ivec2 getDirection(glm::ivec2 p, int32_t index);
 
-
 		void replaceGroup(glm::ivec2 p, int32_t replace, int32_t with);
 
 		bool isGrouped(glm::ivec2 pos);
@@ -56,3 +57,28 @@ namespace game
 		bool empty(glm::ivec2 pos);
 	};
 }
+
+template<>
+struct Serializable<game::WorldGrid>
+{
+	template<class Selector, class T>
+	static bool run(Serializer& serializer, T worldGrid) {
+		return serializer.runAll<Selector>(
+			worldGrid.grid,
+			worldGrid.group,
+			worldGrid.directions
+			);
+	};
+};
+
+template<>
+struct Serializable<game::Directions>
+{
+	template<class Selector, class T>
+	static bool run(Serializer& serializer, T directions) {
+		return serializer.runAll<Selector>(
+			directions.data
+			);
+	};
+};
+

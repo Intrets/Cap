@@ -13,9 +13,46 @@
 
 #include <tepp/tepp.h>
 #include <misc/Misc.h>
+#include <serial/Serializer.h>
 
 using SizeAlias = size_t;
 
+template<class T>
+struct Identifier;
+
+struct StructInformation
+{
+	std::string name{};
+	int32_t index{};
+	size_t width{};
+
+	void(*objectDestructor)(void*) = nullptr;
+	bool(*objectReader)(Serializer& serializer, void*) = nullptr;
+	bool(*objectWriter)(Serializer& serializer, void const*) = nullptr;
+};
+
+struct StoredStructInformations
+{
+	inline static std::unordered_map<std::string, StructInformation> infos{};
+};
+
+template<>
+struct Serializable<StructInformation>
+{
+	static bool read(Serializer& serializer, StructInformation& val) {
+		std::string name;
+		READ(name);
+		if (name != "") {
+			assert(StoredStructInformations::infos.contains(name));
+			val = StoredStructInformations::infos[name];
+		}
+		return true;
+	};
+
+	static bool write(Serializer& serializer, StructInformation const& val) {
+		return serializer.write(val.name);
+	}
+};
 
 namespace game
 {
@@ -43,7 +80,8 @@ namespace game
 			}
 		};
 
-		Everything& parent;
+		StructInformation structInformation;
+
 		SizeAlias reservedObjects = 0;
 		SizeAlias index = 0;
 		SizeAlias objectSize = 0;
@@ -60,11 +98,7 @@ namespace game
 
 		std::vector<DeletedInfo> packDeletions();
 
-		void(*objectDestructor)(void*) = nullptr;
-
-		RawData() = delete;
-		RawData(Everything& p) : parent(p) {};
-
+		RawData() = default;
 		~RawData();
 
 		DEFAULTCOPYMOVE(RawData);
@@ -78,13 +112,69 @@ namespace game
 		inline T& get(SizeAlias i);
 
 		inline void* getUntyped(SizeAlias i);
+		inline void const* getUntyped(SizeAlias i) const;
 
 		inline SizeAlias getIndex(SizeAlias i) const;
 
 		template<class T, class... Args>
 		inline std::pair<SizeAlias, T*> add(SizeAlias i, Args&&... args);
 	};
+}
 
+template<>
+struct Serializable<game::RawData::DeletedInfo>
+{
+	template<class Selector, class T>
+	static bool run(Serializer& serializer, T deletedInfo) {
+		return serializer.runAll<Selector>(
+			deletedInfo.i,
+			deletedInfo.changed
+			);
+	}
+};
+
+template<>
+struct Serializable<game::RawData>
+{
+	static bool read(Serializer& serializer, game::RawData& rawData) {
+		if (!serializer.readAll(
+			rawData.structInformation,
+			rawData.reservedObjects,
+			rawData.index,
+			rawData.objectSize,
+			rawData.indices,
+			rawData.deletions
+			)) return false;
+
+		rawData.data.resize(rawData.structInformation.width * rawData.index);
+
+		for (size_t i = 1; i < rawData.index; i++) {
+			if (!rawData.structInformation.objectReader(serializer, rawData.getUntyped(i))) return false;
+		}
+
+		return true;
+	};
+
+	static bool write(Serializer& serializer, game::RawData const& rawData) {
+		if (!serializer.writeAll(
+			rawData.structInformation,
+			rawData.reservedObjects,
+			rawData.index,
+			rawData.objectSize,
+			rawData.indices,
+			rawData.deletions
+			)) return false;
+
+		for (size_t i = 1; i < rawData.index; i++) {
+			if (!rawData.structInformation.objectWriter(serializer, rawData.getUntyped(i))) return false;
+		}
+
+		return true;
+	};
+};
+
+namespace game
+{
 	struct WeakObject
 	{
 		SizeAlias index{ 0 };
@@ -187,7 +277,8 @@ namespace game
 		template<class... Ms>
 		static inline const SignatureType group_signature_v = group_signature<Ms...>::value;
 
-		std::vector<RawData> data{ SIZE, { *this } };
+
+		std::vector<RawData> data{ SIZE };
 		std::vector<size_t> freeIndirections{};
 
 		std::vector<Qualifier> qualifiers{ 0 };
@@ -244,8 +335,68 @@ namespace game
 		Everything();
 		~Everything() = default;
 
-		NOCOPYMOVE(Everything);
+		NOCOPY(Everything);
+		DEFAULTMOVE(Everything);
 	};
+}
+
+template<>
+struct Serializable<game::Everything>
+{
+	static bool read(Serializer& serializer, game::Everything& val) {
+		return serializer.readAll(
+			val.data,
+			val.freeIndirections,
+			val.qualifiers,
+			val.qualifier,
+			val.signatures,
+			val.dataIndices,
+			val.removed
+		);
+	};
+
+	static bool write(Serializer& serializer, game::Everything const& val) {
+		return serializer.writeAll(
+			val.data,
+			val.freeIndirections,
+			val.qualifiers,
+			val.qualifier,
+			val.signatures,
+			val.dataIndices,
+			val.removed
+		);
+	}
+};
+
+namespace game
+{
+	template<class T>
+	struct RegisterStruct
+	{
+		static bool reg() {
+			StructInformation info;
+			info.name = Identifier<T>::name;
+			info.index = game::Everything::component_index_v<T>;
+			info.width = RawData::aligned_sizeof<T>::get();
+			info.objectDestructor = [](void* obj) {
+				reinterpret_cast<T*>(obj)->~T();
+			};
+
+			info.objectReader = [](Serializer& serializer, void* obj) {
+				return serializer.read<T>(*reinterpret_cast<T*>(obj));
+			};
+
+			info.objectWriter = [](Serializer& serializer, void const* obj) {
+				return serializer.write<T>(*reinterpret_cast<T const*>(obj));
+			};
+
+			StoredStructInformations::infos[info.name] = info;
+
+			return true;
+		};
+		inline static bool initialized = reg();
+	};
+
 
 	struct Loop
 	{
@@ -377,7 +528,7 @@ namespace game
 
 	inline RawData::~RawData() {
 		for (size_t i = 1; i < this->index; i++) {
-			this->objectDestructor(this->getUntyped(i));
+			this->structInformation.objectDestructor(this->getUntyped(i));
 		}
 	}
 
@@ -387,7 +538,7 @@ namespace game
 
 		size_t targetOffset = i * this->objectSize;
 
-		this->objectDestructor(&this->data[targetOffset]);
+		this->structInformation.objectDestructor(&this->data[targetOffset]);
 
 		this->deletions.push_back(i);
 	}
@@ -403,6 +554,12 @@ namespace game
 		assert(i != 0);
 		assert(i < this->reservedObjects);
 		return static_cast<void*>(&this->data[this->objectSize * i]);
+	}
+
+	inline void const* RawData::getUntyped(SizeAlias i) const {
+		assert(i != 0);
+		assert(i < this->reservedObjects);
+		return static_cast<void const*>(&this->data[this->objectSize * i]);
 	}
 
 	inline SizeAlias RawData::getIndex(SizeAlias i) const {
@@ -421,9 +578,8 @@ namespace game
 			this->indices.push_back(0);
 			this->data.resize(this->reservedObjects * aligned_sizeof<T>::get());
 
-			this->objectDestructor = [](void* obj) {
-				static_cast<T*>(obj)->~T();
-			};
+			this->structInformation = StoredStructInformations::infos[Identifier<T>::name];
+
 		}
 		else if (this->index >= this->reservedObjects) {
 			this->reservedObjects *= 2;
@@ -510,6 +666,7 @@ namespace game
 
 	template<class T, class... Args>
 	inline T& Everything::add(SizeAlias i, Args&&... args) {
+		RegisterStruct<T>::initialized;
 		assert(!this->has<T>(i));
 		auto [index, ptr] = this->data[component_index_v<T>].add<T>(i, std::forward<Args>(args)...);
 		this->dataIndices[component_index_v<T>][i] = index;

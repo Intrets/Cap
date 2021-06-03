@@ -55,6 +55,12 @@ struct Front
 };
 
 template<>
+struct Identifier<Front>
+{
+	inline static std::string name = "Front";
+};
+
+template<>
 struct Serializable<Front>
 {
 	template<class Selector, class T>
@@ -143,9 +149,43 @@ struct GamePosition
 	glm::ivec2 pos;
 };
 
+template<>
+struct Serializable<GamePosition>
+{
+	template<class Selector, class T>
+	static bool run(Serializer& serializer, T front) {
+		return serializer.runAll<Selector>(
+			front.pos
+			);
+	}
+};
+
+template<>
+struct Identifier<GamePosition>
+{
+	inline static std::string name = "GamePosition";
+};
+
 struct GraphicsTile
 {
 	int32_t blockID;
+};
+
+template<>
+struct Serializable<GraphicsTile>
+{
+	template<class Selector, class T>
+	static bool run(Serializer& serializer, T front) {
+		return serializer.runAll<Selector>(
+			front.blockID
+			);
+	}
+};
+
+template<>
+struct Identifier<GraphicsTile>
+{
+	inline static std::string name = "GraphicsTile";
 };
 
 struct Brain

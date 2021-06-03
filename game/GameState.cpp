@@ -15,8 +15,6 @@
 #include "Grapher.h"
 #include "Merger.h"
 
-#include <serial/Serializer.h>
-
 #include <fstream>
 
 namespace game
@@ -213,50 +211,10 @@ namespace game
 		this->placeInWorld(obj.index, pos);
 	}
 
-	GameState::GameState() {
-		Front front;
-		front.current = { 123,-12 };
-		front.clockwise = true;
-		front.collided = true;
-		front.direction = 111111;
-		front.winding = 123;
-		front.path.push_back({ 222,333 });
-		front.waypoints.push_back({ 222,333 });
-		bool sucessfulWrite = false;
+	void GameState::init() {
 		{
-			std::ofstream file;
-			file.open("test.save", std::ofstream::binary);
-
-			Serializer serial{ file };
-			sucessfulWrite = serial.write(front);
-
-			file.close();
-		}
-
-		Front front2;
-		bool successfulRead = false;
-
-		{
-			std::ifstream file;
-			file.open("test.save", std::ifstream::binary);
-
-			Serializer serial{ file };
-
-			successfulRead = serial.read(front2);
-
-			file.close();
-		}
-
-
-		rand();
-
-
-		exit(0);
-
-		{
-
 			auto p = this->everything.make();
-			p.add<Grapher>().region = { {0,0}, {WORLD_SIZE - 1, WORLD_SIZE - 1} };
+			p.add<Grapher>();
 		}
 		{
 			auto const place = [&](int i, int j) {
@@ -383,6 +341,7 @@ namespace game
 				p2.get<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
 			}
 		}
+
 	}
 
 	//float Concept::value(SignatureAlias const& signature) {

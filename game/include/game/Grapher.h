@@ -10,14 +10,6 @@
 
 struct Grapher
 {
-	struct Region
-	{
-		glm::ivec2 bot;
-		glm::ivec2 top;
-
-		bool contains(glm::ivec2 p);
-	} region;
-
 	struct Front
 	{
 		glm::ivec2 min;
@@ -51,8 +43,66 @@ struct Grapher
 	bool step(game::WorldGrid& grid);
 };
 
+template<>
+struct Serializable<Grapher::Front>
+{
+	template<class Selector, class T>
+	static bool run(Serializer& serializer, T front) {
+		return serializer.runAll<Selector>(
+			front.min,
+			front.max,
+			front.direction,
+			front.size
+			);
+	}
+};
+
+template<>
+struct Serializable<Grapher>
+{
+	template<class Selector, class T>
+	static bool run(Serializer& serializer, T grapher) {
+		return serializer.runAll<Selector>(
+			grapher.finished,
+			grapher.currentDepth,
+			grapher.blockSize,
+			grapher.currentBlock,
+			grapher.lastPos,
+			grapher.lastGroup,
+			grapher.fronts,
+			grapher.groups
+			);
+	}
+};
+
+template<>
+struct Identifier<Grapher>
+{
+	inline static std::string name = "Grapher";
+};
+
+
 struct RandomWalker
 {
 	int32_t indexTarget;
 	int32_t groupTarget;
 };
+
+template<>
+struct Serializable<RandomWalker>
+{
+	template<class Selector, class T>
+	static bool run(Serializer& serializer, T front) {
+		return serializer.runAll<Selector>(
+			front.indexTarget,
+			front.groupTarget
+			);
+	}
+};
+
+template<>
+struct Identifier<RandomWalker>
+{
+	inline static std::string name = "RandomWalker";
+};
+

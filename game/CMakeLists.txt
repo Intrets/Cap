@@ -12,6 +12,7 @@ set(MODULE_FILES
 	Grapher
 	WorldGrid
 	Merger
+	test/Tests
 )
 
 make_module(${MODULE_NAME} "${MODULE_FILES}")

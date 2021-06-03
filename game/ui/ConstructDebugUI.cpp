@@ -11,6 +11,7 @@
 #include <ui/AnchoredProxy.h>
 #include <ui/binds/Binds.h>
 #include <ui/ControlState.h>
+#include <ui/State.h>
 
 #include <render/Colors.h>
 #include <render/BufferWrappers.h>
@@ -20,6 +21,9 @@
 #include <misc/Timer.h>
 #include <misc/Option.h>
 #include <misc/Log.h>
+#include <misc/StringHelpers.h>
+
+#include "player/PlayerInfo.h"
 
 namespace game
 {
@@ -51,7 +55,23 @@ namespace game
 		ui::constrainWidth({ ui::SIZETYPE::RELATIVE_WIDTH, 0.5f });
 		auto saveButton = ui::textButton("save");
 
+		saveButton.get()->setOnPress([saveName = saveName.get()](PlayerInfo& playerInfo, ui::Base* self) {
+			auto const name = misc::trim(saveName->text.getLines()[0]);
+			playerInfo.uiState.saveGame = name;
+
+			return ui::BIND::RESULT::CONTINUE;
+			}
+		);
+
 		auto loadButton = ui::textButton("load");
+
+		loadButton.get()->setOnPress([saveName = saveName.get()](PlayerInfo& playerInfo, ui::Base* self) {
+			auto const name = misc::trim(saveName->text.getLines()[0]);
+			playerInfo.uiState.loadGame = name;
+
+			return ui::BIND::RESULT::CONTINUE;
+			}
+		);
 
 		ui::endList();
 

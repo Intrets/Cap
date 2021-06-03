@@ -16,6 +16,8 @@
 #include "Game.h"
 #include "WorldGrid.h"
 
+#include <serial/Serializer.h>
+
 namespace render
 {
 	struct RenderInfo;
@@ -96,10 +98,9 @@ namespace game
 
 	class GameState
 	{
-	private:
+	public:
 		Everything everything;
 
-	public:
 		std::unique_ptr<WorldGrid> world = std::make_unique<WorldGrid>();
 
 		int32_t tick = 0;
@@ -117,7 +118,32 @@ namespace game
 		void placeInWorld(WeakObject& obj, glm::ivec2 pos);
 		void placeInWorld(UniqueObject& obj, glm::ivec2 pos);
 
-		GameState();
+		void init();
+
+		GameState() = default;
 		~GameState() = default;
+
+		NOCOPY(GameState);
+		DEFAULTMOVE(GameState);
 	};
 }
+
+template<>
+struct Serializable<game::GameState>
+{
+	static bool read(Serializer& serializer, game::GameState& gameState) {
+		return serializer.readAll(
+			gameState.everything,
+			gameState.world,
+			gameState.tick
+		);
+	}
+
+	static bool write(Serializer& serializer, game::GameState const& gameState) {
+		return serializer.writeAll(
+			gameState.everything,
+			gameState.world,
+			gameState.tick
+		);
+	}
+};

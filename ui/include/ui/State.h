@@ -39,6 +39,9 @@ namespace ui
 		std::unordered_map<std::string, ManagedReference<Base, Base>> namedUIs;
 
 	public:
+		std::optional<std::string> loadGame;
+		std::optional<std::string> saveGame;
+
 		std::list<UniqueReference<Base, Base>> UIs;
 
 		std::vector<UniqueReference<Base, Base>> UIsBuffer;
