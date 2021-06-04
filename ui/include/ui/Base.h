@@ -173,4 +173,21 @@ namespace ui
 		BaseEnd() = default;
 		virtual ~BaseEnd() = default;
 	};
+
+	class BaseInvisibleEnd : public Base
+	{
+	private:
+		virtual void addElement(UniqueReference<Base, Base> element) override;
+
+	public:
+		virtual void translate(glm::vec2 p) override;
+		virtual void setScreenPixels(glm::ivec2 px) override;
+
+		virtual ScreenRectangle updateSize(ScreenRectangle newScreenRectangle) override;
+
+		BaseInvisibleEnd() = default;
+		virtual ~BaseInvisibleEnd() = default;
+	};
+
+
 }

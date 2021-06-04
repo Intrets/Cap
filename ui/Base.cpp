@@ -381,4 +381,25 @@ namespace ui
 	void BaseEnd::setScreenPixels(glm::ivec2 px) {
 		this->screenRectangle.setPixelSize(px);
 	}
+
+	void BaseInvisibleEnd::addElement(UniqueReference<Base, Base> element) {
+		assert(0);
+	}
+
+	void BaseInvisibleEnd::translate(glm::vec2 p) {
+		this->screenRectangle.translate(p);
+	}
+
+	void BaseInvisibleEnd::setScreenPixels(glm::ivec2 px) {
+		this->screenRectangle.setPixelSize(px);
+	}
+
+	ScreenRectangle BaseInvisibleEnd::updateSize(ScreenRectangle newScreenRectangle) {
+		newScreenRectangle.setHeight(0);
+		newScreenRectangle.setWidth(0);
+
+		this->screenRectangle = newScreenRectangle;
+
+		return this->screenRectangle;
+	}
 }
