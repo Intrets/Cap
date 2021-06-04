@@ -267,7 +267,7 @@ namespace game
 
 			place(41, 30);
 
-			for (size_t i = 0; i < 100; i++) {
+			for (size_t i = 0; i < 000; i++) {
 				int x = 1 + rand() % (WORLD_SIZE - 5);
 				int y = 1 + rand() % (WORLD_SIZE - 5);
 				if (x < 30 && y < 30) {

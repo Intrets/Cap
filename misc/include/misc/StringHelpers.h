@@ -15,5 +15,5 @@ namespace misc
 	std::string join(std::vector<std::string> const& in, std::optional<char> c = std::nullopt);
 
 	using namespace std::literals;
-	std::string_view trim(std::string_view in, std::string_view c = "\n"sv);
+	std::string_view trim(std::string_view in, std::string_view c = "\n "sv);
 }

@@ -18,6 +18,7 @@
 #include <misc/Option.h>
 #include <misc/Timer.h>
 #include <misc/Log.h>
+#include <misc/PathManager.h>
 
 #include <fstream>
 #include <format>
@@ -117,15 +118,22 @@ void mainLoop(GLFWwindow* window) {
 		if (uiState.loadGame.has_value()) {
 			game::GameState newGameState;
 
-			std::ifstream file{ uiState.loadGame.value(), std::ifstream::binary };
-			Serializer serializer{ file };
-
-			if (!serializer.read(newGameState)) {
-				Locator<misc::Log>::ref().putLine(std::format("failed to load game from: {}", uiState.loadGame.value()));
+			std::ifstream file;
+			Locator<misc::PathManager>::ref().openSave(file, uiState.loadGame.value());
+			if (!file.good()) {
+				Locator<misc::Log>::ref().putLine(std::format("failed to open save file: {}", uiState.loadGame.value()));
 			}
 			else {
-				gameState = std::move(newGameState);
-				Locator<misc::Log>::ref().putLine(std::format("loaded game from {}", uiState.loadGame.value()));
+				Serializer serializer{ file };
+
+				auto start = glfwGetTime();
+				if (!serializer.read(newGameState)) {
+					Locator<misc::Log>::ref().putLine(std::format("failed to load game from: {}", uiState.loadGame.value()));
+				}
+				else {
+					gameState = std::move(newGameState);
+					Locator<misc::Log>::ref().putLine(std::format("loaded game from {} in {:.4f} seconds", uiState.loadGame.value(), glfwGetTime() - start));
+				}
 			}
 
 			uiState.loadGame.reset();
@@ -133,14 +141,21 @@ void mainLoop(GLFWwindow* window) {
 		}
 
 		if (uiState.saveGame.has_value()) {
-			std::ofstream file{ uiState.saveGame.value(), std::ofstream::binary };
-			Serializer serializer{ file };
-
-			if (!serializer.write(gameState)) {
-				Locator<misc::Log>::ref().putLine(std::format("failed to save game to: {}", uiState.saveGame.value()));
+			std::ofstream file;
+			Locator<misc::PathManager>::ref().openSave(file, uiState.saveGame.value());
+			if (!file.good()) {
+				Locator<misc::Log>::ref().putLine(std::format("failed to open save file: {}", uiState.saveGame.value()));
 			}
 			else {
-				Locator<misc::Log>::ref().putLine(std::format("saved game to: {}", uiState.saveGame.value()));
+				Serializer serializer{ file };
+
+				auto start = glfwGetTime();
+				if (!serializer.write(gameState)) {
+					Locator<misc::Log>::ref().putLine(std::format("failed to save game to: {}", uiState.saveGame.value()));
+				}
+				else {
+					Locator<misc::Log>::ref().putLine(std::format("saved game to {} in {:.4f} seconds", uiState.saveGame.value(), glfwGetTime() - start));
+				}
 			}
 
 			uiState.saveGame.reset();

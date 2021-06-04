@@ -283,7 +283,8 @@ void Merger::fillPaths(game::WorldGrid& grid, int32_t g) {
 			auto point = open.front();
 			open.pop();
 
-			for (size_t i = 0; i < 8; i++) {
+			for (size_t i_ = 0; i_ < 4; i_++) {
+				size_t i = i_ * 2 + 1;
 				auto p = point + game::getDirectionFromIndex(i);
 
 				if (grid.empty(p) && grid.getGroup(p) == g && !grid.hasDirection(p, index)) {
