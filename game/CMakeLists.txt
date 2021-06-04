@@ -5,13 +5,15 @@ set(MODULE_NAME game)
 set(MODULE_FILES
 	GameState
 	player/PlayerInfo
-	ui/ConstructDebugUI
 	Signature
 	GameObject
 	Game
 	Grapher
 	WorldGrid
 	Merger
+
+	ui/ConstructDebugUI
+	ui/game_control/EntityInterface
 )
 
 make_module(${MODULE_NAME} "${MODULE_FILES}")
