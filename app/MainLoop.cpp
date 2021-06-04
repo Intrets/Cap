@@ -6,6 +6,7 @@
 #include <game/GameState.h>
 #include <game/player/PlayerInfo.h>
 #include <game/ui/ConstructDebugUI.h>
+#include <game/Merger.h>
 
 #include <ui/State.h>
 #include <ui/ControlState.h>
@@ -20,6 +21,7 @@
 
 #include <fstream>
 #include <format>
+#include <sstream>
 
 ui::ControlState controlState;
 
