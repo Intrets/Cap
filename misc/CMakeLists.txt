@@ -17,6 +17,7 @@ set(MODULE_FILES
 	Timer
 	PeriodAverage
 	CircularArray
+	Num
 )
 
 make_module(${MODULE_NAME} "${MODULE_FILES}")

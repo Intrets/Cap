@@ -3,10 +3,12 @@
 #include <queue>
 #include <cstdint>
 
+#include <misc/Num.h>
+
 namespace game
 {
 	bool Directions::hasDirection(int32_t index) {
-		return this->data[index] & 0x10;
+		return this->data[index] & 0x10_u8;
 	}
 
 	bool WorldGrid::hasDirection(glm::ivec2 p, int32_t index) {
@@ -107,11 +109,11 @@ namespace game
 	}
 
 	void Directions::setDirection(int32_t index, uint8_t direction) {
-		this->data[index] = direction | 0x10;
+		this->data[index] = direction | 0x10_u8;
 	}
 
 	void Directions::setDirection(int32_t index, glm::ivec2 direction) {
-		this->data[index] = static_cast<uint8_t>(getIndexFromDirection(direction) | 0x10);
+		this->data[index] = getIndexFromDirection(direction) | 0x10_u8;
 	}
 
 	uint8_t getIndexFromDirection(glm::ivec2 vec) {

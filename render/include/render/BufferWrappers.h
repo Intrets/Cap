@@ -497,6 +497,7 @@ namespace render
 			glBindBuffer(GL_ARRAY_BUFFER, this->ID);
 			glBufferData(GL_ARRAY_BUFFER, size, data, this->usageHint);
 		}
+
 		template<class T>
 		inline void ArrayBuffer<T>::bind(GLenum location) {
 			glBindBuffer(location, this->ID);
