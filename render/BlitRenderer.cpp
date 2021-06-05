@@ -72,9 +72,9 @@ namespace render
 		bool flipUVvertical,
 		std::optional<glm::vec4> maybeColor) {
 
-		BlitRenderInfo infos;
-		infos.addBlitInfo(info);
-		this->render(config, infos, target, viewport, texture, depth_, flipUVvertical, glm::vec2(0.0f), maybeColor);
+		BlitRenderInfo infos_;
+		infos_.addBlitInfo(info);
+		this->render(config, infos_, target, viewport, texture, depth_, flipUVvertical, glm::vec2(0.0f), maybeColor);
 	}
 
 	BlitRenderer::BlitRenderer() {

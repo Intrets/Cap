@@ -167,7 +167,7 @@ void Merger::mergeStep(game::WorldGrid& grid) {
 }
 
 int32_t Merger::getNeighbourCount(int32_t group) {
-	return this->groups[group].neighbours.size();
+	return static_cast<int32_t>(this->groups[group].neighbours.size());
 }
 
 void Merger::mergeGroups(game::WorldGrid& grid, int32_t group, int32_t into) {

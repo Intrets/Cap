@@ -358,11 +358,11 @@ namespace ui
 				if (self->isDown()) {
 					glm::ivec2 bottomRight = playerInfo.uiState.getCursor() - self->getMousePressOffset() + glm::ivec2(1,-1) * self->screenRectangle.size();
 
-					if (bottomRight.x - windowPtr->screenRectangle.getLeft() < 0.2f) {
-						bottomRight.x = windowPtr->screenRectangle.getLeft() + 0.2f;
+					if (bottomRight.x - windowPtr->screenRectangle.getLeft() < 10) {
+						bottomRight.x = windowPtr->screenRectangle.getLeft() + 10;
 					}
-					if (windowPtr->screenRectangle.getTop() - bottomRight.y < 0.2f) {
-						bottomRight.y = windowPtr->screenRectangle.getTop() - 0.2f;
+					if (windowPtr->screenRectangle.getTop() - bottomRight.y < 10) {
+						bottomRight.y = windowPtr->screenRectangle.getTop() - 10;
 					}
 					windowPtr->screenRectangle.setBottomRight(bottomRight);
 					windowPtr->updateSize(windowPtr->screenRectangle);

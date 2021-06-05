@@ -23,9 +23,6 @@ bool Grapher::incrementLastPos() {
 }
 
 void Grapher::debugRender() {
-	auto& debugRender = Locator<render::DebugRenderInfo>::ref();
-
-	//debugRender.world.addBox(this->region.bot, this->region.top + glm::ivec2(1, 1));
 }
 
 bool Grapher::step(game::WorldGrid& grid) {
@@ -49,7 +46,7 @@ bool Grapher::step(game::WorldGrid& grid) {
 			if (isValid(this->lastPos)) {
 				grid.setGroup(this->lastPos, ++this->lastGroup);
 				this->groups.push_back(this->lastPos);
-				for (size_t i = 0; i < 4; i++) {
+				for (int32_t i = 0; i < 4; i++) {
 					Front f;
 					f.max = lastPos;
 					f.min = lastPos;
@@ -133,7 +130,6 @@ bool Grapher::step(game::WorldGrid& grid) {
 			else {
 				this->currentDepth++;
 				progress = true;
-				auto oldSize = front.size;
 
 				front.size = endi - starti;
 				front.max = front.min + (endi - 1) * d + forward;

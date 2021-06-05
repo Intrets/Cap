@@ -6,6 +6,8 @@ add_executable(${PROJECT_NAME}
 	MainLoop.cpp
 )
 
+# compile options also in MakeModule.cmake
+
 # Full path of source code file in diagnostics
 if (MSVC)
 	target_compile_options(${PROJECT_NAME} PRIVATE /FC)

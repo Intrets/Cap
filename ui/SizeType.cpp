@@ -22,17 +22,17 @@ namespace ui
 		auto pixelSize = screenRectangle.getPixelSize();
 		switch (this->type) {
 			case SIZETYPE::PX:
-				{
-					float scale = misc::Option<misc::OPTION::UI_SCALE, float>::getVal();
-					widthS = static_cast<int32_t>(glm::ceil(scale * this->px));
-				}
-				break;
+			{
+				float scale = misc::Option<misc::OPTION::UI_SCALE, float>::getVal();
+				widthS = static_cast<int32_t>(glm::ceil(scale * this->px));
+			}
+			break;
 			case SIZETYPE::FH:
-				{
-					float scale = misc::Option<misc::OPTION::UI_SCALE, float>::getVal();
-					widthS = static_cast<int32_t>(glm::ceil(scale * this->relative * 17));
-				}
-				break;
+			{
+				float scale = misc::Option<misc::OPTION::UI_SCALE, float>::getVal();
+				widthS = static_cast<int32_t>(glm::ceil(scale * this->relative * 17));
+			}
+			break;
 			case SIZETYPE::STATIC_PX:
 				widthS = this->px;
 				break;
@@ -43,11 +43,10 @@ namespace ui
 				widthS = static_cast<int32_t>(glm::round(this->absolute_width * pixelSize.x));
 				break;
 			case SIZETYPE::RELATIVE_HEIGHT:
-				widthS = static_cast<int32_t>(screenRectangle.getHeight() * this->relative_height);
+				widthS = static_cast<int32_t>(static_cast<float>(screenRectangle.getHeight()) * this->relative_height);
 				break;
 			case SIZETYPE::RELATIVE_WIDTH:
-				widthS = screenRectangle.getWidth() * this->relative_width;
-				widthS = static_cast<int32_t>(screenRectangle.getWidth() * this->relative_width);
+				widthS = static_cast<int32_t>(static_cast<float>(screenRectangle.getWidth()) * this->relative_width);
 				break;
 			default:
 				widthS = screenRectangle.getWidth();

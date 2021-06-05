@@ -228,34 +228,33 @@ bool PathFinding::stage1(game::WorldGrid& grid) {
 		return false;
 	}
 
-	auto F = front.front();
-	//auto F = front.top();
+	auto f = front.front();
 	front.pop();
 
-	if (glm::abs(F.winding) > 10) {
+	if (glm::abs(f.winding) > 10) {
 		return false;
 	}
 
-	auto D = target - F.current;
+	auto D = target - f.current;
 	auto Dabs = glm::abs(D);
 	auto m = glm::max(Dabs.x, Dabs.y);
 
 	if (m == 0) {
 		found = true;
 		this->stage++;
-		this->path = F.path;
-		this->waypoints = F.waypoints;
+		this->path = f.path;
+		this->waypoints = f.waypoints;
 		//this->newWaypoints.push_back(this->target);
 		return true;
 	}
 
 	D /= m;
 
-	glm::ivec2 p = F.current + D;
+	glm::ivec2 p = f.current + D;
 
 	int32_t match = 16 * (D.x + 1) + (D.y + 1);
 
-	size_t dir;
+	size_t dir = 8;
 	switch (match) {
 		case 0x22:
 			dir = 0;
@@ -282,41 +281,42 @@ bool PathFinding::stage1(game::WorldGrid& grid) {
 			dir = 7;
 			break;
 		default:
+			assert(0);
 			break;
 	}
 
 
-	if (!F.collided) {
+	if (!f.collided) {
 		if (!grid.occupied(p.x, p.y)) {
 			this->visited.insert({ *reinterpret_cast<uint64_t*>(&p), this->count });
-			F.path.push_back(p);
+			f.path.push_back(p);
 			//this->current = p;
-			F.current = p;
-			this->front.push(F);
+			f.current = p;
+			this->front.push(f);
 		}
 		else {
-			auto w = F.winding;
+			auto w = f.winding;
 			//this->direction = dir;
 			//this->collided = true;
-			F.D = norm2(this->target - p);
-			F.clockwise = true;
-			F.collided = true;
-			F.direction = prev(prev(dir));
-			F.winding = w + 2;
-			this->front.push(F);
+			f.D = norm2(this->target - p);
+			f.clockwise = true;
+			f.collided = true;
+			f.direction = prev(prev(dir));
+			f.winding = w + 2;
+			this->front.push(f);
 
-			F.D = norm2(this->target - p);
-			F.clockwise = false;
-			F.winding = w + 2;
-			F.direction = next(next(dir));
-			this->front.push(F);
+			f.D = norm2(this->target - p);
+			f.clockwise = false;
+			f.winding = w + 2;
+			f.direction = next(next(dir));
+			this->front.push(f);
 		}
 		return false;
 	}
 
-	if (glm::abs(F.winding) < 2) {
+	if (glm::abs(f.winding) < 2) {
 		if (!grid.occupied(p.x, p.y) && !this->visited.count(*reinterpret_cast<uint64_t*>(&p))) {
-			F.waypoints.push_back(p);
+			f.waypoints.push_back(p);
 
 			//this->visited.insert({ *reinterpret_cast<uint64_t*>(&p), this->count });
 			updateOrInsert<uint64_t, int32_t>(this->visited,
@@ -329,13 +329,13 @@ bool PathFinding::stage1(game::WorldGrid& grid) {
 			//this->path.push_back(p);
 			//this->collided = false;
 
-			F.direction = dir;
-			F.collided = false;
-			F.path.push_back(p);
-			F.current = p;
-			F.D = norm2(this->target - p);
+			f.direction = dir;
+			f.collided = false;
+			f.path.push_back(p);
+			f.current = p;
+			f.D = norm2(this->target - p);
 
-			this->front.push(F);
+			this->front.push(f);
 
 			return false;
 		}
@@ -354,11 +354,10 @@ bool PathFinding::stage1(game::WorldGrid& grid) {
 
 	this->searched.clear();
 
-	auto dec = F.clockwise ? next : prev;
-	auto inc = F.clockwise ? prev : next;
-	size_t index = (inc(inc(flip(F.direction))));
-	for (size_t i = 0; i < 8; i++) {
-		p = F.current + order[index];
+	auto inc = f.clockwise ? prev : next;
+	size_t index = (inc(inc(flip(f.direction))));
+	for (int32_t i = 0; i < 8; i++) {
+		p = f.current + order[index];
 		this->searched.push_back(p);
 
 		if (!grid.occupied(p.x, p.y)) {
@@ -369,14 +368,14 @@ bool PathFinding::stage1(game::WorldGrid& grid) {
 			//this->winding += i - 1;
 			//this->direction = index;
 
-			F.direction = index;
-			F.winding += i - 2;
-			F.path.push_back(p);
-			F.current = p;
-			F.D = norm2(this->target - p);
-			this->front.push(F);
+			f.direction = index;
+			f.winding += i - 2;
+			f.path.push_back(p);
+			f.current = p;
+			f.D = norm2(this->target - p);
+			this->front.push(f);
 
-			Locator<misc::Log>::ref().putStreamLine(std::stringstream() << "winding: " << F.winding << " i: " << i);
+			Locator<misc::Log>::ref().putStreamLine(std::stringstream() << "winding: " << f.winding << " i: " << i);
 
 
 			return false;
@@ -495,16 +494,16 @@ bool PathFinding::stage3(game::WorldGrid& grid) {
 			return true;
 		}
 		F = std::make_unique<PathFinding>();
-		auto start = this->newWaypoints.back();
-		this->highlight1 = start;
+		auto start_ = this->newWaypoints.back();
+		this->highlight1 = start_;
 		this->newWaypoints.pop_back();
-		auto target = this->newWaypoints.back();
-		this->highlight2 = target;
+		auto target_ = this->newWaypoints.back();
+		this->highlight2 = target_;
 
-		Front f{ start };
-		f.waypoints.push_back(start);
+		Front f{ start_ };
+		f.waypoints.push_back(start_);
 		F->front.push(f);
-		F->target = target;
+		F->target = target_;
 	}
 	else {
 		if (this->F->stage1(grid)) {

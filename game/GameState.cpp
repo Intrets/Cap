@@ -90,7 +90,7 @@ namespace game
 
 				if (currentGroup == walker.groupTarget) {
 					auto targets = merger.groups[currentGroup].neighbours.size();
-					auto target = rand() % targets;
+					int32_t target = rand() % targets;
 
 					walker.groupTarget = merger.groups[currentGroup].neighbours[target].group;
 					walker.indexTarget = target;
@@ -267,7 +267,7 @@ namespace game
 
 			place(41, 30);
 
-			for (size_t i = 0; i < 000; i++) {
+			for (int32_t i = 0; i < 000; i++) {
 				int x = 1 + rand() % (WORLD_SIZE - 5);
 				int y = 1 + rand() % (WORLD_SIZE - 5);
 				if (x < 30 && y < 30) {
@@ -276,7 +276,7 @@ namespace game
 				place(x, y);
 			}
 
-			for (size_t i = 5; i < 20; i++) {
+			for (int32_t i = 5; i < 20; i++) {
 				place(10 + i, 20 - i);
 
 			}

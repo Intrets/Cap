@@ -238,22 +238,22 @@ namespace game
 	{
 		struct component_counter
 		{
-			static inline size_t t = 0;
+			static inline int32_t t = 0;
 		};
 
 		template<class T>
 		struct component_index : component_counter
 		{
-			static inline size_t getVal() {
+			static inline int32_t getVal() {
 				assert(t < SIZE);
 				return t++;
 			};
 
-			static inline size_t val = getVal();
+			static inline int32_t val = getVal();
 		};
 
 		template<class T>
-		static inline const size_t component_index_v = component_index<T>::val;
+		static inline const int32_t component_index_v = component_index<T>::val;
 
 		template<class M, class... Ms>
 		struct group_signature

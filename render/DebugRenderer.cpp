@@ -31,7 +31,7 @@ void render::DebugRenderer::render(
 			glDrawArrays(
 				GL_LINES,
 				0,
-				info.world.lines.lines.size()
+				static_cast<GLsizei>(info.world.lines.lines.size())
 			); }
 		);
 	}
@@ -49,7 +49,7 @@ void render::DebugRenderer::render(
 			glDrawArrays(
 				GL_POINTS,
 				0,
-				info.world.points.points.size()
+				static_cast<GLsizei>(info.world.points.points.size())
 			); }
 		);
 	}
@@ -66,7 +66,7 @@ void render::DebugRenderer::render(
 			glDrawArrays(
 				GL_LINES,
 				0,
-				info.screen.lines.lines.size()
+				static_cast<GLsizei>(info.screen.lines.lines.size())
 			); }
 		);
 	}
@@ -84,7 +84,7 @@ void render::DebugRenderer::render(
 			glDrawArrays(
 				GL_POINTS,
 				0,
-				info.screen.points.points.size()
+				static_cast<GLsizei>(info.screen.points.points.size())
 			); }
 		);
 	}

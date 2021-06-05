@@ -107,47 +107,14 @@ namespace game
 	}
 
 	void Directions::setDirection(int32_t index, int32_t direction) {
-		this->data[index] = direction | 0x10;
+		this->data[index] = static_cast<uint8_t>(direction | 0x10);
 	}
 
 	void Directions::setDirection(int32_t index, glm::ivec2 direction) {
-		this->data[index] = getIndexFromDirection(direction) | 0x10;
+		this->data[index] = static_cast<uint8_t>(getIndexFromDirection(direction) | 0x10);
 	}
 
-	glm::ivec2 getDirectionFromIndex(uint32_t index) {
-		switch (index) {
-			case 0:
-				return glm::ivec2(1, 1);
-				break;
-			case 1:
-				return glm::ivec2(1, 0);
-				break;
-			case 2:
-				return glm::ivec2(1, -1);
-				break;
-			case 3:
-				return glm::ivec2(0, -1);
-				break;
-			case 4:
-				return glm::ivec2(-1, -1);
-				break;
-			case 5:
-				return glm::ivec2(-1, 0);
-				break;
-			case 6:
-				return glm::ivec2(-1, 1);
-				break;
-			case 7:
-				return glm::ivec2(0, 1);
-				break;
-			default:
-				assert(0);
-				return glm::ivec2(0, 0);
-				break;
-		}
-	}
-
-	uint32_t getIndexFromDirection(glm::ivec2 vec) {
+	int32_t getIndexFromDirection(glm::ivec2 vec) {
 		assert(!(vec.x == 0 && vec.y == 0));
 		assert(vec.x >= -1 && vec.y >= -1);
 		assert(vec.x <= 1 && vec.y <= 1);

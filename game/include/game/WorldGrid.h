@@ -1,5 +1,7 @@
 #pragma once
 
+#include <concepts>
+
 #include <array>
 #include <cstdint>
 
@@ -12,12 +14,12 @@ using SizeAlias = size_t;
 
 namespace game
 {
-	glm::ivec2 getDirectionFromIndex(uint32_t index);
-	uint32_t getIndexFromDirection(glm::ivec2 vec);
+	glm::ivec2 getDirectionFromIndex(std::integral auto index);
+	int32_t getIndexFromDirection(glm::ivec2 vec);
 
 	struct Directions
 	{
-		std::array<uint16_t, 8> data;
+		std::array<uint8_t, 8> data;
 
 		glm::ivec2 getDirection(int32_t index) const;
 		void setDirection(int32_t index, int32_t direction);
@@ -56,6 +58,41 @@ namespace game
 		bool occupied(glm::ivec2 pos);
 		bool empty(glm::ivec2 pos);
 	};
+
+	glm::ivec2 getDirectionFromIndex(std::integral auto index) {
+		assert(index >= 0);
+		switch (static_cast<int>(index)) {
+			case 0:
+				return glm::ivec2(1, 1);
+				break;
+			case 1:
+				return glm::ivec2(1, 0);
+				break;
+			case 2:
+				return glm::ivec2(1, -1);
+				break;
+			case 3:
+				return glm::ivec2(0, -1);
+				break;
+			case 4:
+				return glm::ivec2(-1, -1);
+				break;
+			case 5:
+				return glm::ivec2(-1, 0);
+				break;
+			case 6:
+				return glm::ivec2(-1, 1);
+				break;
+			case 7:
+				return glm::ivec2(0, 1);
+				break;
+			default:
+				assert(0);
+				return glm::ivec2(0, 0);
+				break;
+		}
+	}
+
 }
 
 template<>

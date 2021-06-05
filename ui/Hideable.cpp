@@ -2,11 +2,6 @@
 
 #include <game/player/PlayerInfo.h>
 
-namespace render
-{
-	RenderInfo;
-}
-
 namespace ui
 {
 	Hideable::Hideable(Handle self) {
