@@ -17,6 +17,7 @@ set(MODULE_FILES
 	Timer
 	PeriodAverage
 	CircularArray
+	BoundsCheckedCast
 )
 
 make_module(${MODULE_NAME} "${MODULE_FILES}")
