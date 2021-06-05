@@ -15,14 +15,14 @@ using SizeAlias = size_t;
 namespace game
 {
 	glm::ivec2 getDirectionFromIndex(std::integral auto index);
-	int32_t getIndexFromDirection(glm::ivec2 vec);
+	uint8_t getIndexFromDirection(glm::ivec2 vec);
 
 	struct Directions
 	{
 		std::array<uint8_t, 8> data;
 
 		glm::ivec2 getDirection(int32_t index) const;
-		void setDirection(int32_t index, int32_t direction);
+		void setDirection(int32_t index, uint8_t direction);
 		void setDirection(int32_t index, glm::ivec2 direction);
 
 		bool hasDirection(int32_t index);
@@ -35,7 +35,7 @@ namespace game
 		std::array<std::array<Directions, WORLD_SIZE>, WORLD_SIZE> directions;
 
 		bool hasDirection(glm::ivec2 p, int32_t index);
-		void setDirection(glm::ivec2 p, int32_t index, int32_t direction);
+		void setDirection(glm::ivec2 p, int32_t index, uint8_t direction);
 		void setDirection(glm::ivec2 p, int32_t index, glm::ivec2 direction);
 		glm::ivec2 getDirection(glm::ivec2 p, int32_t index);
 

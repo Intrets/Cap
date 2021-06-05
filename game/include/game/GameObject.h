@@ -104,7 +104,7 @@ struct PathFinding
 
 	//int32_t winding = 0;
 
-	uint32_t tick = 0;
+	int32_t tick = 0;
 
 	int32_t count = 0;
 

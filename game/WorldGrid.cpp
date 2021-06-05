@@ -13,7 +13,7 @@ namespace game
 		return this->directions[p.x][p.y].hasDirection(index);
 	}
 
-	void WorldGrid::setDirection(glm::ivec2 p, int32_t index, int32_t direction) {
+	void WorldGrid::setDirection(glm::ivec2 p, int32_t index, uint8_t direction) {
 		this->directions[p.x][p.y].setDirection(index, direction);
 	}
 
@@ -106,20 +106,20 @@ namespace game
 		return getDirectionFromIndex(this->data[index] & 0x0F);
 	}
 
-	void Directions::setDirection(int32_t index, int32_t direction) {
-		this->data[index] = static_cast<uint8_t>(direction | 0x10);
+	void Directions::setDirection(int32_t index, uint8_t direction) {
+		this->data[index] = direction | 0x10;
 	}
 
 	void Directions::setDirection(int32_t index, glm::ivec2 direction) {
 		this->data[index] = static_cast<uint8_t>(getIndexFromDirection(direction) | 0x10);
 	}
 
-	int32_t getIndexFromDirection(glm::ivec2 vec) {
+	uint8_t getIndexFromDirection(glm::ivec2 vec) {
 		assert(!(vec.x == 0 && vec.y == 0));
 		assert(vec.x >= -1 && vec.y >= -1);
 		assert(vec.x <= 1 && vec.y <= 1);
 
-		const uint32_t i[3][3] = {
+		const uint8_t i[3][3] = {
 			{6,7,0},
 			{5,0,1},
 			{4,3,2}
