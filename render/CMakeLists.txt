@@ -24,9 +24,11 @@ set(MODULE_FILES
 	infos/BlitArrayRenderInfo
 	infos/BlitRenderInfo
 	infos/DebugRenderInfo
+	infos/HighlightRenderInfo
 	Fonts
 	textures/BlockIDTextures
 	GLStateWrapper
+	HighlightRenderer
 )
 
 set(SHADER_FILES
@@ -34,6 +36,7 @@ set(SHADER_FILES
 	UIBackground
 	BlitArray
 	Debug
+	Highlight
 )
 
 foreach(SHADER ${SHADER_FILES})

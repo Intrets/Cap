@@ -2,6 +2,7 @@
 
 #include <wglm/glm.hpp>
 #include <string>
+#include <concepts>
 
 namespace colors
 {
@@ -21,6 +22,18 @@ namespace colors
 	template<class T>
 	Color uniqueColor(T val) {
 		return { static_cast<uint32_t>(std::hash<T>{}(val)) | 0xFF000000 };
+	}
+
+	constexpr Color alpha(Color c, std::integral auto val) {
+		assert(0 <= val && val < 256);
+
+		return { c.c & (0x00FFFFFF | (static_cast<uint32_t>(val) << 24)) };
+	}
+
+	constexpr Color alpha(Color c, std::floating_point auto val) {
+		assert(0.0 <= val && val < 1.0);
+
+		return alpha(c, static_cast<int32_t>(256 * val));
 	}
 }
 

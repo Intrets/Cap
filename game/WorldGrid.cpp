@@ -69,11 +69,16 @@ namespace game
 	}
 
 	SizeAlias WorldGrid::get(int32_t x, int32_t y) {
-		return this->grid[x][y];
+		if (0 <= x && x < WORLD_SIZE && 0 <= y && y <= WORLD_SIZE) {
+			return this->grid[x][y];
+		}
+		else {
+			return 0;
+		}
 	}
 
 	SizeAlias WorldGrid::get(glm::ivec2 pos) {
-		return this->grid[pos.x][pos.y];
+		return this->get(pos.x, pos.y);
 	}
 
 	void WorldGrid::place(SizeAlias index, int32_t x, int32_t y) {

@@ -36,6 +36,13 @@ namespace render
 			renderInfo.cameraInfo.VP
 		);
 
+		this->highlightRenderer.render(
+			renderInfo.highlightRenderInfo,
+			target,
+			viewport,
+			renderInfo.cameraInfo.VP
+		);
+
 		target.clearDepth();
 
 		this->uiBackgroundRenderer.render(

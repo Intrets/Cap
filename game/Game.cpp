@@ -52,6 +52,8 @@ namespace game
 			size_t i = this->freeIndirections.back();
 			this->freeIndirections.pop_back();
 
+			this->validIndices[i] = true;
+
 			return { i, this };
 		}
 		else {
@@ -61,6 +63,7 @@ namespace game
 			}
 
 			this->qualifiers.push_back(this->getNextQualifier());
+			this->validIndices.push_back(true);
 
 			return { this->signatures.size() - 1, this };
 		}
@@ -68,6 +71,25 @@ namespace game
 
 	UniqueObject Everything::makeUnique() {
 		return this->make();
+	}
+
+	std::optional<WeakObject> Everything::maybeGetFromIndex(SizeAlias index) {
+		if (this->isValidIndex(index)) {
+			return this->getFromIndex(index);
+		}
+		else {
+			return std::nullopt;
+		}
+	}
+
+	WeakObject Everything::getFromIndex(SizeAlias index) {
+		assert(index > 0);
+		assert(this->isValidIndex(index));
+		return { index, this };
+	}
+
+	bool Everything::isValidIndex(SizeAlias index) {
+		return (index > 0) && this->validIndices[index];
 	}
 
 	Qualifier Everything::getNextQualifier() {
@@ -92,9 +114,7 @@ namespace game
 	}
 
 	bool QualifiedObject::isQualified() const {
-		assert(this->object.isNotNull());
-
-		return this->object.proxy->isQualified(this->object.index, this->qualifier);
+		return this->object.isNotNull() && this->object.proxy->isQualified(this->object.index, this->qualifier);
 	}
 
 	WeakObject* QualifiedObject::operator->() {

@@ -4,6 +4,7 @@
 #include "../infos/UIRenderInfo.h"
 #include "../infos/CameraInfo.h"
 #include "../infos/BlitArrayRenderInfo.h"
+#include "../infos/HighlightRenderInfo.h"
 
 namespace render
 {
@@ -14,5 +15,6 @@ namespace render
 		TextRenderInfo textRenderInfo;
 		UIRenderInfo uiRenderInfo;
 		BlitArrayRenderInfo tileRenderInfo;
+		HighlightRenderInfo highlightRenderInfo;
 	};
 }

@@ -144,7 +144,7 @@ struct Serializable<game::RawData>
 			rawData.objectSize,
 			rawData.indices,
 			rawData.deletions
-			)) return false;
+		)) return false;
 
 		rawData.data.resize(rawData.structInformation.width * rawData.index);
 
@@ -163,7 +163,7 @@ struct Serializable<game::RawData>
 			rawData.objectSize,
 			rawData.indices,
 			rawData.deletions
-			)) return false;
+		)) return false;
 
 		for (size_t i = 1; i < rawData.index; i++) {
 			if (!rawData.structInformation.objectWriter(serializer, rawData.getUntyped(i))) return false;
@@ -187,6 +187,9 @@ namespace game
 
 		template<class T>
 		inline void remove();
+
+		template<class T>
+		inline std::optional<T*> getMaybe();
 
 		template<class T>
 		inline T& get();
@@ -282,6 +285,7 @@ namespace game
 		std::vector<size_t> freeIndirections{};
 
 		std::vector<Qualifier> qualifiers{ 0 };
+		std::vector<bool> validIndices{};
 		Qualifier qualifier = 1;
 
 		std::vector<SignatureType> signatures{ 0 };
@@ -291,6 +295,10 @@ namespace game
 
 		WeakObject make();
 		UniqueObject makeUnique();
+
+		std::optional<WeakObject> maybeGetFromIndex(SizeAlias index);
+		WeakObject getFromIndex(SizeAlias index);
+		bool isValidIndex(SizeAlias index);
 
 		Qualifier getNextQualifier();
 		bool isQualified(SizeAlias i, Qualifier q) const;
@@ -614,6 +622,7 @@ namespace game
 		this->qualifiers[i] = this->getNextQualifier();
 
 		this->removed.push_back(i);
+		this->validIndices[i] = false;
 	}
 
 	inline void Everything::collectRemoved() {
@@ -720,6 +729,16 @@ namespace game
 	inline void WeakObject::remove() {
 		assert(this->isNotNull());
 		this->proxy->removeComponent<T>(this->index);
+	}
+
+	template<class T>
+	inline std::optional<T*> WeakObject::getMaybe() {
+		if (this->has<T>()) {
+			return &this->get<T>();
+		}
+		else {
+			return std::nullopt;
+		}
 	}
 
 	template<class T>

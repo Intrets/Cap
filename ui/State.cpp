@@ -43,7 +43,6 @@ namespace ui
 	}
 
 	glm::vec2 State::getCursorPositionWorld() {
-		assert(0);
 		return this->cursorWorld;
 	}
 
@@ -185,6 +184,9 @@ namespace ui
 		glm::vec2 viewport(ratio, 1.0f);
 
 		viewport *= misc::Option<misc::OPTION::CL_VIEWPORTSCALE, float>::getVal();
+
+		this->cursorWorld = cam + glm::vec2(x, y) * viewport;
+		rand();
 	}
 
 	void State::appendRenderInfo(game::GameState& gameState, render::RenderInfo& renderInfo) {
@@ -286,7 +288,6 @@ namespace ui
 	}
 
 	void State::init() {
-
 		// Test window
 		{
 			//Global::push();

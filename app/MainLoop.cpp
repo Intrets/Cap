@@ -7,6 +7,7 @@
 #include <game/player/PlayerInfo.h>
 #include <game/ui/ConstructDebugUI.h>
 #include <game/Merger.h>
+#include <game/ui/game_control/EntityInterface.h>
 
 #include <ui/State.h>
 #include <ui/ControlState.h>
@@ -23,6 +24,7 @@
 #include <fstream>
 #include <format>
 #include <sstream>
+
 
 ui::ControlState controlState;
 
@@ -42,7 +44,11 @@ void scroll_callback(GLFWwindow* w, double xoffset, double yoffset) {
 	controlState.scroll_callback(w, xoffset, yoffset);
 }
 
-void prepareRender(GLFWwindow* window, render::RenderInfo& renderInfo, PlayerInfo& playerInfo) {
+void prepareRender(
+	GLFWwindow* window,
+	render::RenderInfo& renderInfo,
+	PlayerInfo& playerInfo) {
+
 	auto& gameState = playerInfo.gameState;
 	auto& uiState = playerInfo.uiState;
 
@@ -70,26 +76,11 @@ void mainLoop(GLFWwindow* window) {
 	game::GameState gameState;
 	gameState.init();
 
-	//bool write = false;
-	//if (!write) {
-	//	std::ifstream file{ "test.save", std::ifstream::binary };
-	//	Serializer serial{ file };
-
-	//	serial.read(this->everything);
-
-	//	file.close();
-	//	return;
-	//}
-	//if (write) {
-	//	std::ofstream file{ "test.save", std::ofstream::binary };
-	//	Serializer serial{ file };
-
-	//	serial.write(this->everything);
-
-	//	file.close();
-	//}
-
 	ui::State uiState;
+
+	{
+		uiState.addUI(ui::Global::getManager().makeUniqueRef<game::EntityInterface>());
+	}
 
 	{
 		ui::Global::push();
@@ -107,7 +98,7 @@ void mainLoop(GLFWwindow* window) {
 
 	render::Renderer renderer;
 
-	PlayerInfo playerInfo{ { 35, 35 }, gameState, controlState, uiState };
+	PlayerInfo playerInfo{ { 35, 35 }, {}, gameState, controlState, uiState };
 
 	glfwSetCharCallback(window, char_callback);
 	glfwSetKeyCallback(window, key_callback);
@@ -176,7 +167,7 @@ void mainLoop(GLFWwindow* window) {
 		controlState.cycleStates();
 		glfwPollEvents();
 
-		uiState.updateCursor(window, { 0,0 });
+		uiState.updateCursor(window, { playerInfo.pos });
 
 		uiState.run(playerInfo);
 

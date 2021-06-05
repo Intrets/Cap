@@ -56,6 +56,12 @@ namespace ogs
 				case BLEND_FUNC::SRC_ONE__ONE_MINUS_SRC_ALPHA:
 					glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 					break;
+				case BLEND_FUNC::ONE__ZERO:
+					glBlendFunc(GL_ONE, GL_ZERO);
+					break;
+				case BLEND_FUNC::ZERO__ONE:
+					glBlendFunc(GL_ZERO, GL_ONE);
+					break;
 				default:
 					assert(0);
 					break;
@@ -192,6 +198,17 @@ namespace ogs
 			DEPTH_TEST::DISABLED,
 			DEPTH_FUNC::UNSET,
 			POLYGON_MODE::LINE,
+			0.0f,
+		};
+	}
+
+	Configuration HighlightConfiguration() {
+		return {
+			BLEND::ENABLED,
+			BLEND_FUNC::SRC_ALPHA__ONE_MINUS_SRC_ALPHA,
+			DEPTH_TEST::DISABLED,
+			DEPTH_FUNC::UNSET,
+			POLYGON_MODE::FILL,
 			0.0f,
 		};
 	}

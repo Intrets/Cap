@@ -16,6 +16,8 @@ enum class BLEND_FUNC
 	UNSET,
 	SRC_ALPHA__ONE_MINUS_SRC_ALPHA,
 	SRC_ONE__ONE_MINUS_SRC_ALPHA,
+	ONE__ZERO,
+	ZERO__ONE,
 	MAX,
 };
 
@@ -79,6 +81,7 @@ namespace ogs
 	Configuration BlockIDConfiguration();
 	Configuration DebugPointConfiguration();
 	Configuration DebugLineConfiguration();
+	Configuration HighlightConfiguration();
 
 	class State
 	{

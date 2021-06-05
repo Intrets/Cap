@@ -5,13 +5,13 @@ set(MODULE_NAME game)
 set(MODULE_FILES
 	GameState
 	player/PlayerInfo
+  player/Inventory
 	Signature
 	GameObject
 	Game
 	Grapher
 	WorldGrid
 	Merger
-
 	ui/ConstructDebugUI
 	ui/game_control/EntityInterface
 )

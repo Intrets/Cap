@@ -2,7 +2,7 @@
 
 #include <wglm/glm.hpp>
 
-class Player;
+#include "game/Game.h"
 
 namespace game
 {
@@ -18,7 +18,8 @@ namespace ui
 struct PlayerInfo
 {
 	glm::vec2 pos;
-	// Player& player;
+	game::QualifiedObject controlled;
+
 	game::GameState& gameState;
 	ui::ControlState& controlState;
 	ui::State& uiState;

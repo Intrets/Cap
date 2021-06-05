@@ -61,7 +61,7 @@ namespace game
 
 	glm::ivec2 getDirectionFromIndex(std::integral auto index) {
 		assert(index >= 0);
-		switch (static_cast<int>(index)) {
+		switch (index) {
 			case 0:
 				return glm::ivec2(1, 1);
 				break;
