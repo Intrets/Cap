@@ -11,7 +11,7 @@ namespace misc
 {
 	template<class To, class From>
 	requires std::floating_point<To>
-	bool constexpr checkBounds(From&& from) {
+	bool checkBounds(From&& from) {
 		if constexpr (std::is_same_v<From, double> && std::is_same_v<To, float>) {
 			auto min = static_cast<From>(std::numeric_limits<To>::lowest());
 			auto max = static_cast<From>(std::numeric_limits<To>::max());
@@ -24,15 +24,15 @@ namespace misc
 
 	template<class To, class From>
 	requires std::floating_point<From>
-	bool constexpr checkBounds(From&& from) {
+	bool checkBounds(From&& from) {
 		auto min = static_cast<From>(std::numeric_limits<To>::lowest());
 		auto max = static_cast<From>(std::numeric_limits<To>::max());
 		return min <= from && from <= max;
 	}
 
 	template<class To, class From>
-	requires (std::integral<To> && std::integral<From>)
-	bool constexpr checkBounds(From&& from) {
+	requires (std::integral<To>&& std::integral<From>)
+	bool checkBounds(From&& from) {
 		auto min = static_cast<intmax_t>(std::numeric_limits<To>::lowest());
 		auto max = static_cast<intmax_t>(std::numeric_limits<To>::max());
 		auto val = static_cast<intmax_t>(from);
