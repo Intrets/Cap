@@ -87,10 +87,6 @@ namespace ui
 		return depth;
 	}
 
-	AnchoredProxy::AnchoredProxy(Handle self) {
-		this->selfHandle = self;
-	}
-
 	AnchoredProxy::~AnchoredProxy() {
 		if (this->proxyBase.isValid()) {
 			this->destructible.get()->destruct = true;

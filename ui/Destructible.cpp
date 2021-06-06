@@ -4,9 +4,7 @@
 
 namespace ui
 {
-	Destructible::Destructible(Handle self) {
-		this->selfHandle = self;
-
+	Destructible::Destructible() {
 		this->addGlobalBind({ CONTROL::KEY::EVERY_TICK }, [](PlayerInfo& playerInfo, Base* self_) -> CallBackBindResult
 		{
 			if (static_cast<Destructible*>(self_)->destruct) {

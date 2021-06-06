@@ -23,7 +23,7 @@ namespace ui
 
 		bool minimized = false;
 
-		Window(Handle self);
+		Window() = default;
 		virtual ~Window() = default;
 
 		virtual int32_t addRenderInfo(game::GameState& gameState, render::RenderInfo& renderInfo, int32_t depth) override;

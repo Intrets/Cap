@@ -2,10 +2,6 @@
 
 namespace ui
 {
-	Empty::Empty(Handle self_) {
-		this->selfHandle = self_;
-	}
-
 	ScreenRectangle Empty::updateSize(ScreenRectangle newScreenRectangle) {
 		return newScreenRectangle;
 	}

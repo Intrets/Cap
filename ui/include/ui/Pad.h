@@ -31,7 +31,7 @@ namespace ui
 		PadType right;
 
 	public:
-		Pad(Handle self);
+		Pad() = default;
 		virtual ~Pad() = default;
 
 		virtual ScreenRectangle updateSize(ScreenRectangle newScreenRectangle) override;

@@ -20,7 +20,7 @@ namespace ui
 		void setWidth(SizeType width);
 		void setAlignment(ALIGNMENT alignment);
 
-		ConstrainSize(Handle self);
+		ConstrainSize() = default;
 		~ConstrainSize() = default;
 
 		virtual TYPE getUIOType() override;

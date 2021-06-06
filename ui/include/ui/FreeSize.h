@@ -7,7 +7,7 @@ namespace ui
 	class FreeSize : public BaseSingle
 	{
 	public:
-		FreeSize(Handle self);
+		FreeSize() = default;
 		virtual ~FreeSize() = default;
 
 		virtual ScreenRectangle updateSize(ScreenRectangle newScreenRectangle) override;

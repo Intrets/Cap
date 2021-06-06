@@ -4,10 +4,6 @@
 
 namespace ui
 {
-	Hideable::Hideable(Handle self) {
-		this->selfHandle = self;
-	}
-
 	void Hideable::hide() {
 		this->hidden = true;
 	}

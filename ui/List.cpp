@@ -2,9 +2,7 @@
 
 namespace ui
 {
-	List::List(Handle self, DIR dir) {
-		this->selfHandle = self;
-		this->direction = dir;
+	List::List(DIR dir) : direction(dir) {
 	}
 
 	ScreenRectangle List::updateSize(ScreenRectangle newScreenRectangle) {

@@ -11,8 +11,8 @@ namespace ui
 		bool initialized = false;
 
 	public:
-		InitialSize(Handle self);
-		InitialSize(Handle self, Rect rect);
+		InitialSize() = default;
+		InitialSize(Rect rect);
 		virtual ~InitialSize() = default;
 
 		virtual ScreenRectangle updateSize(ScreenRectangle newScreenRectangle) override;

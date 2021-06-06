@@ -43,7 +43,7 @@ namespace ui
 		return this->mousePressOffset;
 	}
 
-	Button::Button(Handle self) {
+	Button::Button() {
 		this->onPress = [](PlayerInfo& playerInfo, Base* self_) -> CallBackBindResult
 		{
 			return BIND::RESULT::CONTINUE;
@@ -53,8 +53,6 @@ namespace ui
 		{
 			return BIND::RESULT::CONTINUE;
 		};
-
-		this->selfHandle = self;
 
 		this->addOnHoverBind({ CONTROL::KEY::MOUSE_POS_CHANGED_TOPLEVEL, CONTROL::STATE::PRESSED },
 			[](PlayerInfo& playerInfo, Base* self_) -> CallBackBindResult

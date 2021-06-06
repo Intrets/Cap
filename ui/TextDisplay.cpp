@@ -7,13 +7,11 @@
 
 namespace ui
 {
-	TextDisplay::TextDisplay(Handle self) {
-		this->selfHandle = self;
+	TextDisplay::TextDisplay() {
 		this->lineWrap = false;
 	}
 
-	TextDisplay::TextDisplay(Handle self, bool lineWrap_) {
-		this->selfHandle = self;
+	TextDisplay::TextDisplay(bool lineWrap_) {
 		this->lineWrap = lineWrap_;
 	}
 

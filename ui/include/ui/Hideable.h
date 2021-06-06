@@ -23,7 +23,7 @@ namespace ui
 		bool focusOnShow = true;
 
 	public:
-		Hideable(Handle self);
+		Hideable() = default;
 		virtual ~Hideable() = default;
 
 		void hide();

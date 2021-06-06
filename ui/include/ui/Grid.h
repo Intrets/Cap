@@ -16,7 +16,7 @@ namespace ui
 
 	public:
 		Grid() = default;
-		Grid(Handle self, glm::ivec2 size_);
+		Grid(glm::ivec2 size_);
 		virtual	~Grid() = default;
 
 		virtual ScreenRectangle updateSize(ScreenRectangle newScreenRectangle) override;

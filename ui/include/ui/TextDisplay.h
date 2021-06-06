@@ -24,8 +24,8 @@ namespace ui
 
 		impl::Text text;
 
-		TextDisplay(Handle self);
-		TextDisplay(Handle self, bool lineWrap);
+		TextDisplay();
+		TextDisplay(bool lineWrap);
 
 		virtual ~TextDisplay() = default;
 

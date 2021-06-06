@@ -4,9 +4,7 @@
 
 namespace ui
 {
-	Grid::Grid(Handle self, glm::ivec2 size_) :
-		size(size_) {
-		this->selfHandle = self;
+	Grid::Grid(glm::ivec2 size_) : size(size_) {
 	}
 
 	ScreenRectangle Grid::updateSize(ScreenRectangle newScreenRectangle) {

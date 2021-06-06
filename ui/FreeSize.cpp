@@ -2,10 +2,6 @@
 
 namespace ui
 {
-	FreeSize::FreeSize(Handle self) {
-		this->selfHandle = self;
-	}
-
 	ScreenRectangle FreeSize::updateSize(ScreenRectangle newScreenRectangle) {
 		ScreenRectangle r = this->main.get()->getScreenRectangle();
 

@@ -10,7 +10,7 @@ namespace ui
 		DIR direction;
 
 	public:
-		List(Handle self, DIR dir);
+		List(DIR dir);
 		virtual ~List() = default;
 
 		virtual ScreenRectangle updateSize(ScreenRectangle newScreenRectangle) override;

@@ -11,7 +11,7 @@ namespace ui
 	public:
 		glm::vec4 color = COLORS::UI::BACKGROUND;
 
-		ColoredBackground(Handle self);
+		ColoredBackground() = default;
 		~ColoredBackground() = default;
 
 		virtual int32_t addRenderInfo(game::GameState& gameState, render::RenderInfo& renderInfo, int32_t depth) override;

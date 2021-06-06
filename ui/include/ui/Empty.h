@@ -7,7 +7,7 @@ namespace ui
 	class Empty : public Base
 	{
 	public:
-		Empty(Handle self_);
+		Empty() = default;
 		virtual ~Empty() = default;
 
 		virtual ScreenRectangle updateSize(ScreenRectangle newScreenRectangle) override;

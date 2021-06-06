@@ -7,7 +7,7 @@ namespace ui
 	class Proxy : public BaseSingle
 	{
 	public:
-		Proxy(Handle self);
+		Proxy() = default;
 		virtual ~Proxy() = default;
 
 		[[nodiscard]]

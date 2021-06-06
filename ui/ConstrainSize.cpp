@@ -16,10 +16,6 @@ namespace ui
 		this->alignment = alignment_;
 	}
 
-	ConstrainSize::ConstrainSize(Handle self) {
-		this->selfHandle = self;
-	}
-
 	TYPE ConstrainSize::getUIOType() {
 		return TYPE::CONSTRAIN_SIZE;
 	}

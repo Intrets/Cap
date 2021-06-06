@@ -5,10 +5,6 @@
 
 namespace ui
 {
-	Window::Window(Handle self) {
-		this->selfHandle = self;
-	}
-
 	int32_t Window::addRenderInfo(game::GameState& gameState, render::RenderInfo& renderInfo, int32_t depth) {
 		int32_t border = 1;
 		if (this->minimized) {

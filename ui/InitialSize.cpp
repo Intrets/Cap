@@ -1,12 +1,6 @@
 #include "initialsize.h"
 
-ui::InitialSize::InitialSize(Handle self) {
-	this->selfHandle = self;
-}
-
-ui::InitialSize::InitialSize(Handle self, Rect rect) {
-	this->selfHandle = self;
-	this->rectangle = rect;
+ui::InitialSize::InitialSize(Rect rect) : rectangle(rect) {
 }
 
 ScreenRectangle ui::InitialSize::updateSize(ScreenRectangle newScreenRectangle) {

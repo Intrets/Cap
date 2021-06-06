@@ -22,7 +22,7 @@ namespace ui
 		virtual ScreenRectangle updateSize(ScreenRectangle newScreenRectangle) override;
 		virtual int32_t addRenderInfo(game::GameState& gameState, render::RenderInfo& renderInfo, int32_t depth) override;
 
-		AnchoredProxy(Handle self);
+		AnchoredProxy() = default;
 		virtual ~AnchoredProxy();
 	};
 }

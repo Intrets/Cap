@@ -4,10 +4,6 @@
 
 namespace ui
 {
-	ColoredBackground::ColoredBackground(Handle self) {
-		this->selfHandle = self;
-	}
-
 	int32_t ColoredBackground::addRenderInfo(game::GameState& gameState, render::RenderInfo& renderInfo, int32_t depth) {
 		depth = this->BaseSingle::addRenderInfo(gameState, renderInfo, depth);
 		renderInfo.uiRenderInfo.addPixelRectangle(

@@ -35,7 +35,7 @@ namespace ui
 
 		glm::ivec2 const& getMousePressOffset() const;
 
-		Button(Handle self);
+		Button();
 		virtual ~Button() = default;
 
 		virtual ScreenRectangle updateSize(ScreenRectangle newScreenRectangle) override;

@@ -2,10 +2,6 @@
 
 namespace ui
 {
-	Pad::Pad(Handle self) {
-		this->selfHandle = self;
-	}
-
 	ScreenRectangle Pad::updateSize(ScreenRectangle newScreenRectangle) {
 		this->screenRectangle = newScreenRectangle;
 

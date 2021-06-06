@@ -9,7 +9,7 @@ namespace ui
 	public:
 		bool destruct = false;
 
-		Destructible(Handle self);
+		Destructible();
 		virtual ~Destructible() = default;
 	};
 }
