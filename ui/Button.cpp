@@ -59,7 +59,7 @@ namespace ui
 		this->addOnHoverBind({ CONTROL::KEY::MOUSE_POS_CHANGED_TOPLEVEL, CONTROL::STATE::PRESSED },
 			[](PlayerInfo& playerInfo, Base* self_) -> CallBackBindResult
 			{
-				if (!self_->isActive()) {
+				if (!static_cast<Button*>(self_)->isDown() && !self_->isActive()) {
 					Locator<sound::SoundPlayer>::ref().playSound(sound::Sample::BUTTON_HOVER, 30);
 				}
 				self_->activate();
