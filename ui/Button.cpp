@@ -2,8 +2,12 @@
 
 #include <game/player/PlayerInfo.h>
 #include <render/infos/RenderInfo.h>
+#include <mem/Locator.h>
 
 #include "State.h"
+
+#include <SDL_mixer.h>
+
 
 namespace ui
 {
@@ -49,45 +53,51 @@ namespace ui
 		this->selfHandle = self;
 
 		this->addOnHoverBind({ CONTROL::KEY::MOUSE_POS_CHANGED_TOPLEVEL, CONTROL::STATE::PRESSED },
-							 [](PlayerInfo& playerInfo, Base* self_) -> CallBackBindResult
-		{
-			self_->activate();
-			return BIND::RESULT::CONSUME;
-		});
+			[](PlayerInfo& playerInfo, Base* self_) -> CallBackBindResult
+			{
+				if (!self_->isActive()) {
+					auto channel = Mix_PlayChannel(-1, Locator<std::vector<Mix_Chunk*>>::ref()[1], 0);
+					Mix_Volume(channel, 40);
+				}
+				self_->activate();
+				return BIND::RESULT::CONSUME;
+			});
 
 		this->addGlobalBind({ CONTROL::KEY::MOUSE_POS_CHANGED, CONTROL::STATE::PRESSED }, [](PlayerInfo& playerInfo, Base* self_) -> CallBackBindResult
-		{
-			if (!self_->getScreenRectangle().contains(playerInfo.uiState.getCursor()) ||
-				!playerInfo.controlState.activated({ CONTROL::KEY::MOUSE_POS_CHANGED_TOPLEVEL })) {
-				self_->deactivate();
-			}
-			return BIND::RESULT::CONTINUE;
-		});
+			{
+				if (!self_->getScreenRectangle().contains(playerInfo.uiState.getCursor()) ||
+					!playerInfo.controlState.activated({ CONTROL::KEY::MOUSE_POS_CHANGED_TOPLEVEL })) {
+					self_->deactivate();
+				}
+				return BIND::RESULT::CONTINUE;
+			});
 
 		this->addOnHoverBind({ CONTROL::KEY::ACTION0, CONTROL::STATE::PRESSED }, [](PlayerInfo& playerInfo, Base* self_) -> CallBackBindResult
-		{
-			auto self = static_cast<Button*>(self_);
-			self->down = true;
-			self->mousePressOffset = playerInfo.uiState.getCursor() - self->getScreenRectangle().getTopLeft();
-			return self->onPress(playerInfo, self_) | BIND::RESULT::FOCUS | BIND::RESULT::CONSUME;
-		});
+			{
+				auto self = static_cast<Button*>(self_);
+				self->down = true;
+				self->mousePressOffset = playerInfo.uiState.getCursor() - self->getScreenRectangle().getTopLeft();
+				auto channel = Mix_PlayChannel(-1, Locator<std::vector<Mix_Chunk*>>::ref()[0], 0);
+				Mix_Volume(channel, 128);
+				return self->onPress(playerInfo, self_) | BIND::RESULT::FOCUS | BIND::RESULT::CONSUME;
+			});
 
 		this->addGlobalBind({ CONTROL::KEY::ACTION0, CONTROL::STATE::RELEASED }, [this](PlayerInfo& playerInfo, Base* self_) -> CallBackBindResult
-		{
-			if (this->down) {
-				this->down = false;
+			{
+				if (this->down) {
+					this->down = false;
 
-				if (self_->getScreenRectangle().contains(playerInfo.uiState.getCursor())) {
-					return this->onRelease(playerInfo, self_) | BIND::RESULT::CONTINUE;
+					if (self_->getScreenRectangle().contains(playerInfo.uiState.getCursor())) {
+						return this->onRelease(playerInfo, self_) | BIND::RESULT::CONTINUE;
+					}
+					else {
+						return BIND::RESULT::CONTINUE;
+					}
 				}
 				else {
 					return BIND::RESULT::CONTINUE;
 				}
-			}
-			else {
-				return BIND::RESULT::CONTINUE;
-			}
-		});
+			});
 	}
 
 	ScreenRectangle Button::updateSize(ScreenRectangle newScreenRectangle) {

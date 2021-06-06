@@ -52,7 +52,7 @@ namespace game
 			size_t i = this->freeIndirections.back();
 			this->freeIndirections.pop_back();
 
-			this->validIndices[i] = true;
+			this->validIndices[i] = 1;
 
 			return { i, this };
 		}
@@ -63,7 +63,7 @@ namespace game
 			}
 
 			this->qualifiers.push_back(this->getNextQualifier());
-			this->validIndices.push_back(true);
+			this->validIndices.push_back(1);
 
 			return { this->signatures.size() - 1, this };
 		}

@@ -39,4 +39,6 @@ target_link_libraries(${MODULE_NAME} PRIVATE
 	misc
 	game
 	render
+	SDL2::SDL2-static
+	SDL_Mixer
 )

@@ -79,6 +79,7 @@ namespace ui
 
 		void activate();
 		void deactivate();
+		bool isActive() const;
 
 		void addGlobalBind(BindControl bindControl, CallBack callBack);
 		void addFocussedBind(BindControl bindControl, CallBack callBack);

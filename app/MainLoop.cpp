@@ -25,8 +25,11 @@
 #include <format>
 #include <sstream>
 
+#include <SDL_mixer.h>
 
 ui::ControlState controlState;
+
+Mix_Chunk* sound;
 
 static void key_callback(GLFWwindow* w, int32_t key, int32_t scancode, int32_t action, int32_t mods) {
 	controlState.key_callback(w, key, scancode, action, mods);
@@ -73,6 +76,14 @@ void prepareRender(
 }
 
 void mainLoop(GLFWwindow* window) {
+	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 1024);
+	Mix_Init(MIX_INIT_OGG);
+	Mix_AllocateChannels(128);
+	Locator<std::vector<Mix_Chunk*>>::init();
+
+	Locator<std::vector<Mix_Chunk*>>::ref().push_back(Mix_LoadWAV("C:/Users/Intrets/source/Repos/Cap/resources/sound/button.oga"));
+	Locator<std::vector<Mix_Chunk*>>::ref().push_back(Mix_LoadWAV("C:/Users/Intrets/source/Repos/Cap/resources/sound/hover.oga"));
+
 	game::GameState gameState;
 	gameState.init();
 

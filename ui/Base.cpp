@@ -36,6 +36,10 @@ namespace ui
 		this->active = false;
 	}
 
+	bool Base::isActive() const {
+		return this->active;
+	}
+
 	void BaseMulti::translate(glm::vec2 p) {
 		this->screenRectangle.translate(p);
 		for (auto& element : this->elements) {

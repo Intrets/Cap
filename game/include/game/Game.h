@@ -285,7 +285,7 @@ namespace game
 		std::vector<size_t> freeIndirections{};
 
 		std::vector<Qualifier> qualifiers{ 0 };
-		std::vector<bool> validIndices{};
+		std::vector<int32_t> validIndices{};
 		Qualifier qualifier = 1;
 
 		std::vector<SignatureType> signatures{ 0 };
@@ -359,7 +359,8 @@ struct Serializable<game::Everything>
 			val.qualifier,
 			val.signatures,
 			val.dataIndices,
-			val.removed
+			val.removed,
+			val.validIndices
 		);
 	};
 
@@ -371,7 +372,8 @@ struct Serializable<game::Everything>
 			val.qualifier,
 			val.signatures,
 			val.dataIndices,
-			val.removed
+			val.removed,
+			val.validIndices
 		);
 	}
 };
@@ -622,7 +624,7 @@ namespace game
 		this->qualifiers[i] = this->getNextQualifier();
 
 		this->removed.push_back(i);
-		this->validIndices[i] = false;
+		this->validIndices[i] = 0;
 	}
 
 	inline void Everything::collectRemoved() {
