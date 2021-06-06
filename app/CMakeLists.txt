@@ -31,4 +31,5 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 	GLM
 	SDL2::SDL2-static
 	SDL_Mixer
+	sound
 )

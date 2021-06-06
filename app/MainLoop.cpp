@@ -76,14 +76,6 @@ void prepareRender(
 }
 
 void mainLoop(GLFWwindow* window) {
-	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 1024);
-	Mix_Init(MIX_INIT_OGG);
-	Mix_AllocateChannels(128);
-	Locator<std::vector<Mix_Chunk*>>::init();
-
-	Locator<std::vector<Mix_Chunk*>>::ref().push_back(Mix_LoadWAV("C:/Users/Intrets/source/Repos/Cap/resources/sound/button.oga"));
-	Locator<std::vector<Mix_Chunk*>>::ref().push_back(Mix_LoadWAV("C:/Users/Intrets/source/Repos/Cap/resources/sound/hover.oga"));
-
 	game::GameState gameState;
 	gameState.init();
 

@@ -41,4 +41,5 @@ target_link_libraries(${MODULE_NAME} PRIVATE
 	render
 	SDL2::SDL2-static
 	SDL_Mixer
+	sound
 )

@@ -19,6 +19,8 @@
 #include <render/GLStateWrapper.h>
 #include <render/infos/DebugRenderInfo.h>
 
+#include <sound/SoundPlayer.h>
+
 static void GLAPIENTRY
 MessageCallback(
 	GLenum source,
@@ -199,6 +201,14 @@ void initManagers(std::string const& resourceRootPath) {
 	Locator<render::DebugRenderInfo>::init();
 
 	Locator<render::BlockIDTextures>::init();
+
+	auto soundPlayer = sound::SoundPlayer::makeSoundPlayer(44100, 128);
+
+	assert(soundPlayer.has_value());
+
+	if (soundPlayer.has_value()) {
+		Locator<sound::SoundPlayer>::provide(soundPlayer.value().release());
+	}
 
 	Locator<render::Fonts>::init();
 

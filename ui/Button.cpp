@@ -1,8 +1,12 @@
 #include "Button.h"
 
 #include <game/player/PlayerInfo.h>
+
 #include <render/infos/RenderInfo.h>
+
 #include <mem/Locator.h>
+
+#include <sound/SoundPlayer.h>
 
 #include "State.h"
 
@@ -56,8 +60,7 @@ namespace ui
 			[](PlayerInfo& playerInfo, Base* self_) -> CallBackBindResult
 			{
 				if (!self_->isActive()) {
-					auto channel = Mix_PlayChannel(-1, Locator<std::vector<Mix_Chunk*>>::ref()[1], 0);
-					Mix_Volume(channel, 40);
+					Locator<sound::SoundPlayer>::ref().playSound(sound::Sample::BUTTON_HOVER, 30);
 				}
 				self_->activate();
 				return BIND::RESULT::CONSUME;
@@ -77,8 +80,7 @@ namespace ui
 				auto self = static_cast<Button*>(self_);
 				self->down = true;
 				self->mousePressOffset = playerInfo.uiState.getCursor() - self->getScreenRectangle().getTopLeft();
-				auto channel = Mix_PlayChannel(-1, Locator<std::vector<Mix_Chunk*>>::ref()[0], 0);
-				Mix_Volume(channel, 128);
+				Locator<sound::SoundPlayer>::ref().playSound(sound::Sample::BUTTON_CLICK, 80);
 				return self->onPress(playerInfo, self_) | BIND::RESULT::FOCUS | BIND::RESULT::CONSUME;
 			});
 

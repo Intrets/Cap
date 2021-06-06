@@ -1,11 +1,8 @@
 #pragma once
 
-#include <GL/glew.h>
-
 #include <iostream>
 #include <unordered_map>
-
-#include "Enums.h"
+#include <filesystem>
 
 namespace render
 {
@@ -15,22 +12,31 @@ namespace render
 	}
 }
 
+typedef unsigned int GLuint;
+
 namespace misc
 {
+	enum class RESOURCE_PATH
+	{
+		CONFIG,
+		GRAPHICS,
+		SAVE,
+		FONTS,
+		SOUNDS,
+	};
+
+	enum class RESOURCE_FILE
+	{
+		OPTIONS,
+	};
+
 	class PathManager
 	{
-	private:
-		std::unordered_map<int32_t, std::string> paths;
-		std::unordered_map<int32_t, std::string> files;
-
 	public:
-		enum RESOURCE_PATH
-		{
-			CONFIG,
-			GRAPHICS,
-			SAVE,
-			FONTS,
-		};
+	private:
+		std::unordered_map<RESOURCE_PATH, std::filesystem::path> paths;
+		std::unordered_map<RESOURCE_FILE, std::filesystem::path> files;
+	public:
 
 		render::bwo::Texture2D LoadFont(std::string name);
 		GLuint LoadTextureP(std::string name);
@@ -41,6 +47,7 @@ namespace misc
 		bool openFile(std::ofstream& file, RESOURCE_FILE t);
 		bool openSave(std::ifstream& file, std::string name);
 		bool openSave(std::ofstream& file, std::string name);
+		std::filesystem::path getSoundsPath();
 
 		PathManager(std::string const& root);
 		~PathManager();
