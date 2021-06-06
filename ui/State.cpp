@@ -172,7 +172,7 @@ namespace ui
 		glfwGetFramebufferSize(window, &frameSizeX, &frameSizeY);
 
 		this->windowSize = glm::ivec2(frameSizeX, frameSizeY);
-		this->cursor = glm::ivec2(x, frameSizeY - y);
+		this->cursor = glm::ivec2(glm::floor(x), frameSizeY - glm::floor(y));
 
 		x = x / frameSizeX;
 		y = y / frameSizeY;
@@ -186,7 +186,6 @@ namespace ui
 		viewport *= misc::Option<misc::OPTION::CL_VIEWPORTSCALE, float>::getVal();
 
 		this->cursorWorld = cam + glm::vec2(x, y) * viewport;
-		rand();
 	}
 
 	void State::appendRenderInfo(game::GameState& gameState, render::RenderInfo& renderInfo) {

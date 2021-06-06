@@ -219,7 +219,8 @@ namespace ui
 			{
 				auto self = static_cast<Button*>(self_);
 				if (self->isDown()) {
-					auto newPos = playerInfo.uiState.getCursor() - self->getMousePressOffset();
+					// glm::ivec2(-1, 1) <- offset for border
+					auto newPos = playerInfo.uiState.getCursor() - self->getMousePressOffset() + glm::ivec2(-1, 1);
 					windowPtr->screenRectangle.translate(newPos - windowPtr->screenRectangle.getTopLeft());
 				}
 				return BIND::RESULT::CONTINUE;
@@ -356,7 +357,7 @@ namespace ui
 			{
 				auto self = static_cast<Button*>(self_);
 				if (self->isDown()) {
-					glm::ivec2 bottomRight = playerInfo.uiState.getCursor() - self->getMousePressOffset() + glm::ivec2(1,-1) * self->screenRectangle.size();
+					glm::ivec2 bottomRight = playerInfo.uiState.getCursor() - self->getMousePressOffset() + glm::ivec2(1, -1) * self->screenRectangle.size();
 
 					if (bottomRight.x - windowPtr->screenRectangle.getLeft() < 10) {
 						bottomRight.x = windowPtr->screenRectangle.getLeft() + 10;

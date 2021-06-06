@@ -61,7 +61,7 @@ namespace ui
 				{
 					auto ptr = static_cast<TextDisplay*>(self_);
 
-					Locator<sound::SoundPlayer>::ref().playSound(sound::Sample::TEXT_EDIT);
+					Locator<sound::SoundPlayer>::ref().playSound(sound::Sample::BUTTON_CLICK, 80);
 
 					glm::ivec2 click = playerInfo.uiState.getCursor() - ptr->getScreenRectangle().getBottomLeft();
 
