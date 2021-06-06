@@ -19,6 +19,8 @@ namespace misc
 	}
 
 	void Timer::endTiming(std::string timingName) {
+		auto time = glfwGetTime();
+
 		std::lock_guard<std::mutex> guard(this->mtx);
 
 		auto it = this->timings.find(timingName);
@@ -28,7 +30,7 @@ namespace misc
 
 		auto& timing = it->second;
 		if (timing.maybeStart.has_value()) {
-			timing.timing += glfwGetTime() - timing.maybeStart.value();
+			timing.timing += time - timing.maybeStart.value();
 			timing.maybeStart = std::nullopt;
 		}
 	}
