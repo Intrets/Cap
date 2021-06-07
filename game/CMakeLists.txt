@@ -5,7 +5,7 @@ set(MODULE_NAME game)
 set(MODULE_FILES
 	GameState
 	player/PlayerInfo
-  player/Inventory
+	player/Inventory
 	Signature
 	GameObject
 	Game

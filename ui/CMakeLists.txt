@@ -18,7 +18,7 @@ set(MODULE_FILES
 	Pad
 	Window
 	Invisible
-	"List"
+	List
 	Empty
 	ColoredBackground
 	AnchoredProxy
@@ -32,7 +32,7 @@ set(MODULE_FILES
 make_module(${MODULE_NAME} "${MODULE_FILES}")
 
 target_link_libraries(${MODULE_NAME} PRIVATE
-	GLM
+	WGLM
 	GLEW
 	GLFW3
 	mem

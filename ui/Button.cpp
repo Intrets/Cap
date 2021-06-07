@@ -12,7 +12,6 @@
 
 #include <SDL_mixer.h>
 
-
 namespace ui
 {
 	void Button::setColor(glm::vec4 c) {

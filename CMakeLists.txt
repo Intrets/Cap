@@ -1,17 +1,24 @@
-﻿CMAKE_MINIMUM_REQUIRED(VERSION 3.20.3)
+﻿cmake_minimum_required(VERSION 3.20.3)
 
-SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
-FIND_PACKAGE(OpenGL REQUIRED)
-FIND_PACKAGE(GLM REQUIRED)
-FIND_PACKAGE(GLFW3 REQUIRED)
-FIND_PACKAGE(GLEW REQUIRED)
-FIND_PACKAGE(GLI REQUIRED)
-set(SDL2_DIR "c:/program files (x86)/sdl2/cmake")
-FIND_PACKAGE(SDL2 REQUIRED)
-FIND_PACKAGE(SDL_Mixer REQUIRED)
+project(game_thing LANGUAGES CXX)
 
-PROJECT(game_thing LANGUAGES CXX)
+if (MSVC)
+	add_compile_options(/FC /W4 /WX /wd4100)
+else()
+	add_compile_options(-Wall -Wextra -pedantic -Werror)
+endif()
+
+include("${PROJECT_SOURCE_DIR}/cmake/FindStaticLib.cmake")
+
+find_package(OpenGL REQUIRED)
+find_package(GLM REQUIRED)
+find_package(GLFW3 REQUIRED)
+find_package(GLEW REQUIRED)
+find_package(GLI REQUIRED)
+find_package(SDL2 REQUIRED)
+find_package(SDL_Mixer REQUIRED)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED YES)

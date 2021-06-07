@@ -23,7 +23,7 @@ set(MODULE_FILES
 make_module(${MODULE_NAME} "${MODULE_FILES}")
 
 target_link_libraries(${MODULE_NAME} PUBLIC
-	GLM
+	WGLM
 	GLEW
 )
 

@@ -6,19 +6,6 @@ add_executable(${PROJECT_NAME}
 	MainLoop.cpp
 )
 
-# compile options also in MakeModule.cmake
-
-# Full path of source code file in diagnostics
-if (MSVC)
-	target_compile_options(${PROJECT_NAME} PRIVATE /FC)
-endif()
-
-if (MSVC)
-	target_compile_options(${PROJECT_NAME} PRIVATE /W4 /WX /wd4100)
-else()
-	target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic -Werror)
-endif()
-
 target_link_libraries(${PROJECT_NAME} PRIVATE
 	opengl32
 	GLFW3
@@ -28,7 +15,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 	game
 	misc
 	render
-	GLM
+	WGLM
 	SDL2::SDL2-static
 	SDL_Mixer
 	sound

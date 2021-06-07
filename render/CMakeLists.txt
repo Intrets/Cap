@@ -54,7 +54,7 @@ make_module(${MODULE_NAME} "${MODULE_FILES}")
 target_include_directories(${MODULE_NAME} PRIVATE "./shaders")
 
 target_link_libraries(${MODULE_NAME} PUBLIC
-	GLM
+	WGLM
 	GLEW
 	misc
 )
