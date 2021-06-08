@@ -63,17 +63,16 @@ struct Identifier<Front>
 template<>
 struct Serializable<Front>
 {
-	template<class Selector, class T>
-	static bool run(Serializer& serializer, T front) {
+	ALL_DEF(Front) {
 		return serializer.runAll<Selector>(
-			front.current,
-			front.D,
-			front.collided,
-			front.direction,
-			front.winding,
-			front.clockwise,
-			front.path,
-			front.waypoints
+			ALL(current),
+			ALL(D),
+			ALL(collided),
+			ALL(direction),
+			ALL(winding),
+			ALL(clockwise),
+			ALL(path),
+			ALL(waypoints)
 			);
 	}
 };
@@ -152,10 +151,9 @@ struct GamePosition
 template<>
 struct Serializable<GamePosition>
 {
-	template<class Selector>
-	static bool run(Selector, Serializer& serializer, GamePosition&& front) {
+	ALL_DEF(GamePosition) {
 		return serializer.runAll<Selector>(
-			front.pos
+			ALL(pos)
 			);
 	}
 };
@@ -174,10 +172,9 @@ struct GraphicsTile
 template<>
 struct Serializable<GraphicsTile>
 {
-	template<class Selector>
-	static bool run(Selector, Serializer& serializer, GraphicsTile&& front) {
+	ALL_DEF(GraphicsTile) {
 		return serializer.runAll<Selector>(
-			front.blockID
+			ALL(blockID)
 			);
 	}
 };

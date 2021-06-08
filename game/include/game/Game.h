@@ -131,18 +131,21 @@ namespace game
 template<>
 struct Serializable<game::RawData::DeletedInfo>
 {
-	template<class Selector, class T>
-	static bool run(Serializer& serializer, T deletedInfo) {
+	inline const static std::string_view type_name = "RawData";
+
+	ALL_DEF(game::RawData::DeletedInfo) {
 		return serializer.runAll<Selector>(
-			deletedInfo.i,
-			deletedInfo.changed
+			ALL(i),
+			ALL(changed)
 			);
-	}
+	};
 };
 
 template<>
 struct Serializable<game::RawData>
 {
+	inline static const auto typeName = "RawData";
+
 	static bool run(Read, Serializer& serializer, game::RawData&& rawData) {
 		if (!serializer.readAll(
 			rawData.structInformation,
@@ -369,17 +372,16 @@ namespace game
 template<>
 struct Serializable<game::Everything>
 {
-	template<class Selector>
-	static bool run(Selector, Serializer& serializer, game::Everything&& val) {
+	ALL_DEF(game::Everything) {
 		return serializer.runAll<Selector>(
-			val.data,
-			val.freeIndirections,
-			val.qualifiers,
-			val.qualifier,
-			val.signatures,
-			val.dataIndices,
-			val.removed,
-			val.validIndices
+			ALL(data),
+			ALL(freeIndirections),
+			ALL(qualifiers),
+			ALL(qualifier),
+			ALL(signatures),
+			ALL(dataIndices),
+			ALL(removed),
+			ALL(validIndices)
 			);
 	};
 };

@@ -26,11 +26,10 @@ struct Identifier<game::Inventory>
 template<>
 struct Serializable<game::Inventory>
 {
-	template<class Selector, class T>
-	static bool run(Serializer& serializer, T inventory) {
+	ALL_DEF(game::Inventory) {
 		return serializer.runAll<Selector>(
-			inventory.items,
-			inventory.cursor
+			ALL(items),
+			ALL(cursor)
 			);
 	}
 };

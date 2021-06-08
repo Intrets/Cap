@@ -131,19 +131,11 @@ namespace game
 template<>
 struct Serializable<game::GameState>
 {
-	static bool run(Read, Serializer& serializer, game::GameState&& gameState) {
-		return serializer.readAll(
-			gameState.everything,
-			gameState.world,
-			gameState.tick
-		);
-	}
-
-	static bool run(Write, Serializer& serializer, game::GameState&& gameState) {
-		return serializer.writeAll(
-			gameState.everything,
-			gameState.world,
-			gameState.tick
-		);
+	ALL_DEF(game::GameState) {
+		return serializer.runAll<Selector>(
+			ALL(everything),
+			ALL(world),
+			ALL(tick)
+			);
 	}
 };

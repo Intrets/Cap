@@ -79,6 +79,16 @@ void mainLoop(GLFWwindow* window) {
 
 	ui::State uiState;
 
+	Serializer serializer2;
+	serializer2.writeStream = &std::cout;
+	serializer2.print(gameState);
+
+	Serializable<game::GameState>::run(Print{}, serializer2, std::forward<game::GameState>(gameState));
+
+	if (gameState.tick == 0) {
+		exit(0);
+	}
+
 	{
 		uiState.addUI(ui::Global::getManager().makeUniqueRef<game::EntityInterface>());
 	}

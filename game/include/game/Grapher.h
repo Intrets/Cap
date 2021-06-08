@@ -46,13 +46,12 @@ struct Grapher
 template<>
 struct Serializable<Grapher::Front>
 {
-	template<class Selector>
-	static bool run(Selector, Serializer& serializer, Grapher::Front&& front) {
+	ALL_DEF(Grapher::Front) {
 		return serializer.runAll<Selector>(
-			front.min,
-			front.max,
-			front.direction,
-			front.size
+			ALL(min),
+			ALL(max),
+			ALL(direction),
+			ALL(size)
 			);
 	}
 };
@@ -60,17 +59,16 @@ struct Serializable<Grapher::Front>
 template<>
 struct Serializable<Grapher>
 {
-	template<class Selector>
-	static bool run(Selector, Serializer& serializer, Grapher&& grapher) {
+	ALL_DEF(Grapher) {
 		return serializer.runAll<Selector>(
-			grapher.finished,
-			grapher.currentDepth,
-			grapher.blockSize,
-			grapher.currentBlock,
-			grapher.lastPos,
-			grapher.lastGroup,
-			grapher.fronts,
-			grapher.groups
+			ALL(finished),
+			ALL(currentDepth),
+			ALL(blockSize),
+			ALL(currentBlock),
+			ALL(lastPos),
+			ALL(lastGroup),
+			ALL(fronts),
+			ALL(groups)
 			);
 	}
 };
@@ -90,11 +88,10 @@ struct RandomWalker
 template<>
 struct Serializable<RandomWalker>
 {
-	template<class Selector>
-	static bool run(Selector, Serializer& serializer, RandomWalker&& front) {
+	ALL_DEF(RandomWalker) {
 		return serializer.runAll<Selector>(
-			front.indexTarget,
-			front.groupTarget
+			ALL(indexTarget),
+			ALL(groupTarget)
 			);
 	}
 };

@@ -9,7 +9,7 @@
 
 #include <serial/Serializer.h>
 
-constexpr auto WORLD_SIZE = 70;
+constexpr auto WORLD_SIZE = 5;
 using SizeAlias = size_t;
 
 namespace game
@@ -98,8 +98,7 @@ namespace game
 template<>
 struct Serializable<game::WorldGrid>
 {
-	template<class Selector>
-	static bool run(Selector, Serializer& serializer, game::WorldGrid&& obj) {
+	ALL_DEF(game::WorldGrid) {
 		return serializer.runAll<Selector>(
 			ALL(grid),
 			ALL(group),
@@ -111,8 +110,7 @@ struct Serializable<game::WorldGrid>
 template<>
 struct Serializable<game::Directions>
 {
-	template<class Selector>
-	static bool run(Selector, Serializer& serializer, game::Directions&& obj) {
+	ALL_DEF(game::Directions) {
 		return serializer.runAll<Selector>(
 			ALL(data)
 			);
