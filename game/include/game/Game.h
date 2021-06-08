@@ -52,6 +52,14 @@ struct Serializable<StructInformation>
 	static bool run(Write, Serializer& serializer, StructInformation&& val) {
 		return serializer.write(val.name);
 	}
+
+	static bool run(Print, Serializer& serializer, StructInformation&& obj) {
+		return serializer.runAll<Print>(
+			ALL(name),
+			ALL(index),
+			ALL(width)
+			);
+	}
 };
 
 namespace game
@@ -170,6 +178,17 @@ struct Serializable<game::RawData>
 
 		return true;
 	};
+
+	PRINT_DEF(game::RawData) {
+		return serializer.runAll<Print>(
+			ALL(structInformation),
+			ALL(reservedObjects),
+			ALL(objectSize),
+			ALL(data),
+			ALL(indices),
+			ALL(deletions)
+			);
+	}
 };
 
 namespace game
@@ -361,7 +380,7 @@ struct Serializable<game::Everything>
 			val.dataIndices,
 			val.removed,
 			val.validIndices
-		);
+			);
 	};
 };
 
