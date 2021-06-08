@@ -108,14 +108,15 @@ struct Serializable<game::WorldGrid>
 	};
 };
 
+constexpr auto aaaaaaaaaaaaa = is_wrapped<Wrapped<std::array<uint8_t, 8>>>;
 template<>
 struct Serializable<game::Directions>
 {
 	template<class Selector, class T>
 	static bool run(Serializer& serializer, T directions) {
 		return serializer.runAll<Selector>(
-			directions.data
-			);
+			Wrapped{ directions.data, "1111111111111111111111111111111111111111111111111111111111111data11111111111111111111111" }
+		);
 	};
 };
 
