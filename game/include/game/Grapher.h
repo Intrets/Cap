@@ -46,8 +46,8 @@ struct Grapher
 template<>
 struct Serializable<Grapher::Front>
 {
-	template<class Selector, class T>
-	static bool run(Serializer& serializer, T front) {
+	template<class Selector>
+	static bool run(Selector, Serializer& serializer, Grapher::Front&& front) {
 		return serializer.runAll<Selector>(
 			front.min,
 			front.max,
@@ -60,8 +60,8 @@ struct Serializable<Grapher::Front>
 template<>
 struct Serializable<Grapher>
 {
-	template<class Selector, class T>
-	static bool run(Serializer& serializer, T grapher) {
+	template<class Selector>
+	static bool run(Selector, Serializer& serializer, Grapher&& grapher) {
 		return serializer.runAll<Selector>(
 			grapher.finished,
 			grapher.currentDepth,
@@ -81,7 +81,6 @@ struct Identifier<Grapher>
 	inline static std::string name = "Grapher";
 };
 
-
 struct RandomWalker
 {
 	int32_t indexTarget;
@@ -91,8 +90,8 @@ struct RandomWalker
 template<>
 struct Serializable<RandomWalker>
 {
-	template<class Selector, class T>
-	static bool run(Serializer& serializer, T front) {
+	template<class Selector>
+	static bool run(Selector, Serializer& serializer, RandomWalker&& front) {
 		return serializer.runAll<Selector>(
 			front.indexTarget,
 			front.groupTarget

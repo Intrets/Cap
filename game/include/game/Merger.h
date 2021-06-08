@@ -50,8 +50,8 @@ struct Merger
 template<>
 struct Serializable<Merger::Neighbour>
 {
-	template<class Selector, class T>
-	static bool run(Serializer& serializer, T neighbour) {
+	template<class Selector>
+	static bool run(Selector, Serializer& serializer, Merger::Neighbour&& neighbour) {
 		return serializer.runAll<Selector>(
 			neighbour.group,
 			neighbour.front
@@ -62,8 +62,8 @@ struct Serializable<Merger::Neighbour>
 template<>
 struct Serializable<Merger::Group>
 {
-	template<class Selector, class T>
-	static bool run(Serializer& serializer, T group) {
+	template<class Selector>
+	static bool run(Selector, Serializer& serializer, Merger::Group&& group) {
 		return serializer.runAll<Selector>(
 			group.size,
 			group.group,
@@ -77,8 +77,8 @@ struct Serializable<Merger::Group>
 template<>
 struct Serializable<Merger>
 {
-	template<class Selector, class T>
-	static bool run(Serializer& serializer, T merger) {
+	template<class Selector>
+	static bool run(Selector, Serializer& serializer, Merger&& merger) {
 		return serializer.runAll<Selector>(
 			merger.groups,
 			merger.nonEmptyGroups

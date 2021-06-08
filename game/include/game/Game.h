@@ -28,7 +28,7 @@ struct StructInformation
 
 	void(*objectDestructor)(void*) = nullptr;
 	bool(*objectReader)(Serializer& serializer, void*) = nullptr;
-	bool(*objectWriter)(Serializer& serializer, void const*) = nullptr;
+	bool(*objectWriter)(Serializer& serializer, void*) = nullptr;
 };
 
 struct StoredStructInformations
@@ -39,7 +39,7 @@ struct StoredStructInformations
 template<>
 struct Serializable<StructInformation>
 {
-	static bool read(Serializer& serializer, StructInformation& val) {
+	static bool run(Read, Serializer& serializer, StructInformation&& val) {
 		std::string name;
 		READ(name);
 		if (name != "") {
@@ -49,7 +49,7 @@ struct Serializable<StructInformation>
 		return true;
 	};
 
-	static bool write(Serializer& serializer, StructInformation const& val) {
+	static bool run(Write, Serializer& serializer, StructInformation&& val) {
 		return serializer.write(val.name);
 	}
 };
@@ -112,7 +112,6 @@ namespace game
 		inline T& get(SizeAlias i);
 
 		inline void* getUntyped(SizeAlias i);
-		inline void const* getUntyped(SizeAlias i) const;
 
 		inline SizeAlias getIndex(SizeAlias i) const;
 
@@ -136,7 +135,7 @@ struct Serializable<game::RawData::DeletedInfo>
 template<>
 struct Serializable<game::RawData>
 {
-	static bool read(Serializer& serializer, game::RawData& rawData) {
+	static bool run(Read, Serializer& serializer, game::RawData&& rawData) {
 		if (!serializer.readAll(
 			rawData.structInformation,
 			rawData.reservedObjects,
@@ -155,7 +154,7 @@ struct Serializable<game::RawData>
 		return true;
 	};
 
-	static bool write(Serializer& serializer, game::RawData const& rawData) {
+	static bool run(Write, Serializer& serializer, game::RawData&& rawData) {
 		if (!serializer.writeAll(
 			rawData.structInformation,
 			rawData.reservedObjects,
@@ -351,8 +350,9 @@ namespace game
 template<>
 struct Serializable<game::Everything>
 {
-	static bool read(Serializer& serializer, game::Everything& val) {
-		return serializer.readAll(
+	template<class Selector>
+	static bool run(Selector, Serializer& serializer, game::Everything&& val) {
+		return serializer.runAll<Selector>(
 			val.data,
 			val.freeIndirections,
 			val.qualifiers,
@@ -363,19 +363,6 @@ struct Serializable<game::Everything>
 			val.validIndices
 		);
 	};
-
-	static bool write(Serializer& serializer, game::Everything const& val) {
-		return serializer.writeAll(
-			val.data,
-			val.freeIndirections,
-			val.qualifiers,
-			val.qualifier,
-			val.signatures,
-			val.dataIndices,
-			val.removed,
-			val.validIndices
-		);
-	}
 };
 
 namespace game
@@ -393,11 +380,11 @@ namespace game
 			};
 
 			info.objectReader = [](Serializer& serializer, void* obj) {
-				return serializer.read<T>(*reinterpret_cast<T*>(obj));
+				return serializer.read<T>(std::forward<T>(*reinterpret_cast<T*>(obj)));
 			};
 
-			info.objectWriter = [](Serializer& serializer, void const* obj) {
-				return serializer.write<T>(*reinterpret_cast<T const*>(obj));
+			info.objectWriter = [](Serializer& serializer, void* obj) {
+				return serializer.write<T>(std::forward<T>(*reinterpret_cast<T*>(obj)));
 			};
 
 			StoredStructInformations::infos[info.name] = info;
@@ -564,12 +551,6 @@ namespace game
 		assert(i != 0);
 		assert(i < this->reservedObjects);
 		return static_cast<void*>(&this->data[this->objectSize * i]);
-	}
-
-	inline void const* RawData::getUntyped(SizeAlias i) const {
-		assert(i != 0);
-		assert(i < this->reservedObjects);
-		return static_cast<void const*>(&this->data[this->objectSize * i]);
 	}
 
 	inline SizeAlias RawData::getIndex(SizeAlias i) const {

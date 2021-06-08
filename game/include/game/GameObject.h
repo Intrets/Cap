@@ -152,8 +152,8 @@ struct GamePosition
 template<>
 struct Serializable<GamePosition>
 {
-	template<class Selector, class T>
-	static bool run(Serializer& serializer, T front) {
+	template<class Selector>
+	static bool run(Selector, Serializer& serializer, GamePosition&& front) {
 		return serializer.runAll<Selector>(
 			front.pos
 			);
@@ -174,8 +174,8 @@ struct GraphicsTile
 template<>
 struct Serializable<GraphicsTile>
 {
-	template<class Selector, class T>
-	static bool run(Serializer& serializer, T front) {
+	template<class Selector>
+	static bool run(Selector, Serializer& serializer, GraphicsTile&& front) {
 		return serializer.runAll<Selector>(
 			front.blockID
 			);

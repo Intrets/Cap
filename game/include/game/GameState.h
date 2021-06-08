@@ -131,7 +131,7 @@ namespace game
 template<>
 struct Serializable<game::GameState>
 {
-	static bool read(Serializer& serializer, game::GameState& gameState) {
+	static bool run(Read, Serializer& serializer, game::GameState&& gameState) {
 		return serializer.readAll(
 			gameState.everything,
 			gameState.world,
@@ -139,7 +139,7 @@ struct Serializable<game::GameState>
 		);
 	}
 
-	static bool write(Serializer& serializer, game::GameState const& gameState) {
+	static bool run(Write, Serializer& serializer, game::GameState&& gameState) {
 		return serializer.writeAll(
 			gameState.everything,
 			gameState.world,

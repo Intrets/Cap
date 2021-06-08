@@ -29,8 +29,6 @@
 
 ui::ControlState controlState;
 
-Mix_Chunk* sound;
-
 static void key_callback(GLFWwindow* w, int32_t key, int32_t scancode, int32_t action, int32_t mods) {
 	controlState.key_callback(w, key, scancode, action, mods);
 }
@@ -75,45 +73,9 @@ void prepareRender(
 	Locator<misc::Timer>::ref().endTiming("Prepare UI");
 }
 
-struct SmolStruct
-{
-	int32_t val;
-};
-
-struct Test
-{
-	std::vector<SmolStruct> stuff;
-};
-
-template<>
-struct Serializable<Test>
-{
-	template<class Selector, class T>
-	static bool run(Serializer& serializer, T val) {
-		return serializer.runAll<Selector>(
-			Wrapped{ val.stuff, "stuff1111111111111" }
-		);
-	};
-};
-
-template<>
-struct Serializable<SmolStruct>
-{
-	template<class Selector, class T>
-	static bool run(Serializer& serializer, T val) {
-		return serializer.runAll<Selector>(
-			Wrapped{ val.val, "val" }
-		);
-	};
-};
-
 void mainLoop(GLFWwindow* window) {
 	game::GameState gameState;
 	gameState.init();
-
-	Test testData;
-
-	testData.stuff.resize(50000000);
 
 	ui::State uiState;
 
@@ -154,9 +116,7 @@ void mainLoop(GLFWwindow* window) {
 				Locator<misc::Log>::ref().putLine(std::format("failed to open save file: {}", uiState.loadGame.value()));
 			}
 			else {
-				std::stringstream stream;
-				Serializer serializer;
-				serializer.writeStream = &stream;
+				Serializer serializer{ file };
 
 				auto start = glfwGetTime();
 				if (!serializer.read(newGameState)) {
@@ -179,12 +139,10 @@ void mainLoop(GLFWwindow* window) {
 				Locator<misc::Log>::ref().putLine(std::format("failed to open save file: {}", uiState.saveGame.value()));
 			}
 			else {
-				std::stringstream stream;
-				Serializer serializer;
-				serializer.writeStream = &stream;
+				Serializer serializer{ file };
 
 				auto start = glfwGetTime();
-				if (!serializer.write(testData)) {
+				if (!serializer.write(gameState)) {
 					Locator<misc::Log>::ref().putLine(std::format("failed to save game to: {}", uiState.saveGame.value()));
 				}
 				else {
