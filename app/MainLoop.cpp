@@ -91,7 +91,7 @@ struct Serializable<Test>
 	template<class Selector, class T>
 	static bool run(Serializer& serializer, T val) {
 		return serializer.runAll<Selector>(
-			Wrapped{ val.stuff, "stuff" }
+			Wrapped{ val.stuff, "stuff1111111111111" }
 		);
 	};
 };
