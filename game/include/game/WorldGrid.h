@@ -115,7 +115,7 @@ struct Serializable<game::Directions>
 	template<class Selector, class T>
 	static bool run(Serializer& serializer, T directions) {
 		return serializer.runAll<Selector>(
-			Wrapped{ directions.data, "1111111111111111111111111111111111111111111111111111111111111data11111111111111111111111" }
+			Wrapped{ directions.data, "1111111111111111111111111111111111111" }
 		);
 	};
 };
