@@ -39,6 +39,8 @@ struct StoredStructInformations
 template<>
 struct Serializable<StructInformation>
 {
+	inline static const auto typeName = "StructInformation";
+
 	static bool run(Read, Serializer& serializer, StructInformation&& val) {
 		std::string name;
 		READ(name);
@@ -372,6 +374,8 @@ namespace game
 template<>
 struct Serializable<game::Everything>
 {
+	inline static const auto typeName = "Everything";
+
 	ALL_DEF(game::Everything) {
 		return serializer.runAll<Selector>(
 			ALL(data),
