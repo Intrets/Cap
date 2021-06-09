@@ -9,7 +9,7 @@
 
 #include <serial/Serializer.h>
 
-constexpr auto WORLD_SIZE = 700;
+constexpr auto WORLD_SIZE = 1000;
 using SizeAlias = size_t;
 
 namespace game
