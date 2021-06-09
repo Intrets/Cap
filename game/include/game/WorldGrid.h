@@ -110,6 +110,8 @@ struct Serializable<game::WorldGrid>
 template<>
 struct Serializable<game::Directions>
 {
+	inline static const auto typeName = "Directions";
+
 	ALL_DEF(game::Directions) {
 		return serializer.runAll<Selector>(
 			ALL(data)

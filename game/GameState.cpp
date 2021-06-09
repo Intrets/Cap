@@ -246,40 +246,40 @@ namespace game
 				}
 			};
 
-			placeWall({ 2, 10 }, { 10, 10 });
-			placeWall({ 10, 3 }, { 10, 10 });
+			//placeWall({ 2, 10 }, { 10, 10 });
+			//placeWall({ 10, 3 }, { 10, 10 });
 
-			placeWall({ 2, 6 }, { 2, WORLD_SIZE - 2 });
+			//placeWall({ 2, 6 }, { 2, WORLD_SIZE - 2 });
 
-			placeWall({ 1, 1 }, { 10, 1 });
+			//placeWall({ 1, 1 }, { 10, 1 });
 
-			placeWall({ 30, 33 }, { 30, 40 });
-			placeWall({ 30, 40 }, { WORLD_SIZE - 2, 40 });
-			placeWall({ 40, 30 }, { 40, 40 });
-			placeWall({ 40, 30 }, { 33, 30 });
+			//placeWall({ 30, 33 }, { 30, 40 });
+			//placeWall({ 30, 40 }, { WORLD_SIZE - 2, 40 });
+			//placeWall({ 40, 30 }, { 40, 40 });
+			//placeWall({ 40, 30 }, { 33, 30 });
 
-			placeWall({ 1, 20 }, { WORLD_SIZE - 4, 20 });
+			//placeWall({ 1, 20 }, { WORLD_SIZE - 4, 20 });
 
-			placeWall({ 1, 35 }, { 10, 35 });
-			placeWall({ 12, 35 }, { 35, 35 });
+			//placeWall({ 1, 35 }, { 10, 35 });
+			//placeWall({ 12, 35 }, { 35, 35 });
 
-			placeWall({ 20, 35 }, { 20, 23 });
+			//placeWall({ 20, 35 }, { 20, 23 });
 
-			place(41, 30);
+			//place(41, 30);
 
-			for (int32_t i = 0; i < 000; i++) {
-				int x = 1 + rand() % (WORLD_SIZE - 5);
-				int y = 1 + rand() % (WORLD_SIZE - 5);
-				if (x < 30 && y < 30) {
-					continue;
-				}
-				place(x, y);
-			}
+			//for (int32_t i = 0; i < 000; i++) {
+			//	int x = 1 + rand() % (WORLD_SIZE - 5);
+			//	int y = 1 + rand() % (WORLD_SIZE - 5);
+			//	if (x < 30 && y < 30) {
+			//		continue;
+			//	}
+			//	place(x, y);
+			//}
 
-			for (int32_t i = 5; i < 20; i++) {
-				place(10 + i, 20 - i);
+			//for (int32_t i = 5; i < 20; i++) {
+			//	place(10 + i, 20 - i);
 
-			}
+			//}
 		}
 		{
 			auto p = this->everything.make();
