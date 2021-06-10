@@ -61,7 +61,7 @@ struct Identifier<Front>
 };
 
 template<>
-struct Serializable<Front>
+struct serial::Serializable<Front>
 {
 	ALL_DEF(Front) {
 		return serializer.runAll<Selector>(
@@ -149,7 +149,7 @@ struct GamePosition
 };
 
 template<>
-struct Serializable<GamePosition>
+struct serial::Serializable<GamePosition>
 {
 	ALL_DEF(GamePosition) {
 		return serializer.runAll<Selector>(
@@ -170,7 +170,7 @@ struct GraphicsTile
 };
 
 template<>
-struct Serializable<GraphicsTile>
+struct serial::Serializable<GraphicsTile>
 {
 	ALL_DEF(GraphicsTile) {
 		return serializer.runAll<Selector>(

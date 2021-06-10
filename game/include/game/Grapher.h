@@ -44,7 +44,7 @@ struct Grapher
 };
 
 template<>
-struct Serializable<Grapher::Front>
+struct serial::Serializable<Grapher::Front>
 {
 	ALL_DEF(Grapher::Front) {
 		return serializer.runAll<Selector>(
@@ -57,7 +57,7 @@ struct Serializable<Grapher::Front>
 };
 
 template<>
-struct Serializable<Grapher>
+struct serial::Serializable<Grapher>
 {
 	ALL_DEF(Grapher) {
 		return serializer.runAll<Selector>(
@@ -86,7 +86,7 @@ struct RandomWalker
 };
 
 template<>
-struct Serializable<RandomWalker>
+struct serial::Serializable<RandomWalker>
 {
 	ALL_DEF(RandomWalker) {
 		return serializer.runAll<Selector>(

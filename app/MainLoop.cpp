@@ -81,13 +81,11 @@ void mainLoop(GLFWwindow* window) {
 
 	std::stringstream stream;
 
-	Serializer serializer2;
+	serial::Serializer serializer2;
 	serializer2.writeStream = &stream;
 	serializer2.print(gameState);
 
 	std::cout << stream.str() << "\n";
-
-	Serializable<game::GameState>::run(Print{}, serializer2, std::forward<game::GameState>(gameState));
 
 	{
 		uiState.addUI(ui::Global::getManager().makeUniqueRef<game::EntityInterface>());
@@ -126,7 +124,7 @@ void mainLoop(GLFWwindow* window) {
 				Locator<misc::Log>::ref().putLine(std::format("failed to open save file: {}", uiState.loadGame.value()));
 			}
 			else {
-				Serializer serializer{ file };
+				serial::Serializer serializer{ file };
 
 				auto start = glfwGetTime();
 				if (!serializer.read(newGameState)) {
@@ -149,10 +147,7 @@ void mainLoop(GLFWwindow* window) {
 				Locator<misc::Log>::ref().putLine(std::format("failed to open save file: {}", uiState.saveGame.value()));
 			}
 			else {
-				//Serializer serializer{ file };
-				std::stringstream a;
-				Serializer serializer;
-				serializer.writeStream = &a;
+				serial::Serializer serializer{ file };
 
 				auto start = glfwGetTime();
 				if (!serializer.write(gameState)) {

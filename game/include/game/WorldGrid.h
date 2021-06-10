@@ -9,7 +9,7 @@
 
 #include <serial/Serializer.h>
 
-constexpr auto WORLD_SIZE = 1000;
+constexpr auto WORLD_SIZE = 70;
 using SizeAlias = size_t;
 
 namespace game
@@ -96,7 +96,7 @@ namespace game
 }
 
 template<>
-struct Serializable<game::WorldGrid>
+struct serial::Serializable<game::WorldGrid>
 {
 	inline static const auto typeName = "WorldGrid";
 
@@ -110,7 +110,7 @@ struct Serializable<game::WorldGrid>
 };
 
 template<>
-struct Serializable<game::Directions>
+struct serial::Serializable<game::Directions>
 {
 	inline static const auto typeName = "Directions";
 

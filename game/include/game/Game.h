@@ -27,8 +27,8 @@ struct StructInformation
 	size_t width{};
 
 	void(*objectDestructor)(void*) = nullptr;
-	bool(*objectReader)(Serializer& serializer, void*) = nullptr;
-	bool(*objectWriter)(Serializer& serializer, void*) = nullptr;
+	bool(*objectReader)(serial::Serializer& serializer, void*) = nullptr;
+	bool(*objectWriter)(serial::Serializer& serializer, void*) = nullptr;
 };
 
 struct StoredStructInformations
@@ -37,7 +37,7 @@ struct StoredStructInformations
 };
 
 template<>
-struct Serializable<StructInformation>
+struct serial::Serializable<StructInformation>
 {
 	inline static const auto typeName = "StructInformation";
 
@@ -131,7 +131,7 @@ namespace game
 }
 
 template<>
-struct Serializable<game::RawData::DeletedInfo>
+struct serial::Serializable<game::RawData::DeletedInfo>
 {
 	inline const static std::string_view type_name = "RawData";
 
@@ -144,11 +144,11 @@ struct Serializable<game::RawData::DeletedInfo>
 };
 
 template<>
-struct Serializable<game::RawData>
+struct serial::Serializable<game::RawData>
 {
 	inline static const auto typeName = "RawData";
 
-	static bool run(Read, Serializer& serializer, game::RawData&& rawData) {
+	static bool run(serial::Read, serial::Serializer& serializer, game::RawData&& rawData) {
 		if (!serializer.readAll(
 			rawData.structInformation,
 			rawData.reservedObjects,
@@ -372,7 +372,7 @@ namespace game
 }
 
 template<>
-struct Serializable<game::Everything>
+struct serial::Serializable<game::Everything>
 {
 	inline static const auto typeName = "Everything";
 
@@ -404,11 +404,11 @@ namespace game
 				reinterpret_cast<T*>(obj)->~T();
 			};
 
-			info.objectReader = [](Serializer& serializer, void* obj) {
+			info.objectReader = [](serial::Serializer& serializer, void* obj) {
 				return serializer.read<T>(std::forward<T>(*reinterpret_cast<T*>(obj)));
 			};
 
-			info.objectWriter = [](Serializer& serializer, void* obj) {
+			info.objectWriter = [](serial::Serializer& serializer, void* obj) {
 				return serializer.write<T>(std::forward<T>(*reinterpret_cast<T*>(obj)));
 			};
 

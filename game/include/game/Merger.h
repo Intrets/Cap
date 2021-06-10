@@ -48,7 +48,7 @@ struct Merger
 };
 
 template<>
-struct Serializable<Merger::Neighbour>
+struct serial::Serializable<Merger::Neighbour>
 {
 	ALL_DEF(Merger::Neighbour) {
 		return serializer.runAll<Selector>(
@@ -59,7 +59,7 @@ struct Serializable<Merger::Neighbour>
 };
 
 template<>
-struct Serializable<Merger::Group>
+struct serial::Serializable<Merger::Group>
 {
 	ALL_DEF(Merger::Group) {
 		return serializer.runAll<Selector>(
@@ -73,7 +73,7 @@ struct Serializable<Merger::Group>
 };
 
 template<>
-struct Serializable<Merger>
+struct serial::Serializable<Merger>
 {
 	ALL_DEF(Merger) {
 		return serializer.runAll<Selector>(

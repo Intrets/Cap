@@ -24,7 +24,7 @@ struct Identifier<game::Inventory>
 };
 
 template<>
-struct Serializable<game::Inventory>
+struct serial::Serializable<game::Inventory>
 {
 	ALL_DEF(game::Inventory) {
 		return serializer.runAll<Selector>(

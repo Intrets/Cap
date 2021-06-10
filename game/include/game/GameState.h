@@ -129,7 +129,7 @@ namespace game
 }
 
 template<>
-struct Serializable<game::GameState>
+struct serial::Serializable<game::GameState>
 {
 	ALL_DEF(game::GameState) {
 		return serializer.runAll<Selector>(
