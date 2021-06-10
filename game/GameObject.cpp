@@ -1,6 +1,6 @@
 #include "GameObject.h"
 
-#include "GameState.h"
+#include <bit>
 
 #include <wglm/gtc/matrix_integer.hpp>
 #include <misc/Misc.h>
@@ -11,6 +11,8 @@
 #include <render/Colors.h>
 
 #include "WorldGrid.h"
+#include "GameState.h"
+
 
 static auto next(size_t i) {
 	return (i + 1) % 8;
@@ -41,7 +43,7 @@ void PathFinding::debugRender() {
 		{
 			for (auto [k, v] : this->visited) {
 				auto kk = k;
-				glm::vec2 p = *reinterpret_cast<glm::ivec2*>(&kk);
+				glm::vec2 p = std::bit_cast<glm::ivec2>(kk);
 
 				Locator<render::DebugRenderInfo>::ref().world.addBox(
 					p + 0.2f,
@@ -145,7 +147,7 @@ void PathFinding::debugRender() {
 			if (this->F.get() != nullptr) {
 				for (auto [k, v] : this->F->visited) {
 					auto kk = k;
-					glm::vec2 p = *reinterpret_cast<glm::ivec2*>(&kk);
+					glm::vec2 p = std::bit_cast<glm::ivec2>(kk);
 
 					Locator<render::DebugRenderInfo>::ref().world.addBox(
 						p + 0.2f,
@@ -288,7 +290,7 @@ bool PathFinding::stage1(game::WorldGrid& grid) {
 
 	if (!f.collided) {
 		if (!grid.occupied(p.x, p.y)) {
-			this->visited.insert({ *reinterpret_cast<uint64_t*>(&p), this->count });
+			this->visited.insert({ std::bit_cast<uint64_t>(p), this->count });
 			f.path.push_back(p);
 			//this->current = p;
 			f.current = p;
@@ -315,12 +317,12 @@ bool PathFinding::stage1(game::WorldGrid& grid) {
 	}
 
 	if (glm::abs(f.winding) < 2) {
-		if (!grid.occupied(p.x, p.y) && !this->visited.count(*reinterpret_cast<uint64_t*>(&p))) {
+		if (!grid.occupied(p.x, p.y) && !this->visited.count(std::bit_cast<uint64_t>(p))) {
 			f.waypoints.push_back(p);
 
-			//this->visited.insert({ *reinterpret_cast<uint64_t*>(&p), this->count });
+			//this->visited.insert({ std::bit_cast<uint64_t>(p), this->count });
 			updateOrInsert<uint64_t, int32_t>(this->visited,
-				*reinterpret_cast<uint64_t*>(&p),
+				std::bit_cast<uint64_t>(p),
 				this->count,
 				[](int32_t v) {return v; }
 			);
@@ -361,7 +363,7 @@ bool PathFinding::stage1(game::WorldGrid& grid) {
 		this->searched.push_back(p);
 
 		if (!grid.occupied(p.x, p.y)) {
-			this->visited.insert({ *reinterpret_cast<uint64_t*>(&p), this->count });
+			this->visited.insert({ std::bit_cast<uint64_t>(p), this->count });
 
 			//this->path.push_back(p);
 
@@ -387,8 +389,8 @@ bool PathFinding::stage1(game::WorldGrid& grid) {
 	//for (auto v : vec) {
 	//	p = this->current + (rot * v);
 
-	//	if (!this->visited.count(*reinterpret_cast<uint64_t*>(&p)) && !grid.occupied(p.x, p.y)) {
-	//		this->visited.insert({ *reinterpret_cast<uint64_t*>(&p), this->path.size() });
+	//	if (!this->visited.count(std::bit_cast<uint64_t>(p)) && !grid.occupied(p.x, p.y)) {
+	//		this->visited.insert({ std::bit_cast<uint64_t>(p), this->path.size() });
 
 	//		this->current = p;
 	//		this->path.push_back(p);

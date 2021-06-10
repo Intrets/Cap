@@ -18,8 +18,8 @@ void Merger::initialize(std::vector<glm::ivec2>& seedPoints, game::WorldGrid& gr
 		group.group = grid.getGroup(p);
 		group.seed = p;
 
-		const auto cmp = [](glm::ivec2 left, glm::ivec2 right) { return *reinterpret_cast<int64_t*>(&left) < *reinterpret_cast<int64_t*>(&right); };
-		const auto hash = [](glm::ivec2 p) { return std::hash<int64_t>{}(*reinterpret_cast<int64_t*>(&p)); };
+		const auto cmp = [](glm::ivec2 left, glm::ivec2 right) { return std::bit_cast<int64_t>(left) < std::bit_cast<int64_t>(right); };
+		const auto hash = [](glm::ivec2 p) { return std::hash<int64_t>{}(std::bit_cast<int64_t>(p)); };
 		const auto equal = [](glm::ivec2 left, glm::ivec2 right) { return left == right; };
 		//std::set<glm::ivec2, decltype(cmp)> visited(cmp);
 		std::unordered_set<glm::ivec2, decltype(hash), decltype(equal)> visited(8, hash, equal);
