@@ -1,5 +1,9 @@
 ﻿cmake_minimum_required(VERSION 3.20.3)
 
+if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
+	message(FATAL_ERROR "Please don't use in-source builds.")
+endif()
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
 project(game_thing LANGUAGES CXX)

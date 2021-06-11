@@ -8,7 +8,7 @@ add_executable(${PROJECT_NAME}
 
 option(USE_PRECOMPILED_HEADERS "enable/disable precompiled headers" ON)
 
-if(use_precompiled_headers)
+if(USE_PRECOMPILED_HEADERS)
 	target_precompile_headers(game PUBLIC pch.h)
 	target_precompile_headers(render PUBLIC pch.h)
 	target_precompile_headers(serial PUBLIC pch.h)
