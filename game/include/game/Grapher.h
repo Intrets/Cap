@@ -46,6 +46,8 @@ struct Grapher
 template<>
 struct serial::Serializable<Grapher::Front>
 {
+	static constexpr std::string_view typeName = "Front";
+
 	ALL_DEF(Grapher::Front) {
 		return serializer.runAll<Selector>(
 			ALL(min),
@@ -59,6 +61,8 @@ struct serial::Serializable<Grapher::Front>
 template<>
 struct serial::Serializable<Grapher>
 {
+	static constexpr std::string_view typeName = "Grapher";
+
 	ALL_DEF(Grapher) {
 		return serializer.runAll<Selector>(
 			ALL(finished),
@@ -73,12 +77,6 @@ struct serial::Serializable<Grapher>
 	}
 };
 
-template<>
-struct Identifier<Grapher>
-{
-	inline static std::string name = "Grapher";
-};
-
 struct RandomWalker
 {
 	int32_t indexTarget;
@@ -88,17 +86,13 @@ struct RandomWalker
 template<>
 struct serial::Serializable<RandomWalker>
 {
+	static constexpr std::string_view typeName = "RandomWalker";
+
 	ALL_DEF(RandomWalker) {
 		return serializer.runAll<Selector>(
 			ALL(indexTarget),
 			ALL(groupTarget)
 			);
 	}
-};
-
-template<>
-struct Identifier<RandomWalker>
-{
-	inline static std::string name = "RandomWalker";
 };
 

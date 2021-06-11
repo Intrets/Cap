@@ -12,7 +12,9 @@
 #include <unordered_map>
 
 #include <tepp/tepp.h>
+
 #include <misc/Misc.h>
+
 #include <serial/Serializer.h>
 
 using SizeAlias = size_t;
@@ -29,6 +31,7 @@ struct StructInformation
 	void(*objectDestructor)(void*) = nullptr;
 	bool(*objectReader)(serial::Serializer& serializer, void*) = nullptr;
 	bool(*objectWriter)(serial::Serializer& serializer, void*) = nullptr;
+	bool(*objectPrinter)(serial::Serializer& serializer, void*) = nullptr;
 };
 
 struct StoredStructInformations
@@ -39,7 +42,7 @@ struct StoredStructInformations
 template<>
 struct serial::Serializable<StructInformation>
 {
-	inline static const auto typeName = "StructInformation";
+	static constexpr std::string_view typeName = "StructInformation";
 
 	static bool run(Read, Serializer& serializer, StructInformation&& val) {
 		std::string name;
@@ -124,6 +127,8 @@ namespace game
 		inline void* getUntyped(SizeAlias i);
 
 		inline SizeAlias getIndex(SizeAlias i) const;
+
+		bool print(serial::Serializer& serializer, SizeAlias i);
 
 		template<class T, class... Args>
 		inline std::pair<SizeAlias, T*> add(SizeAlias i, Args&&... args);
@@ -222,6 +227,8 @@ namespace game
 
 		template<class T>
 		inline bool has() const;
+
+		bool has(SizeAlias i);
 	};
 
 	struct UniqueObject : WeakObject
@@ -347,6 +354,8 @@ namespace game
 
 		inline RawData& gets(size_t type);
 
+		bool print(serial::Serializer& serializer, SizeAlias index, size_t type);
+
 		template<class... Ts>
 		inline bool has(SizeAlias i) const;
 
@@ -390,6 +399,47 @@ struct serial::Serializable<game::Everything>
 	};
 };
 
+template<>
+struct serial::Serializable<game::WeakObject>
+{
+	inline static const auto typeName = "WeakObject";
+
+	PRINT_DEF(game::WeakObject) {
+		if (obj.isNull()) {
+			return serializer.printString("Empty object");
+		}
+		else {
+			auto end = obj.proxy->getTypeCount();
+
+			for (size_t i = 0; i < end; i++) {
+				if (obj.has(i)) {
+					serializer.printIndentedString(obj.proxy->data[i].structInformation.name + " ");
+					obj.proxy->print(serializer, obj.index, i);
+				}
+			}
+
+			return true;
+		}
+	}
+};
+
+template<>
+struct serial::Serializable<game::QualifiedObject>
+{
+	inline static const auto typeName = "QualifiedObject";
+
+	PRINT_DEF(game::QualifiedObject) {
+		if (!obj.isQualified()) {
+			return serializer.printString("Unqualified object");
+		}
+		else {
+			return serializer.print(obj.object);
+		}
+	}
+};
+
+
+
 namespace game
 {
 	template<class T>
@@ -397,7 +447,8 @@ namespace game
 	{
 		static bool reg() {
 			StructInformation info;
-			info.name = Identifier<T>::name;
+			static_assert(serial::has_type_name<T>);
+			info.name = serial::Serializable<T>::typeName;
 			info.index = game::Everything::component_index_v<T>;
 			info.width = RawData::aligned_sizeof<T>::get();
 			info.objectDestructor = [](void* obj) {
@@ -410,6 +461,10 @@ namespace game
 
 			info.objectWriter = [](serial::Serializer& serializer, void* obj) {
 				return serializer.write<T>(std::forward<T>(*reinterpret_cast<T*>(obj)));
+			};
+
+			info.objectPrinter = [](serial::Serializer& serializer, void* obj) {
+				return serializer.print<T>(std::forward<T>(*reinterpret_cast<T*>(obj)));
 			};
 
 			StoredStructInformations::infos[info.name] = info;
@@ -584,6 +639,10 @@ namespace game
 		return this->indices[i];
 	}
 
+	inline bool RawData::print(serial::Serializer& serializer, SizeAlias i) {
+		return this->structInformation.objectPrinter(serializer, this->getUntyped(i));
+	}
+
 	template<class T, class... Args>
 	inline std::pair<SizeAlias, T*> RawData::add(SizeAlias i, Args&&... args) {
 		this->objectSize = aligned_sizeof<T>::get();
@@ -594,7 +653,7 @@ namespace game
 			this->indices.push_back(0);
 			this->data.resize(this->reservedObjects * aligned_sizeof<T>::get());
 
-			this->structInformation = StoredStructInformations::infos[Identifier<T>::name];
+			this->structInformation = StoredStructInformations::infos[std::string(serial::Serializable<T>::typeName)];
 
 		}
 		else if (this->index >= this->reservedObjects) {
@@ -660,6 +719,10 @@ namespace game
 
 	inline RawData& Everything::gets(size_t type) {
 		return this->data[type];
+	}
+
+	inline bool Everything::print(serial::Serializer& serializer, SizeAlias index, size_t type) {
+		return this->data[type].print(serializer, this->dataIndices[type][index]);
 	}
 
 	inline bool Everything::has(SizeAlias i, size_t type) {
@@ -761,6 +824,7 @@ namespace game
 
 	template<class T>
 	inline bool WeakObject::has() const {
+		assert(this->isNotNull());
 		return this->proxy->has<T>(this->index);
 	}
 }

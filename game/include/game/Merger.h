@@ -75,16 +75,12 @@ struct serial::Serializable<Merger::Group>
 template<>
 struct serial::Serializable<Merger>
 {
+	static constexpr std::string_view typeName = "Merger";
+
 	ALL_DEF(Merger) {
 		return serializer.runAll<Selector>(
 			ALL(groups),
 			ALL(nonEmptyGroups)
 			);
 	}
-};
-
-template<>
-struct Identifier<Merger>
-{
-	inline static std::string name = "Merger";
 };

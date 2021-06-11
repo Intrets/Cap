@@ -126,7 +126,7 @@ namespace game
 			}
 			});
 
-		if (this->tick % 1 == 0) {
+		if (this->tick % 10 == 0) {
 			this->everything.match([&](Grapher& grapher) {
 				while (!grapher.step(*this->world));
 				});
@@ -213,8 +213,8 @@ namespace game
 
 	void GameState::init() {
 		{
-			auto p = this->everything.make();
-			p.add<Grapher>();
+			//auto p = this->everything.make();
+			//p.add<Grapher>();
 		}
 		{
 			auto const place = [&](int i, int j) {
@@ -288,9 +288,9 @@ namespace game
 		for (size_t i = 0; i < 1; i++) {
 			auto p = this->everything.make();
 			p.add<GraphicsTile>();
-			p.add<GamePosition>(glm::ivec2(2, 2));
-			p.add<RandomWalker>();
-
+			this->placeInWorld(p, { 2,2 });
+			//p.add<RandomWalker>();
+			p.add<Grapher>();
 			p.get<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("gnome.dds");
 		}
 

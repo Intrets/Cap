@@ -47,6 +47,11 @@ namespace game
 		return (this->index != 0) && (this->proxy != nullptr);
 	}
 
+	bool WeakObject::has(SizeAlias i) {
+		assert(this->isNotNull());
+		return this->proxy->has(this->index, i);
+	}
+
 	WeakObject Everything::make() {
 		if (!this->freeIndirections.empty()) {
 			size_t i = this->freeIndirections.back();

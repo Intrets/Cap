@@ -13,8 +13,7 @@ namespace game
 
 		virtual int32_t addRenderInfo(game::GameState& gameState, render::RenderInfo& renderInfo, int32_t depth) override;
 
-		EntityInterface(Handle self);
-		EntityInterface() = default;
+		EntityInterface();
 		virtual ~EntityInterface() = default;
 	};
 }

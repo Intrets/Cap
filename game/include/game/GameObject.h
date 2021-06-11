@@ -55,14 +55,9 @@ struct Front
 };
 
 template<>
-struct Identifier<Front>
-{
-	inline static std::string name = "Front";
-};
-
-template<>
 struct serial::Serializable<Front>
 {
+	static constexpr std::string_view typeName = "Front";
 	ALL_DEF(Front) {
 		return serializer.runAll<Selector>(
 			ALL(current),
@@ -151,17 +146,13 @@ struct GamePosition
 template<>
 struct serial::Serializable<GamePosition>
 {
+	static constexpr std::string_view typeName = "GamePosition";
+
 	ALL_DEF(GamePosition) {
 		return serializer.runAll<Selector>(
 			ALL(pos)
 			);
 	}
-};
-
-template<>
-struct Identifier<GamePosition>
-{
-	inline static std::string name = "GamePosition";
 };
 
 struct GraphicsTile
@@ -172,17 +163,13 @@ struct GraphicsTile
 template<>
 struct serial::Serializable<GraphicsTile>
 {
+	static constexpr std::string_view typeName = "GraphicsTile";
+
 	ALL_DEF(GraphicsTile) {
 		return serializer.runAll<Selector>(
 			ALL(blockID)
 			);
 	}
-};
-
-template<>
-struct Identifier<GraphicsTile>
-{
-	inline static std::string name = "GraphicsTile";
 };
 
 struct Brain
