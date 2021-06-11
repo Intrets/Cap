@@ -6,7 +6,17 @@ add_executable(${PROJECT_NAME}
 	MainLoop.cpp
 )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE
+option(USE_PRECOMPILED_HEADERS "enable/disable precompiled headers" ON)
+
+if(use_precompiled_headers)
+	target_precompile_headers(game PUBLIC pch.h)
+	target_precompile_headers(render PUBLIC pch.h)
+	target_precompile_headers(serial PUBLIC pch.h)
+	target_precompile_headers(ui PUBLIC pch.h)
+	target_precompile_headers(misc PUBLIC pch.h)
+endif()
+
+target_link_libraries(${PROJECT_NAME} PUBLIC
 	opengl32
 	GLFW3
 	GLEW

@@ -269,8 +269,8 @@ namespace ui
 
 		void Text::moveStartWordBackward() {
 			this->moveCursor(-1);
-			if (auto new1 = this->findPrevious(this->getCursor(), std::isalnum)) {
-				if (auto new2 = this->findPrevious(new1.value(), FUNC_NOT(std::isalnum))) {
+			if (auto new1 = this->findPrevious(this->getCursor(), isalnum)) {
+				if (auto new2 = this->findPrevious(new1.value(), FUNC_NOT(isalnum))) {
 					this->setCursor(new2.value());
 				}
 			}
@@ -279,8 +279,8 @@ namespace ui
 
 		void Text::moveEndWord() {
 			this->moveCursor(1);
-			if (auto new1 = this->findNext(this->getCursor(), std::isalnum)) {
-				if (auto new2 = this->findNext(new1.value(), FUNC_NOT(std::isalnum))) {
+			if (auto new1 = this->findNext(this->getCursor(), isalnum)) {
+				if (auto new2 = this->findNext(new1.value(), FUNC_NOT(isalnum))) {
 					this->setCursor(new2.value());
 				}
 			}
@@ -291,7 +291,7 @@ namespace ui
 			auto cursor = this->getCursor();
 			cursor.x = 0;
 
-			if (auto spaces = this->findNext(cursor, FUNC_NOT(std::isspace))) {
+			if (auto spaces = this->findNext(cursor, FUNC_NOT(isspace))) {
 				auto spacesSize = spaces.value().x;
 				if (this->moveCursor({ 0,1 })) {
 					this->startOfLine();
@@ -310,8 +310,8 @@ namespace ui
 			auto cursor = this->getCursor();
 
 			if (cursor.y > 0) {
-				if (auto l1size = this->findNext({ 0, cursor.y - 1 }, FUNC_NOT(std::isblank))) {
-					if (auto l2size = this->findNext({ 0, cursor.y }, FUNC_NOT(std::isblank))) {
+				if (auto l1size = this->findNext({ 0, cursor.y - 1 }, FUNC_NOT(isblank))) {
+					if (auto l2size = this->findNext({ 0, cursor.y }, FUNC_NOT(isblank))) {
 						if (l2size.value().x < l1size.value().x) {
 							auto size = l1size.value().x - l2size.value().x;
 
@@ -463,8 +463,8 @@ namespace ui
 		}
 
 		void Text::moveStartWordForward() {
-			if (auto new1 = this->findNext(this->getCursor(), FUNC_NOT(std::isalnum))) {
-				if (auto new2 = this->findNext(new1.value(), std::isalnum)) {
+			if (auto new1 = this->findNext(this->getCursor(), FUNC_NOT(isalnum))) {
+				if (auto new2 = this->findNext(new1.value(), isalnum)) {
 					this->setCursor(new2.value());
 				}
 			}
