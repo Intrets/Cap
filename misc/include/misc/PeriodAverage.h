@@ -36,10 +36,10 @@ namespace misc
 	template<class T>
 	inline PeriodAvarage<T>::PeriodAvarage(int32_t historySize, double timePeriod_) :
 		history(historySize),
-		timePeriod(timePeriod_),
-		current(this->zero()),
 		currentTime(0.0),
-		measurements(0) {
+		current(this->zero()),
+		measurements(0),
+		timePeriod(timePeriod_) {
 	}
 
 	template<class T>

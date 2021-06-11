@@ -6,10 +6,6 @@ namespace game
 		this->proxy->remove(this->index);
 	}
 
-	UniqueObject::operator WeakObject() const {
-		return *this;
-	}
-
 	UniqueObject::UniqueObject(WeakObject&& other) {
 		this->index = other.index;
 		this->proxy = other.proxy;

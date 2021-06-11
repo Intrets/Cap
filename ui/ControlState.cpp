@@ -278,7 +278,7 @@ namespace ui
 
 	BindControl::BindControl(CONTROL::KEY c, int32_t s, int32_t m) :
 		control(c),
-		state(s),
-		modifiers(m) {
+		modifiers(m),
+		state(s) {
 	}
 }

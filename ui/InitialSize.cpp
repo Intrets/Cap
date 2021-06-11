@@ -1,4 +1,4 @@
-#include "initialsize.h"
+#include "InitialSize.h"
 
 ui::InitialSize::InitialSize(Rect rect) : rectangle(rect) {
 }

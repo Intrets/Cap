@@ -108,7 +108,7 @@ namespace ui
 		state->singlesLeaf.clear();
 		state->stack.clear();
 
-		auto res = std::move(state->root.get()->getMain());
+		auto res = state->root.get()->getMain();
 
 		Global::states.pop_back();
 

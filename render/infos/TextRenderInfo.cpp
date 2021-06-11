@@ -9,9 +9,9 @@ namespace render
 {
 	WindowTextRenderInfo::WindowTextRenderInfo(ScreenRectangle rect, bool lineWrap_, bool clickSupport_) :
 		screenRectangle(rect),
+		nextPos(0, rect.getSize().y),
 		lineWrap(lineWrap_),
-		clickSelect(clickSupport_),
-		nextPos(0, rect.getSize().y) {
+		clickSelect(clickSupport_) {
 	}
 
 	void WindowTextRenderInfo::addString(FONT font, std::string text) {

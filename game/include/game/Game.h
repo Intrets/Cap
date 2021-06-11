@@ -233,8 +233,6 @@ namespace game
 
 	struct UniqueObject : WeakObject
 	{
-		operator WeakObject() const;
-
 		UniqueObject(WeakObject&& other);
 
 		UniqueObject& operator=(UniqueObject&& other) noexcept;
@@ -489,7 +487,7 @@ namespace game
 				f(args...);
 			}
 			else {
-				using head_stripped_ref = std::remove_reference_t<L::head>;
+				using head_stripped_ref = std::remove_reference_t<typename L::head>;
 				head_stripped_ref::template run<F, typename L::tail, Args...>(e, f, args...);
 			}
 		}
@@ -503,13 +501,13 @@ namespace game
 		template<class T>
 		inline T& get() {
 			static_assert(te::contains_v<te::list<M, Ms...>, T>);
-			return this->obj.get<T>();
+			return this->obj.template get<T>();
 		};
 
 		template<class T>
 		inline void remove() {
 			static_assert(te::contains_v<te::list<M, Ms...>, T>);
-			this->obj.remove<T>();
+			this->obj.template remove<T>();
 		};
 
 		template<class F, class L, class... Args>
@@ -746,9 +744,10 @@ namespace game
 
 	template<class T, class... Args>
 	inline T& Everything::add(SizeAlias i, Args&&... args) {
-		RegisterStruct<T>::initialized;
+		[[maybe_unused]]
+		auto b = RegisterStruct<T>::initialized;
 		assert(!this->has<T>(i));
-		auto [index, ptr] = this->data[component_index_v<T>].add<T>(i, std::forward<Args>(args)...);
+		auto [index, ptr] = this->data[component_index_v<T>].template add<T>(i, std::forward<Args>(args)...);
 		this->dataIndices[component_index_v<T>][i] = index;
 		this->signatures[i].set(component_index_v<T>);
 		return *ptr;
@@ -756,7 +755,7 @@ namespace game
 
 	template<class T>
 	inline T& Everything::get(SizeAlias i) {
-		return this->data[component_index_v<T>].get<T>(this->dataIndices[component_index_v<T>][i]);
+		return this->data[component_index_v<T>].template get<T>(this->dataIndices[component_index_v<T>][i]);
 	}
 
 	template<class T>

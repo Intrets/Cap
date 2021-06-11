@@ -288,8 +288,6 @@ namespace ui
 		}
 
 		bool Text::insertLineAfter() {
-			auto const oldPos = this->getCursor();
-
 			auto cursor = this->getCursor();
 			cursor.x = 0;
 

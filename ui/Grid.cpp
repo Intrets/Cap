@@ -38,10 +38,6 @@ namespace ui
 	}
 
 	int32_t Grid::addRenderInfo(game::GameState& gameState, render::RenderInfo& renderInfo, int32_t depth) {
-		for (auto& element : this->elements) {
-			auto rec = element.get()->getScreenRectangle();
-		}
-
 		return this->BaseMulti::addRenderInfo(gameState, renderInfo, depth);
 	}
 

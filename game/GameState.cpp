@@ -226,7 +226,7 @@ namespace game
 				p2.add<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
 			};
 
-
+			[[maybe_unused]]
 			auto const placeWall = [&](glm::ivec2 from, glm::ivec2 to) {
 				glm::vec2 diff = to - from;
 

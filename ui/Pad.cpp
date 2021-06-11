@@ -59,10 +59,10 @@ namespace ui
 	PadType::PadType() : PadType(PAD::TYPE::SHRINK) {
 	}
 
-	PadType::PadType(PAD::TYPE t) : size(SIZETYPE::ABSOLUTE_HEIGHT, -1.0f), type(t) {
+	PadType::PadType(PAD::TYPE t) : type(t), size(SIZETYPE::ABSOLUTE_HEIGHT, -1.0f) {
 	}
 
-	PadType::PadType(SizeType s) : size(s), type(PAD::TYPE::SIZETYPE) {
+	PadType::PadType(SizeType s) : type(PAD::TYPE::SIZETYPE), size(s) {
 
 	}
 }

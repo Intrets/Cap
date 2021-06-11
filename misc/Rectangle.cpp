@@ -127,15 +127,15 @@ float Rect::getHeight() const {
 }
 
 ScreenRectangle::ScreenRectangle(glm::ivec2 size) :
+	screenPixels(size),
 	bot(0, 0),
-	top(size),
-	screenPixels(size) {
+	top(size) {
 }
 
 ScreenRectangle::ScreenRectangle(glm::ivec2 bot_, glm::ivec2 size_, glm::ivec2 screenPixels_) :
+	screenPixels(screenPixels_),
 	bot(bot_),
-	top(bot_ + size_),
-	screenPixels(screenPixels_) {
+	top(bot_ + size_) {
 }
 
 glm::ivec2 ScreenRectangle::size() const {

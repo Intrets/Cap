@@ -134,7 +134,7 @@ namespace ui
 	template<class T>
 	WeakReference<Base, T> makeEnd(UniqueReference<Base, T> ref) {
 		static_assert(std::is_base_of<Base, T>::value);
-		auto res = ref.as<T>();
+		auto res = ref.template as<T>();
 
 		Global::getState()->addEnd(std::move(ref));
 
@@ -145,7 +145,7 @@ namespace ui
 	WeakReference<Base, T> makeEnd(Args&&... args) {
 		static_assert(std::is_base_of<Base, T>::value);
 		auto ref = Global::getManager().makeUniqueRef<T>(std::forward<Args>(args)...);
-		auto res = ref.as<T>();
+		auto res = ref.template as<T>();
 
 		Global::getState()->addEnd(std::move(ref));
 
@@ -178,7 +178,7 @@ namespace ui
 	template<class T>
 	inline WeakReference<Base, T> ConstructerState::addSingle() {
 		auto ref = Global::getManager().makeUniqueRef<T>();
-		auto res = ref.as<T>();
+		auto res = ref.template as<T>();
 
 		this->addSingle(std::move(ref));
 
