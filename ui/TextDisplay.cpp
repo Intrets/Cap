@@ -176,7 +176,17 @@ namespace ui
 				break;
 		}
 
-		depth = this->text.addRenderInfo(this->screenRectangle, renderInfo, render::FONT::ROBOTO_12, depth, this->lineWrap, ticks, this->active, this->clickSupport, cursorType);
+		depth = this->text.addRenderInfo(
+			this->screenRectangle,
+			renderInfo,
+			render::FONT::ROBOTO_12,
+			depth,
+			this->lineWrap,
+			ticks,
+			this->active,
+			this->clickSupport,
+			cursorType
+		);
 
 		if (this->active) {
 			renderInfo.uiRenderInfo.addPixelRectangle(

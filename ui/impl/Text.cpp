@@ -118,7 +118,17 @@ namespace ui
 			this->cachedRenderInfo = std::move(textInfo);
 		}
 
-		int32_t Text::addRenderInfo(ScreenRectangle screenRectangle, render::RenderInfo& renderInfo, render::FONT font, int32_t depth, bool wrap, int32_t tick, bool renderCursor, bool clickSupport, CURSOR::TYPE cursorType) {
+		int32_t Text::addRenderInfo(
+			ScreenRectangle screenRectangle,
+			render::RenderInfo& renderInfo,
+			render::FONT font,
+			int32_t depth,
+			bool wrap,
+			int32_t tick,
+			bool renderCursor,
+			bool clickSupport,
+			CURSOR::TYPE cursorType) {
+
 			if (!this->cachedRenderInfo.has_value()) {
 				this->makeRenderInfo(screenRectangle, font, wrap, clickSupport);
 			}

@@ -60,7 +60,7 @@ namespace game
 			playerInfo.uiState.saveGame = name;
 
 			return ui::BIND::RESULT::CONTINUE;
-			}
+		}
 		);
 
 		auto loadButton = ui::textButton("load");
@@ -70,7 +70,7 @@ namespace game
 			playerInfo.uiState.loadGame = name;
 
 			return ui::BIND::RESULT::CONTINUE;
-			}
+		}
 		);
 
 		ui::endList();
@@ -192,8 +192,11 @@ namespace game
 				for (auto& newLine : newLines) {
 					self->text.addLine(newLine);
 				}
+
+				std::cout << "view: " << self->text.getView() << "\n";
+
 				if (newLines.size() != 0) {
-					self->text.moveCursor(glm::ivec2(100000, newLines.size()));
+					self->text.moveCursor(glm::ivec2(0, newLines.size()));
 				}
 				return ui::BIND::RESULT::CONTINUE;
 			});
