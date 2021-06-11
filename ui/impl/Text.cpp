@@ -137,12 +137,12 @@ namespace ui
 						case CURSOR::TYPE::BLOCK:
 							break;
 						case CURSOR::TYPE::LINE:
-							{
-								auto width = quad.getWidth();
-								quad.setWidth(quad.getWidth() * 0.4f);
-								quad.translate({ -width * 0.2f, 0 });
-								break;
-							}
+						{
+							auto width = quad.getWidth();
+							quad.setWidth(quad.getWidth() * 0.4f);
+							quad.translate({ -width * 0.2f, 0 });
+							break;
+						}
 						default:
 							assert(0);
 							break;
@@ -438,7 +438,7 @@ namespace ui
 			view += lineHeight * glm::vec2(p) * 1.4f;
 
 			// margin from top
-			float topStop = this->lastRenderedSize.y;
+			float topStop = this->lastRenderedSize.y * 2.0f / height;
 
 			// margin from bottom
 			float botStop = lineHeight;

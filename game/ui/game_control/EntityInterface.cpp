@@ -50,7 +50,7 @@ namespace game
 						ui::WINDOW::TYPE::RESIZE
 					);
 
-					auto text = ui::textDisplaySingle("");
+					auto text = ui::textDisplayMulti("");
 					text.get()->addGlobalBind(
 						{ ui::CONTROL::KEY::EVERY_TICK },
 						[this](PlayerInfo& playerInfo, ui::Base* self_) {
