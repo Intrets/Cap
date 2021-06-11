@@ -30,9 +30,22 @@
 
 #include <iostream>
 
-#pragma warning(push,0)
+#if defined(COMPILER_CLANGCL) || defined(COMPILER_CLANG)
+	#pragma clang diagnostic push
+	#pragma clang diagnostic ignored "-Wignored-qualifiers"
+	#pragma clang diagnostic ignored "-Wdeprecated-anon-enum-enum-conversion"
+	#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#elif defined(COMPILER_MSVC)
+	#pragma warning(push,0)
+#endif
+
 #include <gli.hpp>
-#pragma warning(pop)
+
+#if defined(COMPILER_CLANGCL) || defined(COMPILER_CLANG)
+	#pragma clang diagnostic pop
+#elif defined(COMPILER_MSVC)
+	#pragma warning(pop)
+#endif
 
 #include "BufferWrappers.h"
 
