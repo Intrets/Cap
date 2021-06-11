@@ -28,7 +28,7 @@ elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
 
 	# clang-cl
 	if(${CMAKE_CXX_SIMULATE_ID} STREQUAL MSVC)
-		message(STATUS "compiler: Clang-cl")
+		message(STATUS "Compiler: Clang-cl")
 		add_compile_options(-W4 -Werror -std:c++20)
 
 		# disabled warnings
@@ -39,7 +39,7 @@ elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
 
 	# clang
 	else()
-		message(STATUS "compiler: Clang")
+		message(STATUS "Compiler: Clang")
 		add_compile_options(-W4 -Werror -std=c++20)
 
 		# disabled warnings
