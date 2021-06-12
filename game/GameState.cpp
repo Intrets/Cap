@@ -63,7 +63,7 @@ namespace game
 				});
 
 			this->everything.match([&](RandomWalker& walker, GamePosition& pos) {
-				auto& merger = this->everything.gets<Merger>().get<Merger>(1);
+				auto& merger = this->everything.gets<Merger>().get<Merger>(Index<game::RawData>{ 1 });
 				auto p = merger.groups[walker.groupTarget].approximation;
 
 				debugRender.world.addLine(
@@ -85,7 +85,7 @@ namespace game
 		}
 		if (this->tick > 30 && this->tick % 10 == 0) {
 			this->everything.match([&](RandomWalker& walker, GamePosition& pos) {
-				auto& merger = this->everything.gets<Merger>().get<Merger>(1);
+				auto& merger = this->everything.gets<Merger>().get<Merger>(Index<game::RawData>{ 1 });
 				auto currentGroup = this->world->getGroup(pos.pos);
 
 				if (currentGroup == walker.groupTarget) {
@@ -133,7 +133,7 @@ namespace game
 		}
 
 		this->everything.match([&](Merger& merger) {
-			auto& grapher = this->everything.gets<Grapher>().get<Grapher>(1);
+			auto& grapher = this->everything.gets<Grapher>().get<Grapher>(Index<game::RawData>{ 1 });
 			Locator<misc::Timer>::ref().newTiming("Merge");
 			if (grapher.finished) {
 				if (!grapher.groups.empty()) {
@@ -194,10 +194,10 @@ namespace game
 		assert(this->world->grid[to.x][to.y] == 0);
 
 		this->world->grid[to.x][to.y] = this->world->grid[from.x][from.y];
-		this->world->grid[from.x][from.y] = 0;
+		this->world->grid[from.x][from.y].set(0);
 	}
 
-	void GameState::placeInWorld(SizeAlias index, glm::ivec2 pos) {
+	void GameState::placeInWorld(Index<Everything> index, glm::ivec2 pos) {
 		assert(this->world->grid[pos.x][pos.y] == 0);
 		this->everything.add<GamePosition>(index, pos);
 		this->world->place(index, pos);

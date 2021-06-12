@@ -68,33 +68,33 @@ namespace game
 		return this->group[pos.x][pos.y];
 	}
 
-	SizeAlias WorldGrid::get(int32_t x, int32_t y) {
+	Index<Everything> WorldGrid::get(int32_t x, int32_t y) {
 		if (0 <= x && x < WORLD_SIZE && 0 <= y && y <= WORLD_SIZE) {
 			return this->grid[x][y];
 		}
 		else {
-			return 0;
+			return Index<Everything>{ 0 };
 		}
 	}
 
-	SizeAlias WorldGrid::get(glm::ivec2 pos) {
+	Index<Everything> WorldGrid::get(glm::ivec2 pos) {
 		return this->get(pos.x, pos.y);
 	}
 
-	void WorldGrid::place(SizeAlias index, int32_t x, int32_t y) {
+	void WorldGrid::place(Index<Everything> index, int32_t x, int32_t y) {
 		this->grid[x][y] = index;
 	}
 
-	void WorldGrid::place(SizeAlias index, glm::ivec2 pos) {
+	void WorldGrid::place(Index<Everything> index, glm::ivec2 pos) {
 		this->grid[pos.x][pos.y] = index;
 	}
 
 	void WorldGrid::remove(int32_t x, int32_t y) {
-		this->grid[x][y] = 0;
+		this->grid[x][y].set(0);
 	}
 
 	void WorldGrid::remove(glm::ivec2 pos) {
-		this->grid[pos.x][pos.y] = 0;
+		this->grid[pos.x][pos.y].set(0);
 	}
 
 	bool WorldGrid::occupied(int32_t x, int32_t y) {

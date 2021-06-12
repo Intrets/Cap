@@ -14,7 +14,7 @@ namespace game
 	UniqueObject::UniqueObject(UniqueObject&& other) noexcept {
 		this->index = other.index;
 		this->proxy = other.proxy;
-		other.index = 0;
+		other.index.set(0);
 		other.proxy = nullptr;
 	}
 
@@ -43,7 +43,7 @@ namespace game
 		return (this->index != 0) && (this->proxy != nullptr);
 	}
 
-	bool WeakObject::has(SizeAlias i) {
+	bool WeakObject::has(Index<Component> i) {
 		assert(this->isNotNull());
 		return this->proxy->has(this->index, i);
 	}
@@ -60,7 +60,7 @@ namespace game
 		else {
 			this->signatures.push_back(0);
 			for (size_t type = 0; type < this->getTypeCount(); type++) {
-				this->dataIndices[type].push_back(0);
+				this->dataIndices[type].push_back(Index<RawData>{ 0 });
 			}
 
 			this->qualifiers.push_back(this->getNextQualifier());
@@ -74,7 +74,7 @@ namespace game
 		return this->make();
 	}
 
-	std::optional<WeakObject> Everything::maybeGetFromIndex(SizeAlias index) {
+	std::optional<WeakObject> Everything::maybeGetFromIndex(Index<Everything> index) {
 		if (this->isValidIndex(index)) {
 			return this->getFromIndex(index);
 		}
@@ -83,13 +83,13 @@ namespace game
 		}
 	}
 
-	WeakObject Everything::getFromIndex(SizeAlias index) {
+	WeakObject Everything::getFromIndex(Index<Everything> index) {
 		assert(index > 0);
 		assert(this->isValidIndex(index));
 		return { index, this };
 	}
 
-	bool Everything::isValidIndex(SizeAlias index) {
+	bool Everything::isValidIndex(Index<Everything> index) {
 		return (index > 0) && this->validIndices[index];
 	}
 
@@ -97,12 +97,12 @@ namespace game
 		return this->qualifier++;
 	}
 
-	bool Everything::isQualified(SizeAlias i, Qualifier q) const {
+	bool Everything::isQualified(Index<Everything> i, Qualifier q) const {
 		assert(i != 0);
 		return this->qualifiers[i] == q;
 	}
 
-	Qualifier Everything::getQualifier(SizeAlias i) const {
+	Qualifier Everything::getQualifier(Index<Everything> i) const {
 		assert(i != 0);
 		return this->qualifiers[i];
 	}

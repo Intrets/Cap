@@ -23,10 +23,6 @@ namespace render
 	struct RenderInfo;
 }
 
-struct Spawner
-{
-};
-
 namespace game
 {
 	//enum ACTION
@@ -114,7 +110,7 @@ namespace game
 		void removeFromWorld(glm::ivec2 pos);
 		void moveInWorld(glm::ivec2 from, glm::ivec2 to);
 
-		void placeInWorld(SizeAlias index, glm::ivec2 pos);
+		void placeInWorld(Index<Everything> index, glm::ivec2 pos);
 		void placeInWorld(WeakObject& obj, glm::ivec2 pos);
 		void placeInWorld(UniqueObject& obj, glm::ivec2 pos);
 

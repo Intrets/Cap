@@ -193,8 +193,6 @@ namespace game
 					self->text.addLine(newLine);
 				}
 
-				std::cout << "view: " << self->text.getView() << "\n";
-
 				if (newLines.size() != 0) {
 					self->text.moveCursor(glm::ivec2(0, newLines.size()));
 				}

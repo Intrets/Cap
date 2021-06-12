@@ -15,9 +15,11 @@
 
 #include <misc/Misc.h>
 
+#include <mem/Index.h>
+
 #include <serial/Serializer.h>
 
-using SizeAlias = size_t;
+struct Component;
 
 template<class T>
 struct Identifier;
@@ -95,18 +97,18 @@ namespace game
 
 		StructInformation structInformation;
 
-		SizeAlias reservedObjects = 0;
-		SizeAlias index = 0;
-		SizeAlias objectSize = 0;
+		size_t reservedObjects = 0;
+		Index<RawData> index{ 0 };
+		size_t objectSize = 0;
 		std::vector<std::byte> data{};
-		std::vector<SizeAlias> indices{};
+		std::vector<Index<Everything>> indices{};
 
-		std::vector<SizeAlias> deletions{};
+		std::vector<Index<RawData>> deletions{};
 
 		struct DeletedInfo
 		{
-			SizeAlias i;
-			SizeAlias changed;
+			Index<RawData> i;
+			Index<Everything> changed;
 		};
 
 		std::vector<DeletedInfo> packDeletions();
@@ -117,21 +119,25 @@ namespace game
 		DEFAULTCOPYMOVE(RawData);
 
 		template<class T>
-		inline void remove(SizeAlias i);
+		inline void remove(Index<RawData> i);
 
-		inline void removeUntyped(SizeAlias i);
+		inline void removeUntyped(Index<RawData> i);
 
 		template<class T>
-		inline T& get(SizeAlias i);
+		inline T& get(Index<RawData> i);
 
-		inline void* getUntyped(SizeAlias i);
+		inline void* getUntyped(Index<RawData> i);
 
-		inline SizeAlias getIndex(SizeAlias i) const;
+		inline Index<Everything> getIndex(Index<RawData> i) const;
 
-		bool print(serial::Serializer& serializer, SizeAlias i);
+		bool print(serial::Serializer& serializer, Index<RawData> i);
 
 		template<class T, class... Args>
-		inline std::pair<SizeAlias, T*> add(SizeAlias i, Args&&... args);
+		inline std::pair<Index<RawData>, T*> add(Index<Everything> i, Args&&... args);
+
+		inline Index<RawData> cloneUntyped(Index<RawData> i, Index<Everything> j);
+
+		void increaseSize();
 	};
 }
 
@@ -165,7 +171,7 @@ struct serial::Serializable<game::RawData>
 
 		rawData.data.resize(rawData.structInformation.width * rawData.index);
 
-		for (size_t i = 1; i < rawData.index; i++) {
+		for (Index<game::RawData> i{ 1 }; i < rawData.index; i++) {
 			if (!rawData.structInformation.objectReader(serializer, rawData.getUntyped(i))) return false;
 		}
 
@@ -182,7 +188,7 @@ struct serial::Serializable<game::RawData>
 			rawData.deletions
 		)) return false;
 
-		for (size_t i = 1; i < rawData.index; i++) {
+		for (Index<game::RawData> i{ 1 }; i < rawData.index; i++) {
 			if (!rawData.structInformation.objectWriter(serializer, rawData.getUntyped(i))) return false;
 		}
 
@@ -205,7 +211,7 @@ namespace game
 {
 	struct WeakObject
 	{
-		SizeAlias index{ 0 };
+		Index<Everything> index{ 0 };
 		Everything* proxy{ nullptr };
 
 		void deleteObject();
@@ -228,7 +234,7 @@ namespace game
 		template<class T>
 		inline bool has() const;
 
-		bool has(SizeAlias i);
+		bool has(Index<Component> i);
 	};
 
 	struct UniqueObject : WeakObject
@@ -317,47 +323,47 @@ namespace game
 		Qualifier qualifier = 1;
 
 		std::vector<SignatureType> signatures{ 0 };
-		std::array<std::vector<SizeAlias>, SIZE> dataIndices;
+		std::array<std::vector<Index<RawData>>, SIZE> dataIndices;
 
-		std::vector<SizeAlias> removed{};
+		std::vector<Index<Everything>> removed{};
 
 		WeakObject make();
 		UniqueObject makeUnique();
 
-		std::optional<WeakObject> maybeGetFromIndex(SizeAlias index);
-		WeakObject getFromIndex(SizeAlias index);
-		bool isValidIndex(SizeAlias index);
+		std::optional<WeakObject> maybeGetFromIndex(Index<Everything> index);
+		WeakObject getFromIndex(Index<Everything> index);
+		bool isValidIndex(Index<Everything> index);
 
 		Qualifier getNextQualifier();
-		bool isQualified(SizeAlias i, Qualifier q) const;
-		Qualifier getQualifier(SizeAlias i) const;
+		bool isQualified(Index<Everything> i, Qualifier q) const;
+		Qualifier getQualifier(Index<Everything> i) const;
 
-		inline void remove(SizeAlias i);
+		inline void remove(Index<Everything> i);
 
 		void collectRemoved();
 
 		template<class T>
-		inline void removeComponent(SizeAlias i);
+		inline void removeComponent(Index<Everything> i);
 
-		inline void removeComponent(SizeAlias i, size_t type);
+		inline void removeComponent(Index<Everything> i, size_t type);
 
 		template<class T, class... Args>
-		inline T& add(SizeAlias i, Args&&... args);
+		inline T& add(Index<Everything> i, Args&&... args);
 
 		template<class T>
-		inline T& get(SizeAlias i);
+		inline T& get(Index<Everything> i);
 
 		template<class T>
 		inline RawData& gets();
 
 		inline RawData& gets(size_t type);
 
-		bool print(serial::Serializer& serializer, SizeAlias index, size_t type);
+		bool print(serial::Serializer& serializer, Index<Everything> index, size_t type);
 
 		template<class... Ts>
-		inline bool has(SizeAlias i) const;
+		inline bool has(Index<Everything> i) const;
 
-		inline bool has(SizeAlias i, size_t type);
+		inline bool has(Index<Everything> i, Index<Component> type);
 
 		template<class F>
 		inline void run(F f);
@@ -409,7 +415,7 @@ struct serial::Serializable<game::WeakObject>
 		else {
 			auto end = obj.proxy->getTypeCount();
 
-			for (size_t i = 0; i < end; i++) {
+			for (Index<Component> i{ 0 }; i < end; i++) {
 				if (obj.has(i)) {
 					serializer.printIndentedString(obj.proxy->data[i].structInformation.name + " ");
 					obj.proxy->print(serializer, obj.index, i);
@@ -518,13 +524,13 @@ namespace game
 			const size_t end = g.index;
 
 			if constexpr (sizeof...(Ms) == 0) {
-				for (SizeAlias i = 1; i < end; i++) {
+				for (Index<game::RawData> i{ 1 }; i < end; i++) {
 					auto index = g.getIndex(i);
 					Loop::run<Everything, F, L, Match<M, Ms...>, Args...>(e, f, Match<M, Ms...>{ { index, & e } }, args...);
 				}
 			}
 			else {
-				for (SizeAlias i = 1; i < end; i++) {
+				for (Index<game::RawData> i{ 1 }; i < end; i++) {
 					auto index = g.getIndex(i);
 
 					if (e.has<Ms...>(index)) {
@@ -549,12 +555,12 @@ namespace game
 			const size_t end = g.index;
 
 			if constexpr (sizeof...(Ms) == 0) {
-				for (SizeAlias i = 1; i < end; i++) {
+				for (Index<game::RawData> i{ 1 }; i < end; i++) {
 					f(g.get<M>(i));
 				}
 			}
 			else {
-				for (SizeAlias i = 1; i < end; i++) {
+				for (Index<game::RawData> i{ 1 }; i < end; i++) {
 					auto index = g.getIndex(i);
 
 					if (e.has<Ms...>(index)) {
@@ -566,7 +572,7 @@ namespace game
 	};
 
 	template<class T>
-	inline void RawData::remove(SizeAlias i) {
+	inline void RawData::remove(Index<RawData> i) {
 		assert(i != 0);
 		assert(i < this->index);
 		assert(this->objectSize != 0);
@@ -602,12 +608,12 @@ namespace game
 	}
 
 	inline RawData::~RawData() {
-		for (size_t i = 1; i < this->index; i++) {
+		for (Index<RawData> i{ 1 }; i < this->index; i++) {
 			this->structInformation.objectDestructor(this->getUntyped(i));
 		}
 	}
 
-	inline void RawData::removeUntyped(SizeAlias i) {
+	inline void RawData::removeUntyped(Index<RawData> i) {
 		assert(i != 0);
 		assert(i < this->index);
 
@@ -619,44 +625,64 @@ namespace game
 	}
 
 	template<class T>
-	inline T& RawData::get(SizeAlias i) {
+	inline T& RawData::get(Index<RawData> i) {
 		assert(i != 0);
 		assert(i < this->reservedObjects);
 		return *reinterpret_cast<T*>(&this->data[aligned_sizeof<T>::get() * i]);
 	}
 
-	inline void* RawData::getUntyped(SizeAlias i) {
+	inline void* RawData::getUntyped(Index<RawData> i) {
 		assert(i != 0);
 		assert(i < this->reservedObjects);
 		return static_cast<void*>(&this->data[this->objectSize * i]);
 	}
 
-	inline SizeAlias RawData::getIndex(SizeAlias i) const {
+	inline Index<Everything> RawData::getIndex(Index<RawData> i) const {
 		assert(i != 0);
 		assert(i < this->index);
 		return this->indices[i];
 	}
 
-	inline bool RawData::print(serial::Serializer& serializer, SizeAlias i) {
+	inline bool RawData::print(serial::Serializer& serializer, Index<RawData> i) {
 		return this->structInformation.objectPrinter(serializer, this->getUntyped(i));
 	}
 
+	inline Index<RawData> RawData::cloneUntyped(Index<RawData> i, Index<Everything> j) {
+		assert(this->index > 1);
+		assert(i > 0 && i <= this->index);
+		assert(this->structInformation.clone != nullptr);
+		assert(this->structInformation.width != 0);
+
+		if (this->index >= this->reservedObjects) {
+			this->increaseSize();
+		}
+
+		this->indices.push_back(j);
+		this->structInformation.clone(this->getUntyped(i), this->getUntyped(this->index));
+
+		return this->index++;
+	}
+
+	inline void RawData::increaseSize() {
+		this->reservedObjects *= 2;
+		this->data.resize(this->reservedObjects * this->structInformation.width);
+	}
+
 	template<class T, class... Args>
-	inline std::pair<SizeAlias, T*> RawData::add(SizeAlias i, Args&&... args) {
+	inline std::pair<Index<RawData>, T*> RawData::add(Index<Everything> i, Args&&... args) {
 		this->objectSize = aligned_sizeof<T>::get();
 
 		if (this->reservedObjects == 0) {
 			this->reservedObjects = 16;
-			this->index = 1;
-			this->indices.push_back(0);
+			this->index.set(1);
+			this->indices.push_back(Index<Everything>{ 0 });
 			this->data.resize(this->reservedObjects * aligned_sizeof<T>::get());
 
 			this->structInformation = StoredStructInformations::infos[std::string(serial::Serializable<T>::typeName)];
 
 		}
 		else if (this->index >= this->reservedObjects) {
-			this->reservedObjects *= 2;
-			this->data.resize(this->reservedObjects * aligned_sizeof<T>::get());
+			this->increaseSize();
 		}
 
 		assert(this->objectSize == aligned_sizeof<T>::get());
@@ -668,15 +694,15 @@ namespace game
 
 		new (&obj) T{ std::forward<Args>(args)... };
 
-		return { this->index++, &obj };
+		return { Index<RawData>{ this->index++ }, &obj };
 	}
 
-	inline void Everything::remove(SizeAlias i) {
+	inline void Everything::remove(Index<Everything> i) {
 		if (i == 0) {
 			return;
 		}
 
-		for (size_t type = 0; type < this->getTypeCount(); type++) {
+		for (Index<Component> type{ 0 }; type < this->getTypeCount(); type++) {
 			if (this->has(i, type)) {
 				this->data[type].removeUntyped(this->dataIndices[type][i]);
 			}
@@ -694,7 +720,7 @@ namespace game
 		for (size_t type = 0; type < this->getTypeCount(); type++) {
 			for (auto const& d : this->data[type].packDeletions()) {
 				this->dataIndices[type][d.changed] = this->dataIndices[type][d.i];
-				this->dataIndices[type][d.i] = 0;
+				this->dataIndices[type][d.i].set(0);
 			}
 		}
 
@@ -709,7 +735,7 @@ namespace game
 		this->removed.clear();
 	}
 
-	inline void Everything::removeComponent(SizeAlias i, size_t type) {
+	inline void Everything::removeComponent(Index<Everything> i, size_t type) {
 		assert(this->signatures[i].test(type));
 		this->data[type].removeUntyped(this->dataIndices[type][i]);
 		this->signatures[i].reset(type);
@@ -719,11 +745,11 @@ namespace game
 		return this->data[type];
 	}
 
-	inline bool Everything::print(serial::Serializer& serializer, SizeAlias index, size_t type) {
+	inline bool Everything::print(serial::Serializer& serializer, Index<Everything> index, size_t type) {
 		return this->data[type].print(serializer, this->dataIndices[type][index]);
 	}
 
-	inline bool Everything::has(SizeAlias i, size_t type) {
+	inline bool Everything::has(Index<Everything> i, Index<Component> type) {
 		return this->signatures[i].test(type);
 	}
 
@@ -733,17 +759,17 @@ namespace game
 
 	inline Everything::Everything() {
 		for (size_t type = 0; type < SIZE; type++) {
-			this->dataIndices[type].push_back(0);
+			this->dataIndices[type].push_back(Index<RawData>{ 0 });
 		}
 	}
 
 	template<class T>
-	inline void Everything::removeComponent(SizeAlias i) {
+	inline void Everything::removeComponent(Index<Everything> i) {
 		this->removeComponent(i, component_index_v<T>);
 	}
 
 	template<class T, class... Args>
-	inline T& Everything::add(SizeAlias i, Args&&... args) {
+	inline T& Everything::add(Index<Everything> i, Args&&... args) {
 		[[maybe_unused]]
 		auto b = RegisterStruct<T>::initialized;
 		assert(!this->has<T>(i));
@@ -754,7 +780,7 @@ namespace game
 	}
 
 	template<class T>
-	inline T& Everything::get(SizeAlias i) {
+	inline T& Everything::get(Index<Everything> i) {
 		return this->data[component_index_v<T>].template get<T>(this->dataIndices[component_index_v<T>][i]);
 	}
 
@@ -764,7 +790,7 @@ namespace game
 	}
 
 	template<class... Ts>
-	inline bool Everything::has(SizeAlias i) const {
+	inline bool Everything::has(Index<Everything> i) const {
 		auto const sig = group_signature_v<Ts...>;
 		return (this->signatures[i] & sig) == sig;
 	}

@@ -10,14 +10,13 @@
 #include <queue>
 
 #include <wglm/glm.hpp>
-#include <misc/Misc.h>
 
-#include "Game.h"
-#include "WorldGrid.h"
+#include <misc/Misc.h>
 
 #include <serial/Serializer.h>
 
-using SizeAlias = size_t;
+#include "Game.h"
+#include "WorldGrid.h"
 
 struct GameObjectProxy;
 struct GetEnum;

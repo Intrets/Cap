@@ -9,11 +9,14 @@
 
 #include <serial/Serializer.h>
 
+#include <mem/Index.h>
+
 constexpr auto WORLD_SIZE = 70;
-using SizeAlias = size_t;
 
 namespace game
 {
+	struct Everything;
+
 	glm::ivec2 getDirectionFromIndex(std::integral auto index);
 	uint8_t getIndexFromDirection(glm::ivec2 vec);
 
@@ -30,7 +33,7 @@ namespace game
 
 	struct WorldGrid
 	{
-		std::array<std::array<SizeAlias, WORLD_SIZE>, WORLD_SIZE> grid;
+		std::array<std::array<Index<Everything>, WORLD_SIZE>, WORLD_SIZE> grid;
 		std::array<std::array<int32_t, WORLD_SIZE>, WORLD_SIZE> group;
 		std::array<std::array<Directions, WORLD_SIZE>, WORLD_SIZE> directions;
 
@@ -45,11 +48,11 @@ namespace game
 		void setGroup(glm::ivec2 pos, int32_t g);
 		int32_t getGroup(glm::ivec2 pos) const;
 
-		SizeAlias get(int32_t x, int32_t y);
-		SizeAlias get(glm::ivec2 pos);
+		Index<Everything> get(int32_t x, int32_t y);
+		Index<Everything> get(glm::ivec2 pos);
 
-		void place(SizeAlias index, int32_t x, int32_t y);
-		void place(SizeAlias index, glm::ivec2 pos);
+		void place(Index<Everything> index, int32_t x, int32_t y);
+		void place(Index<Everything> index, glm::ivec2 pos);
 
 		void remove(int32_t x, int32_t y);
 		void remove(glm::ivec2 pos);
