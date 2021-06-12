@@ -27,7 +27,7 @@ struct Identifier;
 struct StructInformation
 {
 	std::string name{};
-	int32_t index{};
+	Index<Component> index{};
 	size_t width{};
 
 	void(*objectDestructor)(void*) = nullptr;
@@ -281,16 +281,16 @@ namespace game
 		template<class T>
 		struct component_index : component_counter
 		{
-			static inline int32_t getVal() {
+			static inline Index<Component> getVal() {
 				assert(t < SIZE);
-				return t++;
+				return Index<Component>{ static_cast<size_t>(t++) };
 			};
 
-			static inline int32_t val = getVal();
+			static inline Index<Component> val = getVal();
 		};
 
 		template<class T>
-		static inline const int32_t component_index_v = component_index<T>::val;
+		static inline Index<Component> component_index_v = component_index<T>::val;
 
 		template<class M, class... Ms>
 		struct group_signature
@@ -345,7 +345,7 @@ namespace game
 		template<class T>
 		inline void removeComponent(Index<Everything> i);
 
-		inline void removeComponent(Index<Everything> i, size_t type);
+		inline void removeComponent(Index<Everything> i, Index<Component> type);
 
 		template<class T, class... Args>
 		inline T& add(Index<Everything> i, Args&&... args);
@@ -356,9 +356,9 @@ namespace game
 		template<class T>
 		inline RawData& gets();
 
-		inline RawData& gets(size_t type);
+		inline RawData& gets(Index<Component> type);
 
-		bool print(serial::Serializer& serializer, Index<Everything> index, size_t type);
+		bool print(serial::Serializer& serializer, Index<Everything> index, Index<Component> type);
 
 		template<class... Ts>
 		inline bool has(Index<Everything> i) const;
@@ -372,7 +372,7 @@ namespace game
 		inline void match(F f);
 
 		template<class... Ms>
-		size_t selectPivot();
+		Index<Component> selectPivot();
 
 		size_t getTypeCount();
 
@@ -518,10 +518,10 @@ namespace game
 
 		template<class F, class L, class... Args>
 		static inline void run(Everything& e, F f, Args... args) {
-			size_t pivot = e.selectPivot<M, Ms...>();
+			auto pivot = e.selectPivot<M, Ms...>();
 
 			auto& g = e.gets(pivot);
-			const size_t end = g.index;
+			const auto end = g.index;
 
 			if constexpr (sizeof...(Ms) == 0) {
 				for (Index<game::RawData> i{ 1 }; i < end; i++) {
@@ -549,10 +549,10 @@ namespace game
 	{
 		template<class F>
 		static inline void run(Everything& e, F f) {
-			size_t pivot = e.selectPivot<M, Ms...>();
+			auto pivot = e.selectPivot<M, Ms...>();
 
 			auto& g = e.gets(pivot);
-			const size_t end = g.index;
+			const auto end = g.index;
 
 			if constexpr (sizeof...(Ms) == 0) {
 				for (Index<game::RawData> i{ 1 }; i < end; i++) {
@@ -735,17 +735,17 @@ namespace game
 		this->removed.clear();
 	}
 
-	inline void Everything::removeComponent(Index<Everything> i, size_t type) {
+	inline void Everything::removeComponent(Index<Everything> i, Index<Component> type) {
 		assert(this->signatures[i].test(type));
 		this->data[type].removeUntyped(this->dataIndices[type][i]);
 		this->signatures[i].reset(type);
 	}
 
-	inline RawData& Everything::gets(size_t type) {
+	inline RawData& Everything::gets(Index<Component> type) {
 		return this->data[type];
 	}
 
-	inline bool Everything::print(serial::Serializer& serializer, Index<Everything> index, size_t type) {
+	inline bool Everything::print(serial::Serializer& serializer, Index<Everything> index, Index<Component> type) {
 		return this->data[type].print(serializer, this->dataIndices[type][index]);
 	}
 
@@ -758,7 +758,7 @@ namespace game
 	}
 
 	inline Everything::Everything() {
-		for (size_t type = 0; type < SIZE; type++) {
+		for (Index<Component> type{ 0 }; type < SIZE; type++) {
 			this->dataIndices[type].push_back(Index<RawData>{ 0 });
 		}
 	}
@@ -807,8 +807,8 @@ namespace game
 	}
 
 	template<class... Ms>
-	inline size_t Everything::selectPivot() {
-		size_t pivot = 0;
+	inline Index<Component> Everything::selectPivot() {
+		Index<Component> pivot{ 0 };
 		size_t smallest = std::numeric_limits<size_t>::max();
 		for (auto s : { Everything::component_index<Ms>::val... }) {
 			size_t typeSize = this->data[s].index;
