@@ -71,7 +71,6 @@ namespace game
 					glm::vec2(pos.pos) + 0.5f
 				);
 				});
-
 		}
 	}
 

@@ -30,6 +30,7 @@ struct StructInformation
 	Index<Component> index{};
 	size_t width{};
 
+	void(*clone)(void* source, void* target) = nullptr;
 	void(*objectDestructor)(void*) = nullptr;
 	bool(*objectReader)(serial::Serializer& serializer, void*) = nullptr;
 	bool(*objectWriter)(serial::Serializer& serializer, void*) = nullptr;
@@ -133,8 +134,10 @@ namespace game
 		bool print(serial::Serializer& serializer, Index<RawData> i);
 
 		template<class T, class... Args>
+		[[nodiscard]]
 		inline std::pair<Index<RawData>, T*> add(Index<Everything> i, Args&&... args);
 
+		[[nodiscard]]
 		inline Index<RawData> cloneUntyped(Index<RawData> i, Index<Everything> j);
 
 		void increaseSize();
@@ -234,11 +237,14 @@ namespace game
 		template<class T>
 		inline bool has() const;
 
-		bool has(Index<Component> i);
+		bool has(Index<Component> i) const;
+		Index<RawData> getComponentIndex(Index<Component> type) const;
 	};
 
 	struct UniqueObject : WeakObject
 	{
+		void release();
+
 		UniqueObject(WeakObject&& other);
 
 		UniqueObject& operator=(UniqueObject&& other) noexcept;
@@ -319,7 +325,7 @@ namespace game
 		std::vector<Index<Everything>> freeIndirections{};
 
 		std::vector<Qualifier> qualifiers{ 0 };
-		std::vector<int32_t> validIndices{};
+		std::vector<int32_t> validIndices{ false };
 		Qualifier qualifier = 1;
 
 		std::vector<SignatureType> signatures{ 0 };
@@ -329,6 +335,13 @@ namespace game
 
 		WeakObject make();
 		UniqueObject makeUnique();
+
+		UniqueObject cloneAll(WeakObject const& obj);
+
+		template<class... Ms>
+		UniqueObject clone(WeakObject const& obj);
+
+		UniqueObject clone(std::vector<Index<Component>> components, WeakObject const& obj);
 
 		std::optional<WeakObject> maybeGetFromIndex(Index<Everything> index);
 		WeakObject getFromIndex(Index<Everything> index);
@@ -363,7 +376,9 @@ namespace game
 		template<class... Ts>
 		inline bool has(Index<Everything> i) const;
 
-		inline bool has(Index<Everything> i, Index<Component> type);
+		inline bool has(Index<Everything> i, Index<Component> type) const;
+
+		Index<RawData> getComponentIndex(Index<Everything> i, Index<Component> type) const;
 
 		template<class F>
 		inline void run(F f);
@@ -442,8 +457,6 @@ struct serial::Serializable<game::QualifiedObject>
 	}
 };
 
-
-
 namespace game
 {
 	template<class T>
@@ -471,13 +484,16 @@ namespace game
 				return serializer.print<T>(std::forward<T>(*reinterpret_cast<T*>(obj)));
 			};
 
+			info.clone = [](void* source, void* target) {
+				new (target) T(*reinterpret_cast<T*>(source));
+			};
+
 			StoredStructInformations::infos[info.name] = info;
 
 			return true;
 		};
 		inline static bool initialized = reg();
 	};
-
 
 	struct Loop
 	{
@@ -749,8 +765,13 @@ namespace game
 		return this->data[type].print(serializer, this->dataIndices[type][index]);
 	}
 
-	inline bool Everything::has(Index<Everything> i, Index<Component> type) {
+	inline bool Everything::has(Index<Everything> i, Index<Component> type) const {
 		return this->signatures[i].test(type);
+	}
+
+	inline Index<RawData> Everything::getComponentIndex(Index<Everything> i, Index<Component> type) const {
+		assert(this->has(i, type));
+		return this->dataIndices[type][i];
 	}
 
 	inline size_t Everything::getTypeCount() {
@@ -761,6 +782,17 @@ namespace game
 		for (Index<Component> type{ 0 }; type < SIZE; type++) {
 			this->dataIndices[type].push_back(Index<RawData>{ 0 });
 		}
+	}
+
+	template<class ...Ms>
+	inline UniqueObject Everything::clone(WeakObject const& obj) {
+		std::vector<Index<Component>> components;
+
+		for (auto component : { Everything::component_index<Ms>::val... }) {
+			components.push_back(component);
+		}
+
+		return this->clone(components, obj);
 	}
 
 	template<class T>

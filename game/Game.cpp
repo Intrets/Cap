@@ -6,6 +6,10 @@ namespace game
 		this->proxy->remove(this->index);
 	}
 
+	void UniqueObject::release() {
+		this->index.set(0);
+	}
+
 	UniqueObject::UniqueObject(WeakObject&& other) {
 		this->index = other.index;
 		this->proxy = other.proxy;
@@ -43,9 +47,13 @@ namespace game
 		return (this->index != 0) && (this->proxy != nullptr);
 	}
 
-	bool WeakObject::has(Index<Component> i) {
+	bool WeakObject::has(Index<Component> i) const {
 		assert(this->isNotNull());
 		return this->proxy->has(this->index, i);
+	}
+
+	Index<RawData> WeakObject::getComponentIndex(Index<Component> type) const {
+		return this->proxy->getComponentIndex(this->index, type);
 	}
 
 	WeakObject Everything::make() {
@@ -74,6 +82,30 @@ namespace game
 
 	UniqueObject Everything::makeUnique() {
 		return this->make();
+	}
+
+	UniqueObject Everything::cloneAll(WeakObject const& obj) {
+		std::vector<Index<Component>> all;
+
+		for (size_t i = 0; i < this->getTypeCount(); i++) {
+			all.push_back(Index<Component>{ i });
+		}
+
+		return this->clone(all, obj);
+	}
+
+	UniqueObject Everything::clone(std::vector<Index<Component>> components, WeakObject const& obj) {
+		auto p = this->makeUnique();
+		for (auto& type : components) {
+			if (obj.has(type)) {
+				auto componentIndex = obj.getComponentIndex(type);
+				auto newComponentIndex = this->data[type].cloneUntyped(componentIndex, p.index);
+
+				this->dataIndices[type][p.index] = newComponentIndex;
+				this->signatures[p.index].set(type);
+			}
+		}
+		return p;
 	}
 
 	std::optional<WeakObject> Everything::maybeGetFromIndex(Index<Everything> index) {
