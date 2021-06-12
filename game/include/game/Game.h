@@ -316,7 +316,7 @@ namespace game
 
 
 		std::vector<RawData> data{ SIZE };
-		std::vector<size_t> freeIndirections{};
+		std::vector<Index<Everything>> freeIndirections{};
 
 		std::vector<Qualifier> qualifiers{ 0 };
 		std::vector<int32_t> validIndices{};
@@ -713,7 +713,7 @@ namespace game
 		this->qualifiers[i] = this->getNextQualifier();
 
 		this->removed.push_back(i);
-		this->validIndices[i] = 0;
+		this->validIndices[i] = false;
 	}
 
 	inline void Everything::collectRemoved() {

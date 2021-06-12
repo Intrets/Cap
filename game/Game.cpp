@@ -50,10 +50,10 @@ namespace game
 
 	WeakObject Everything::make() {
 		if (!this->freeIndirections.empty()) {
-			size_t i = this->freeIndirections.back();
+			auto i = this->freeIndirections.back();
 			this->freeIndirections.pop_back();
 
-			this->validIndices[i] = 1;
+			this->validIndices[i] = true;
 
 			return { i, this };
 		}
@@ -64,9 +64,11 @@ namespace game
 			}
 
 			this->qualifiers.push_back(this->getNextQualifier());
-			this->validIndices.push_back(1);
+			this->validIndices.push_back(true);
 
-			return { this->signatures.size() - 1, this };
+			Index<Everything> i{ this->signatures.size() - 1 };
+
+			return { i, this };
 		}
 	}
 
