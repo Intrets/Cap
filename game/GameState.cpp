@@ -101,30 +101,6 @@ namespace game
 				});
 		}
 
-		this->everything.run([&](Match<Locomotion, GamePosition, Target>& e) {
-			if (e.get<Locomotion>().cooldown != 0) {
-				e.get<Locomotion>().cooldown--;
-			}
-			else {
-				auto& target = e.get<Target>();
-
-				if (target.path.empty()) {
-					e.remove<Target>();
-				}
-				else {
-					e.get<Locomotion>().cooldown = e.get<Locomotion>().fitness;
-
-					auto newPos = e.get<Target>().path.front();
-					e.get<Target>().path.pop_front();
-
-					if (this->empty(newPos)) {
-						this->moveInWorld(e.get<GamePosition>().pos, newPos);
-						e.get<GamePosition>().pos = newPos;
-					}
-				}
-			}
-			});
-
 		if (this->tick % 10 == 0) {
 			this->everything.match([&](Grapher& grapher) {
 				while (!grapher.step(*this->world));
