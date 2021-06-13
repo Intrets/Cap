@@ -281,7 +281,7 @@ namespace game
 	{
 		struct component_counter
 		{
-			static inline int32_t t = 0;
+			static inline size_t t = 0;
 		};
 
 		template<class T>
@@ -289,7 +289,41 @@ namespace game
 		{
 			static inline Index<Component> getVal() {
 				assert(t < SIZE);
-				return Index<Component>{ static_cast<size_t>(t++) };
+
+				StructInformation info;
+				static_assert(serial::has_type_name<T>);
+				info.name = serial::Serializable<T>::typeName;
+				info.index = Index<Component>{ t++ };
+				info.width = RawData::aligned_sizeof<T>::get();
+				info.objectDestructor = [](void* obj) {
+					reinterpret_cast<T*>(obj)->~T();
+				};
+
+				info.objectReader = [](serial::Serializer& serializer, void* obj) {
+					return serializer.read<T>(std::forward<T>(*reinterpret_cast<T*>(obj)));
+				};
+
+				info.objectWriter = [](serial::Serializer& serializer, void* obj) {
+					return serializer.write<T>(std::forward<T>(*reinterpret_cast<T*>(obj)));
+				};
+
+				info.objectPrinter = [](serial::Serializer& serializer, void* obj) {
+					return serializer.print<T>(std::forward<T>(*reinterpret_cast<T*>(obj)));
+				};
+
+				info.clone = [](void* source, void* target) {
+					new (target) T(*reinterpret_cast<T*>(source));
+				};
+
+				// Somehow needs to do something before inserting. Another case of the global static instances fiasco.
+				if (!StoredStructInformations::infos.contains(info.name)) {
+					StoredStructInformations::infos.insert({ info.name, info });
+				}
+				else {
+					assert(0);
+				}
+
+				return info.index;
 			};
 
 			static inline Index<Component> val = getVal();
@@ -415,7 +449,7 @@ struct serial::Serializable<game::Everything>
 			ALL(removed),
 			ALL(validIndices)
 			);
-	};
+	}
 };
 
 template<>
@@ -459,42 +493,6 @@ struct serial::Serializable<game::QualifiedObject>
 
 namespace game
 {
-	template<class T>
-	struct RegisterStruct
-	{
-		static bool reg() {
-			StructInformation info;
-			static_assert(serial::has_type_name<T>);
-			info.name = serial::Serializable<T>::typeName;
-			info.index = game::Everything::component_index_v<T>;
-			info.width = RawData::aligned_sizeof<T>::get();
-			info.objectDestructor = [](void* obj) {
-				reinterpret_cast<T*>(obj)->~T();
-			};
-
-			info.objectReader = [](serial::Serializer& serializer, void* obj) {
-				return serializer.read<T>(std::forward<T>(*reinterpret_cast<T*>(obj)));
-			};
-
-			info.objectWriter = [](serial::Serializer& serializer, void* obj) {
-				return serializer.write<T>(std::forward<T>(*reinterpret_cast<T*>(obj)));
-			};
-
-			info.objectPrinter = [](serial::Serializer& serializer, void* obj) {
-				return serializer.print<T>(std::forward<T>(*reinterpret_cast<T*>(obj)));
-			};
-
-			info.clone = [](void* source, void* target) {
-				new (target) T(*reinterpret_cast<T*>(source));
-			};
-
-			StoredStructInformations::infos[info.name] = info;
-
-			return true;
-		};
-		inline static bool initialized = reg();
-	};
-
 	struct Loop
 	{
 		template<class E, class F>
@@ -802,8 +800,6 @@ namespace game
 
 	template<class T, class... Args>
 	inline T& Everything::add(Index<Everything> i, Args&&... args) {
-		[[maybe_unused]]
-		auto b = RegisterStruct<T>::initialized;
 		assert(!this->has<T>(i));
 		auto [index, ptr] = this->data[component_index_v<T>].template add<T>(i, std::forward<Args>(args)...);
 		this->dataIndices[component_index_v<T>][i] = index;
