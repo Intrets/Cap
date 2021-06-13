@@ -18,7 +18,7 @@ namespace render
 		void loadBlockTexture(std::string);
 		bwo::Texture2DArray const& getTextureArray();
 
-		NOCOPYMOVE(BlockIDTextures);
+		NO_COPY_MOVE(BlockIDTextures);
 
 		BlockIDTextures();
 		~BlockIDTextures() = default;

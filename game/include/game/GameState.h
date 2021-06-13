@@ -115,23 +115,39 @@ namespace game
 		void placeInWorld(UniqueObject& obj, glm::ivec2 pos);
 
 		void init();
+		void clearWorld();
 
 		GameState() = default;
-		~GameState() = default;
+		~GameState();
 
-		NOCOPY(GameState);
-		DEFAULTMOVE(GameState);
+		GameState(GameState&& other) = default;
+		GameState& operator= (GameState&& other);
+
+		NO_COPY(GameState);
 	};
 }
 
 template<>
 struct serial::Serializable<game::GameState>
 {
-	ALL_DEF(game::GameState) {
+	template<class Selector>
+	static bool serializeEverything(Serializer& serializer, game::GameState&& obj) {
 		return serializer.runAll<Selector>(
 			ALL(everything),
 			ALL(world),
 			ALL(tick)
 			);
+	}
+
+	WRITE_DEF(game::GameState) {
+		return serializeEverything<Write>(serializer, std::forward<game::GameState>(obj));
+	}
+
+	READ_DEF(game::GameState) {
+		return serializeEverything<Read>(serializer, std::forward<game::GameState>(obj));
+	}
+
+	PRINT_DEF(game::GameState) {
+		return serializeEverything<Print>(serializer, std::forward<game::GameState>(obj));
 	}
 };

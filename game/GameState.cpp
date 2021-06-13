@@ -340,17 +340,35 @@ namespace game
 				p2.get<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
 			}
 		}
-
 	}
 
-	//float Concept::value(SignatureAlias const& signature) {
-	//	float result = 0.0f;
+	void GameState::clearWorld() {
+		if (!this->world) {
+			return;
+		}
 
-	//	for (auto const& essence : this->essences) {
-	//		if (signature.contains(essence.signature)) {
+		for (size_t x = 0; x < WORLD_SIZE; x++) {
+			for (size_t y = 0; y < WORLD_SIZE; y++) {
+				if (this->world->grid[x][y] != 0) {
+					this->everything.remove(this->world->grid[x][y]);
+					this->world->grid[x][y].set(0);
+				}
+			}
+		}
 
-	//			result += essence.value;
-	//		}
-	//	}
+		this->everything.collectRemoved();
+	}
 
+	GameState::~GameState() {
+		this->clearWorld();
+	}
+
+	GameState& GameState::operator=(GameState&& other) {
+		this->clearWorld();
+
+		this->everything = std::move(other.everything);
+		this->world = std::move(other.world);
+		this->tick = other.tick;
+		return *this;
+	}
 }

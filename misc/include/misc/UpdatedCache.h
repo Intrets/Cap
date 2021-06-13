@@ -23,7 +23,7 @@ public:
 	UpdatedCache(T const& v);
 	UpdatedCache(T&& v);
 
-	NOCOPYMOVE(UpdatedCache);
+	NO_COPY_MOVE(UpdatedCache);
 
 private:
 	UpdatedCache() = default;

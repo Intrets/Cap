@@ -60,6 +60,11 @@ namespace game
 		bool occupied(int32_t x, int32_t y);
 		bool occupied(glm::ivec2 pos);
 		bool empty(glm::ivec2 pos);
+
+		WorldGrid() = default;
+		~WorldGrid() = default;
+
+		NO_COPY_MOVE(WorldGrid);
 	};
 
 	glm::ivec2 getDirectionFromIndex(std::integral auto index) {

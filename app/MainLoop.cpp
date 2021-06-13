@@ -127,6 +127,8 @@ void mainLoop(GLFWwindow* window) {
 				serial::Serializer serializer{ file };
 
 				auto start = glfwGetTime();
+
+				Locator<game::NewEverything>::init(&gameState.everything);
 				if (!serializer.read(newGameState)) {
 					Locator<misc::Log>::ref().putLine(std::format("failed to load game from: {}", uiState.loadGame.value()));
 				}
@@ -134,6 +136,7 @@ void mainLoop(GLFWwindow* window) {
 					gameState = std::move(newGameState);
 					Locator<misc::Log>::ref().putLine(std::format("loaded game from {} in {:.4f} seconds", uiState.loadGame.value(), glfwGetTime() - start));
 				}
+				Locator<game::NewEverything>::destroy();
 			}
 
 			uiState.loadGame.reset();

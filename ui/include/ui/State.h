@@ -81,6 +81,6 @@ namespace ui
 		State();
 		~State() = default;
 
-		NOCOPYMOVE(State);
+		NO_COPY_MOVE(State);
 	};
 }

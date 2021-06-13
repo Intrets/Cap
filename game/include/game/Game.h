@@ -117,7 +117,8 @@ namespace game
 		RawData() = default;
 		~RawData();
 
-		DEFAULTCOPYMOVE(RawData);
+		NO_COPY(RawData);
+		DEFAULT_MOVE(RawData);
 
 		template<class T>
 		inline void remove(Index<RawData> i);
@@ -162,37 +163,37 @@ struct serial::Serializable<game::RawData>
 {
 	inline static const auto typeName = "RawData";
 
-	static bool run(serial::Read, serial::Serializer& serializer, game::RawData&& rawData) {
+	READ_DEF(game::RawData) {
 		if (!serializer.readAll(
-			rawData.structInformation,
-			rawData.reservedObjects,
-			rawData.index,
-			rawData.objectSize,
-			rawData.indices,
-			rawData.deletions
+			obj.structInformation,
+			obj.reservedObjects,
+			obj.index,
+			obj.objectSize,
+			obj.indices,
+			obj.deletions
 		)) return false;
 
-		rawData.data.resize(rawData.structInformation.width * rawData.index);
+		obj.data.resize(obj.structInformation.width * obj.reservedObjects);
 
-		for (Index<game::RawData> i{ 1 }; i < rawData.index; i++) {
-			if (!rawData.structInformation.objectReader(serializer, rawData.getUntyped(i))) return false;
+		for (Index<game::RawData> i{ 1 }; i < obj.index; i++) {
+			if (!obj.structInformation.objectReader(serializer, obj.getUntyped(i))) return false;
 		}
 
 		return true;
 	};
 
-	static bool run(Write, Serializer& serializer, game::RawData&& rawData) {
+	WRITE_DEF(game::RawData) {
 		if (!serializer.writeAll(
-			rawData.structInformation,
-			rawData.reservedObjects,
-			rawData.index,
-			rawData.objectSize,
-			rawData.indices,
-			rawData.deletions
+			obj.structInformation,
+			obj.reservedObjects,
+			obj.index,
+			obj.objectSize,
+			obj.indices,
+			obj.deletions
 		)) return false;
 
-		for (Index<game::RawData> i{ 1 }; i < rawData.index; i++) {
-			if (!rawData.structInformation.objectWriter(serializer, rawData.getUntyped(i))) return false;
+		for (Index<game::RawData> i{ 1 }; i < obj.index; i++) {
+			if (!obj.structInformation.objectWriter(serializer, obj.getUntyped(i))) return false;
 		}
 
 		return true;
@@ -253,7 +254,7 @@ namespace game
 		UniqueObject() = default;
 		~UniqueObject();
 
-		NOCOPY(UniqueObject);
+		NO_COPY(UniqueObject);
 	};
 
 	struct QualifiedObject
@@ -274,7 +275,12 @@ namespace game
 		QualifiedObject() = default;
 		~QualifiedObject() = default;
 
-		DEFAULTCOPYMOVE(QualifiedObject);
+		DEFAULT_COPY_MOVE(QualifiedObject);
+	};
+
+	struct NewEverything
+	{
+		Everything* ptr = nullptr;
 	};
 
 	struct Everything
@@ -315,13 +321,7 @@ namespace game
 					new (target) T(*reinterpret_cast<T*>(source));
 				};
 
-				// Somehow needs to do something before inserting. Another case of the global static instances fiasco.
-				if (!StoredStructInformations::infos.contains(info.name)) {
-					StoredStructInformations::infos.insert({ info.name, info });
-				}
-				else {
-					assert(0);
-				}
+				StoredStructInformations::infos.insert({ info.name, info });
 
 				return info.index;
 			};
@@ -355,7 +355,6 @@ namespace game
 		static inline const SignatureType group_signature_v = group_signature<Ms...>::value;
 
 
-		std::vector<RawData> data{ SIZE };
 		std::vector<Index<Everything>> freeIndirections{};
 
 		std::vector<Qualifier> qualifiers{ 0 };
@@ -366,6 +365,9 @@ namespace game
 		std::array<std::vector<Index<RawData>>, SIZE> dataIndices;
 
 		std::vector<Index<Everything>> removed{};
+
+		std::vector<RawData> data{ SIZE };
+
 
 		WeakObject make();
 		UniqueObject makeUnique();
@@ -428,8 +430,8 @@ namespace game
 		Everything();
 		~Everything() = default;
 
-		NOCOPY(Everything);
-		DEFAULTMOVE(Everything);
+		NO_COPY(Everything);
+		DEFAULT_MOVE(Everything);
 	};
 }
 
@@ -474,6 +476,54 @@ struct serial::Serializable<game::WeakObject>
 			return true;
 		}
 	}
+
+	WRITE_DEF(game::WeakObject) {
+		return serializer.writeAll(
+			ALL(index)
+		);
+	}
+
+	READ_DEF(game::WeakObject) {
+		auto b = serializer.readAll(
+			ALL(index)
+		);
+
+		assert(Locator<game::NewEverything>::ref().ptr != nullptr);
+		obj.proxy = Locator<game::NewEverything>::ref().ptr;
+
+		return b;
+	}
+};
+
+template<>
+struct serial::Serializable<game::UniqueObject>
+{
+	inline static const auto typeName = "UniqueObject";
+
+	PRINT_DEF(game::UniqueObject) {
+		game::WeakObject objWeak = obj;
+		return serializer.printAll(objWeak);
+	}
+
+	WRITE_DEF(game::UniqueObject) {
+		game::WeakObject weakObj = obj;
+
+		return serializer.writeAll(
+			weakObj
+		);
+	}
+
+	READ_DEF(game::UniqueObject) {
+		game::WeakObject weakObj;
+		auto b = serializer.readAll(
+			weakObj
+		);
+
+		obj.index = weakObj.index;
+		obj.proxy = weakObj.proxy;
+
+		return b;
+	}
 };
 
 template<>
@@ -486,8 +536,13 @@ struct serial::Serializable<game::QualifiedObject>
 			return serializer.printString("Unqualified object");
 		}
 		else {
-			return serializer.print(obj.object);
+			return serializer.printAll(obj.object);
 		}
+	}
+
+	ALL_DEF(game::QualifiedObject) {
+		assert(0);
+		return true;
 	}
 };
 
@@ -597,6 +652,8 @@ namespace game
 	inline std::vector<RawData::DeletedInfo> RawData::packDeletions() {
 		std::vector<RawData::DeletedInfo> res;
 
+		std::sort(this->deletions.begin(), this->deletions.end(), [](auto left, auto right) {return left.i > right.i; });
+
 		for (auto i : this->deletions) {
 			size_t targetOffset = i * this->objectSize;
 			size_t sourceOffset = --this->index * this->objectSize;
@@ -622,6 +679,7 @@ namespace game
 	}
 
 	inline RawData::~RawData() {
+		assert(this->deletions.empty());
 		for (Index<RawData> i{ 1 }; i < this->index; i++) {
 			this->structInformation.objectDestructor(this->getUntyped(i));
 		}
@@ -733,16 +791,12 @@ namespace game
 	inline void Everything::collectRemoved() {
 		for (size_t type = 0; type < this->getTypeCount(); type++) {
 			for (auto const& d : this->data[type].packDeletions()) {
-				this->dataIndices[type][d.changed] = this->dataIndices[type][d.i];
-				this->dataIndices[type][d.i].set(0);
+				this->dataIndices[type][d.changed] = d.i;
 			}
 		}
 
 		for (auto i : this->removed) {
 			assert(this->signatures[i].none());
-			for (size_t type = 0; type < this->getTypeCount(); type++) {
-				assert(this->dataIndices[type][i] == 0);
-			}
 			this->freeIndirections.push_back(i);
 		}
 

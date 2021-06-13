@@ -51,7 +51,7 @@ namespace render
 
 			void bind(GLenum location);
 
-			NOCOPYMOVE(ArrayBuffer);
+			NO_COPY_MOVE(ArrayBuffer);
 		};
 
 		class Texture2DArray
@@ -76,7 +76,7 @@ namespace render
 			Texture2DArray(Texture2DArray&& other);
 			Texture2DArray& operator=(Texture2DArray&& other);
 
-			NOCOPY(Texture2DArray);
+			NO_COPY(Texture2DArray);
 		};
 
 		class Texture2D
@@ -102,7 +102,7 @@ namespace render
 			Texture2D(Texture2D&& other);
 			Texture2D& operator=(Texture2D&& other);
 
-			NOCOPY(Texture2D);
+			NO_COPY(Texture2D);
 		};
 
 		namespace Texture2DHelper
@@ -290,7 +290,7 @@ namespace render
 				glDeleteVertexArrays(1, &this->ID);
 			};
 
-			NOCOPYMOVE(VertexArrayObject);
+			NO_COPY_MOVE(VertexArrayObject);
 		};
 
 		class FrameBuffer
@@ -311,7 +311,7 @@ namespace render
 			void clear(glm::vec4 color, bool depth);
 			void clearDepth();
 
-			NOCOPYMOVE(FrameBuffer);
+			NO_COPY_MOVE(FrameBuffer);
 		};
 
 		class Program
@@ -343,7 +343,7 @@ namespace render
 			Program(char const* vert_raw, char const* frag_raw, std::string const& description);
 			~Program();
 
-			NOCOPYMOVE(Program);
+			NO_COPY_MOVE(Program);
 
 		private:
 			Program() = default;

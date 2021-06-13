@@ -185,19 +185,14 @@ struct Brain
 	void merge(std::vector<Action>& other);
 };
 
-struct Target
-{
-	std::deque<glm::ivec2> path;
-};
-
 struct Possession
 {
 	//std::vector<UniqueReference<Object, Object>> inventory{};
 
 	Possession() = default;
 
-	DEFAULTMOVE(Possession);
-	NOCOPY(Possession);
+	DEFAULT_MOVE(Possession);
+	NO_COPY(Possession);
 };
 
 struct Vicinity

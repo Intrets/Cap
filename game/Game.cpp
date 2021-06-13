@@ -3,7 +3,9 @@
 namespace game
 {
 	UniqueObject::~UniqueObject() {
-		this->proxy->remove(this->index);
+		if (this->proxy != nullptr) {
+			this->proxy->remove(this->index);
+		}
 	}
 
 	void UniqueObject::release() {
@@ -29,6 +31,8 @@ namespace game
 
 		this->index = other.index;
 		this->proxy = other.proxy;
+		other.index.set(0);
+		other.proxy = nullptr;
 
 		return *this;
 	}
