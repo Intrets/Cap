@@ -21,6 +21,8 @@
 
 #include <sound/SoundPlayer.h>
 
+#include <game/Game.h>
+
 static void GLAPIENTRY
 MessageCallback(
 	GLenum source,

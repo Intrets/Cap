@@ -171,6 +171,41 @@ struct serial::Serializable<GraphicsTile>
 	}
 };
 
+struct Spawner
+{
+	int32_t interval;
+	int32_t lastSpawn = 0;
+	game::UniqueObject object;
+
+	Spawner() = default;
+	~Spawner() = default;
+
+	Spawner(Spawner const& other) {
+		this->interval = other.interval;
+	}
+
+	Spawner& operator=(Spawner const& other) {
+		this->interval = other.interval;
+		return *this;
+	}
+
+	DEFAULT_MOVE(Spawner);
+};
+
+template<>
+struct serial::Serializable<Spawner>
+{
+	static constexpr std::string_view typeName = "Spawner";
+
+	ALL_DEF(Spawner) {
+		return serializer.runAll<Selector>(
+			ALL(object),
+			ALL(lastSpawn),
+			ALL(interval)
+			);
+	}
+};
+
 struct Brain
 {
 	int32_t happiness = 0;

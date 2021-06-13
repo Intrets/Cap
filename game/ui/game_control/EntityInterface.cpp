@@ -23,9 +23,6 @@ namespace game
 				renderInfo.highlightRenderInfo.addBox(pos.pos, pos.pos + 1);
 			}
 		}
-		else {
-			renderInfo.highlightRenderInfo.addBox({ 0,0 }, { 1,1 });
-		}
 		return depth;
 	}
 
@@ -37,6 +34,11 @@ namespace game
 				auto const index = playerInfo.gameState.world->get(mousePos);
 				if (auto maybeObject = playerInfo.gameState.everything.maybeGetFromIndex(index)) {
 					static_cast<game::EntityInterface*>(self_)->controlled.set(maybeObject.value());
+				}
+				else {
+					if (index != 0) {
+						assert(0);
+					}
 				}
 
 				playerInfo.uiState.addNamedUI("entity info", [this]() {
@@ -64,12 +66,36 @@ namespace game
 									stream.str()
 								);
 							}
+							else {
+								static_cast<ui::TextDisplay*>(self_)->setText(
+									"Nothing selected"
+								);
+							}
 							return ui::BIND::RESULT::CONTINUE;
 						}
 					);
 
 					return ui::Global::pop();
 					});
+
+				return ui::BIND::RESULT::CONTINUE;
+			}
+		);
+
+		this->addGameWorldBind(
+			{ ui::CONTROL::KEY::X },
+			[](PlayerInfo& playerInfo, ui::Base* self_) {
+				auto mousePos = playerInfo.uiState.getCursorPositionWorld();
+				auto const index = playerInfo.gameState.world->get(mousePos);
+				if (auto maybeObject = playerInfo.gameState.everything.maybeGetFromIndex(index)) {
+					playerInfo.gameState.world->remove(mousePos);
+					maybeObject.value().deleteObject();
+				}
+				else {
+					if (index != 0) {
+						assert(0);
+					}
+				}
 
 				return ui::BIND::RESULT::CONTINUE;
 			}

@@ -10,6 +10,7 @@
 #include <numeric>
 #include <optional>
 #include <unordered_map>
+#include <ranges>
 
 #include <tepp/tepp.h>
 

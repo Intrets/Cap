@@ -75,6 +75,21 @@ namespace game
 	}
 
 	void GameState::runTick() {
+		this->everything.match([&](GamePosition& pos, Spawner& spawner) {
+			if (spawner.lastSpawn == 0) {
+				if (!this->world->occupied(pos.pos + glm::ivec2(1, 0))) {
+					spawner.lastSpawn = spawner.interval;
+					auto obj = this->everything.cloneAll(spawner.object);
+					this->placeInWorld(obj, pos.pos + glm::ivec2(1, 0));
+					obj.release();
+				}
+			}
+			else {
+				spawner.lastSpawn--;
+			}
+			});
+
+
 		if (this->tick == 30) {
 			this->everything.match([&](RandomWalker& walker, GamePosition& pos) {
 				auto currentGroup = this->world->getGroup(pos.pos);
@@ -188,8 +203,23 @@ namespace game
 
 	void GameState::init() {
 		{
-			//auto p = this->everything.make();
-			//p.add<Grapher>();
+			auto p = this->everything.make();
+			p.add<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("gnome.dds");
+
+			this->placeInWorld(p, { 3,3 });
+
+			auto& spawner = p.add<Spawner>();
+
+			spawner.interval = 120;
+			auto www = this->everything.makeUnique();
+			spawner.object = std::move(www);
+			spawner.object.add<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("s_block.dds");
+
+			rand();
+		}
+		{
+			auto p = this->everything.make();
+			p.add<Grapher>();
 		}
 		{
 			auto const place = [&](int i, int j) {
@@ -221,40 +251,40 @@ namespace game
 				}
 			};
 
-			//placeWall({ 2, 10 }, { 10, 10 });
-			//placeWall({ 10, 3 }, { 10, 10 });
+			placeWall({ 2, 10 }, { 10, 10 });
+			placeWall({ 10, 3 }, { 10, 10 });
 
-			//placeWall({ 2, 6 }, { 2, WORLD_SIZE - 2 });
+			placeWall({ 2, 6 }, { 2, WORLD_SIZE - 2 });
 
-			//placeWall({ 1, 1 }, { 10, 1 });
+			placeWall({ 1, 1 }, { 10, 1 });
 
-			//placeWall({ 30, 33 }, { 30, 40 });
-			//placeWall({ 30, 40 }, { WORLD_SIZE - 2, 40 });
-			//placeWall({ 40, 30 }, { 40, 40 });
-			//placeWall({ 40, 30 }, { 33, 30 });
+			placeWall({ 30, 33 }, { 30, 40 });
+			placeWall({ 30, 40 }, { WORLD_SIZE - 2, 40 });
+			placeWall({ 40, 30 }, { 40, 40 });
+			placeWall({ 40, 30 }, { 33, 30 });
 
-			//placeWall({ 1, 20 }, { WORLD_SIZE - 4, 20 });
+			placeWall({ 1, 20 }, { WORLD_SIZE - 4, 20 });
 
-			//placeWall({ 1, 35 }, { 10, 35 });
-			//placeWall({ 12, 35 }, { 35, 35 });
+			placeWall({ 1, 35 }, { 10, 35 });
+			placeWall({ 12, 35 }, { 35, 35 });
 
-			//placeWall({ 20, 35 }, { 20, 23 });
+			placeWall({ 20, 35 }, { 20, 23 });
 
-			//place(41, 30);
+			place(41, 30);
 
-			//for (int32_t i = 0; i < 000; i++) {
-			//	int x = 1 + rand() % (WORLD_SIZE - 5);
-			//	int y = 1 + rand() % (WORLD_SIZE - 5);
-			//	if (x < 30 && y < 30) {
-			//		continue;
-			//	}
-			//	place(x, y);
-			//}
+			for (int32_t i = 0; i < 000; i++) {
+				int x = 1 + rand() % (WORLD_SIZE - 5);
+				int y = 1 + rand() % (WORLD_SIZE - 5);
+				if (x < 30 && y < 30) {
+					continue;
+				}
+				place(x, y);
+			}
 
-			//for (int32_t i = 5; i < 20; i++) {
-			//	place(10 + i, 20 - i);
+			for (int32_t i = 5; i < 20; i++) {
+				place(10 + i, 20 - i);
 
-			//}
+			}
 		}
 		{
 			auto p = this->everything.make();
@@ -265,7 +295,6 @@ namespace game
 			p.add<GraphicsTile>();
 			this->placeInWorld(p, { 2,2 });
 			//p.add<RandomWalker>();
-			p.add<Grapher>();
 			p.get<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("gnome.dds");
 		}
 
