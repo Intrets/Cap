@@ -75,11 +75,17 @@ namespace game
 	}
 
 	void GameState::runTick() {
-		this->everything.match([&](GamePosition& pos, Spawner& spawner) {
+		this->everything.match([this](GamePosition& pos, Spawner& spawner) {
 			if (spawner.lastSpawn == 0) {
 				if (!this->world->occupied(pos.pos + glm::ivec2(1, 0))) {
 					spawner.lastSpawn = spawner.interval;
 					auto obj = this->everything.cloneAll(spawner.object);
+					auto& walker = obj.add<RandomWalker>();
+
+					auto currentGroup = this->world->getGroup(pos.pos + glm::ivec2(1, 0));
+					walker.groupTarget = currentGroup;
+					walker.indexTarget = 0;
+
 					this->placeInWorld(obj, pos.pos + glm::ivec2(1, 0));
 					obj.release();
 				}
@@ -89,16 +95,8 @@ namespace game
 			}
 			});
 
-
-		if (this->tick == 30) {
-			this->everything.match([&](RandomWalker& walker, GamePosition& pos) {
-				auto currentGroup = this->world->getGroup(pos.pos);
-				walker.groupTarget = currentGroup;
-				walker.indexTarget = 0;
-				});
-		}
 		if (this->tick > 30 && this->tick % 10 == 0) {
-			this->everything.match([&](RandomWalker& walker, GamePosition& pos) {
+			this->everything.match([this](RandomWalker& walker, GamePosition& pos) {
 				auto& merger = this->everything.gets<Merger>().get<Merger>(Index<game::RawData>{ 1 });
 				auto currentGroup = this->world->getGroup(pos.pos);
 
@@ -112,7 +110,10 @@ namespace game
 
 				auto d = this->world->getDirection(pos.pos, walker.indexTarget);
 
+				auto i = this->world->get(pos.pos);
+				this->world->remove(pos.pos);
 				pos.pos += d;
+				this->world->place(i, pos.pos);
 				});
 		}
 
@@ -272,7 +273,7 @@ namespace game
 
 			place(41, 30);
 
-			for (int32_t i = 0; i < 000; i++) {
+			for (int32_t i = 0; i < 7000; i++) {
 				int x = 1 + rand() % (WORLD_SIZE - 5);
 				int y = 1 + rand() % (WORLD_SIZE - 5);
 				if (x < 30 && y < 30) {

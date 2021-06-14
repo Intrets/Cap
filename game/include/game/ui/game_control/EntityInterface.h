@@ -11,6 +11,8 @@ namespace game
 	public:
 		game::QualifiedObject controlled;
 
+		std::optional<glm::ivec2> highlight;
+
 		virtual int32_t addRenderInfo(game::GameState& gameState, render::RenderInfo& renderInfo, int32_t depth) override;
 
 		EntityInterface();

@@ -69,7 +69,7 @@ namespace game
 	}
 
 	Index<Everything> WorldGrid::get(int32_t x, int32_t y) {
-		if (0 <= x && x < WORLD_SIZE && 0 <= y && y <= WORLD_SIZE) {
+		if (0 <= x && x < WORLD_SIZE && 0 <= y && y < WORLD_SIZE) {
 			return this->grid[x][y];
 		}
 		else {

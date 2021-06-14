@@ -174,7 +174,7 @@ struct serial::Serializable<GraphicsTile>
 struct Spawner
 {
 	int32_t interval;
-	int32_t lastSpawn = 0;
+	int32_t lastSpawn = 10;
 	game::UniqueObject object;
 
 	Spawner() = default;

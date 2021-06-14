@@ -11,7 +11,7 @@
 
 #include <mem/Index.h>
 
-constexpr auto WORLD_SIZE = 70;
+constexpr auto WORLD_SIZE = 200;
 
 namespace game
 {
@@ -22,7 +22,7 @@ namespace game
 
 	struct Directions
 	{
-		std::array<uint8_t, 8> data;
+		std::array<uint8_t, 16> data;
 
 		glm::ivec2 getDirection(int32_t index) const;
 		void setDirection(int32_t index, uint8_t direction);

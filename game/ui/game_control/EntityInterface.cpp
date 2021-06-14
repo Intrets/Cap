@@ -23,12 +23,36 @@ namespace game
 				renderInfo.highlightRenderInfo.addBox(pos.pos, pos.pos + 1);
 			}
 		}
+
+		if (this->highlight) {
+			renderInfo.highlightRenderInfo.addBox(
+				this->highlight.value(),
+				this->highlight.value() + 1,
+				colors::alpha(colors::yellow, 80)
+			);
+		}
+
 		return depth;
 	}
 
 	EntityInterface::EntityInterface() {
 		this->addGameWorldBind(
-			{ ui::CONTROL::KEY::C },
+			{ ui::CONTROL::KEY::MOUSE_POS_CHANGED },
+			[](PlayerInfo& playerInfo, ui::Base* self_) {
+				auto mousePos = playerInfo.uiState.getCursorPositionWorld();
+				auto const index = playerInfo.gameState.world->get(mousePos);
+				if (auto maybeObject = playerInfo.gameState.everything.maybeGetFromIndex(index)) {
+					static_cast<game::EntityInterface*>(self_)->highlight = mousePos;
+				}
+				else {
+					static_cast<game::EntityInterface*>(self_)->highlight = std::nullopt;
+				}
+				return ui::BIND::RESULT::CONTINUE;
+			}
+		);
+
+		this->addGameWorldBind(
+			{ ui::CONTROL::KEY::ACTION0 },
 			[this](PlayerInfo& playerInfo, ui::Base* self_) -> ui::CallBackBindResult {
 				auto mousePos = playerInfo.uiState.getCursorPositionWorld();
 				auto const index = playerInfo.gameState.world->get(mousePos);
@@ -83,7 +107,7 @@ namespace game
 		);
 
 		this->addGameWorldBind(
-			{ ui::CONTROL::KEY::X },
+			{ ui::CONTROL::KEY::X, ui::CONTROL::STATE::DOWN },
 			[](PlayerInfo& playerInfo, ui::Base* self_) {
 				auto mousePos = playerInfo.uiState.getCursorPositionWorld();
 				auto const index = playerInfo.gameState.world->get(mousePos);
