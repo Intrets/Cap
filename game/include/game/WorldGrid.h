@@ -11,7 +11,9 @@
 
 #include <mem/Index.h>
 
-constexpr auto WORLD_SIZE = 200;
+#include <misc/Misc.h>
+
+constexpr auto WORLD_SIZE = 70;
 
 namespace game
 {

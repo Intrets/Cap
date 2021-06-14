@@ -20,9 +20,16 @@
 namespace game
 {
 	void GameState::addRenderInfo(render::RenderInfo& renderInfo) {
-		this->everything.match([&](GamePosition const& pos, GraphicsTile const& tile) {
+		this->everything.match([this, &renderInfo](GamePosition const& pos, GraphicsTile const& tile) {
+
+			float scale = static_cast<float>(this->tick - pos.startMovement) / static_cast<float>(pos.pace);
+
+			scale = glm::clamp(scale, 0.0f, 1.0f);
+
+			glm::vec2 p = glm::vec2(pos.previousPos) + scale * glm::vec2(pos.pos - pos.previousPos);
+
 			renderInfo.tileRenderInfo.addBlitInfo(
-				glm::vec4(pos.pos, 1, 1),
+				glm::vec4(p, 1, 1),
 				0,
 				tile.blockID
 			);
@@ -95,8 +102,9 @@ namespace game
 			}
 			});
 
-		if (this->tick > 30 && this->tick % 10 == 0) {
-			this->everything.match([this](RandomWalker& walker, GamePosition& pos) {
+		const auto pace = 10;
+		if (this->tick > 30 && this->tick % pace == 0) {
+			this->everything.match([this, pace](RandomWalker& walker, GamePosition& pos) {
 				auto& merger = this->everything.gets<Merger>().get<Merger>(Index<game::RawData>{ 1 });
 				auto currentGroup = this->world->getGroup(pos.pos);
 
@@ -109,10 +117,16 @@ namespace game
 				}
 
 				auto d = this->world->getDirection(pos.pos, walker.indexTarget);
+				auto targetPos = pos.pos + d;
 
 				auto i = this->world->get(pos.pos);
 				this->world->remove(pos.pos);
-				pos.pos += d;
+
+				pos.pace = pace;
+				pos.startMovement = this->tick;
+				pos.previousPos = pos.pos;
+				pos.pos = targetPos;
+
 				this->world->place(i, pos.pos);
 				});
 		}
@@ -273,7 +287,7 @@ namespace game
 
 			place(41, 30);
 
-			for (int32_t i = 0; i < 7000; i++) {
+			for (int32_t i = 0; i < 100; i++) {
 				int x = 1 + rand() % (WORLD_SIZE - 5);
 				int y = 1 + rand() % (WORLD_SIZE - 5);
 				if (x < 30 && y < 30) {
@@ -295,7 +309,6 @@ namespace game
 			auto p = this->everything.make();
 			p.add<GraphicsTile>();
 			this->placeInWorld(p, { 2,2 });
-			//p.add<RandomWalker>();
 			p.get<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("gnome.dds");
 		}
 

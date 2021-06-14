@@ -17,6 +17,7 @@
 #include <misc/Misc.h>
 
 #include <mem/Index.h>
+#include <mem/Locator.h>
 
 #include <serial/Serializer.h>
 

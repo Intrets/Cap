@@ -140,6 +140,9 @@ struct ActionResult
 struct GamePosition
 {
 	glm::ivec2 pos;
+	glm::ivec2 previousPos;
+	int32_t startMovement;
+	int32_t pace;
 };
 
 template<>
@@ -149,7 +152,10 @@ struct serial::Serializable<GamePosition>
 
 	ALL_DEF(GamePosition) {
 		return serializer.runAll<Selector>(
-			ALL(pos)
+			ALL(pos),
+			ALL(previousPos),
+			ALL(startMovement),
+			ALL(pace)
 			);
 	}
 };
