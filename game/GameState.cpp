@@ -104,10 +104,7 @@ namespace game
 
 		const auto pace = 10;
 		if (this->tick > 30 && this->tick % pace == 0) {
-			//this->everything.run([this, pace](Match<RandomWalker, GamePosition>& e) {
-			this->everything.match([this, pace](WeakObject obj, RandomWalker& walker, GamePosition & pos) {
-				//RandomWalker& walker = e.get<RandomWalker>();
-				//GamePosition& pos = e.get<GamePosition>();
+			this->everything.match([this, pace](WeakObject obj, RandomWalker& walker, GamePosition& pos) {
 				auto& merger = this->everything.gets<Merger>().get<Merger>(Index<game::RawData>{ 1 });
 				auto currentGroup = this->world->getGroup(pos.pos);
 

@@ -129,24 +129,11 @@ namespace game
 template<>
 struct serial::Serializable<game::GameState>
 {
-	template<class Selector>
-	static bool serializeEverything(Serializer& serializer, game::GameState&& obj) {
+	ALL_DEF(game::GameState) {
 		return serializer.runAll<Selector>(
 			ALL(everything),
 			ALL(world),
 			ALL(tick)
 			);
-	}
-
-	WRITE_DEF(game::GameState) {
-		return serializeEverything<Write>(serializer, std::forward<game::GameState>(obj));
-	}
-
-	READ_DEF(game::GameState) {
-		return serializeEverything<Read>(serializer, std::forward<game::GameState>(obj));
-	}
-
-	PRINT_DEF(game::GameState) {
-		return serializeEverything<Print>(serializer, std::forward<game::GameState>(obj));
 	}
 };
