@@ -21,7 +21,6 @@ namespace game
 {
 	void GameState::addRenderInfo(render::RenderInfo& renderInfo) {
 		this->everything.match([this, &renderInfo](GamePosition const& pos, GraphicsTile const& tile) {
-
 			float scale = static_cast<float>(this->tick - pos.startMovement) / static_cast<float>(pos.pace);
 
 			scale = glm::clamp(scale, 0.0f, 1.0f);
@@ -105,9 +104,10 @@ namespace game
 
 		const auto pace = 10;
 		if (this->tick > 30 && this->tick % pace == 0) {
-			this->everything.run([this, pace](Match<RandomWalker, GamePosition>& e) {
-				RandomWalker& walker = e.get<RandomWalker>();
-				GamePosition& pos = e.get<GamePosition>();
+			//this->everything.run([this, pace](Match<RandomWalker, GamePosition>& e) {
+			this->everything.match([this, pace](WeakObject obj, RandomWalker& walker, GamePosition & pos) {
+				//RandomWalker& walker = e.get<RandomWalker>();
+				//GamePosition& pos = e.get<GamePosition>();
 				auto& merger = this->everything.gets<Merger>().get<Merger>(Index<game::RawData>{ 1 });
 				auto currentGroup = this->world->getGroup(pos.pos);
 
@@ -126,7 +126,7 @@ namespace game
 				pos.startMovement = this->tick;
 				pos.previousPos = pos.pos;
 
-				this->moveInWorld(e.obj, targetPos);
+				this->moveInWorld(obj, targetPos);
 				});
 		}
 

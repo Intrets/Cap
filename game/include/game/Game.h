@@ -626,7 +626,35 @@ namespace game
 	struct MatchExpanded;
 
 	template<class M, class... Ms>
-	struct MatchExpanded<te::list<M, Ms... >>
+	struct MatchExpanded<te::list<WeakObject, M, Ms...>>
+	{
+		template<class F>
+		static inline void run(Everything& e, F f) {
+			auto pivot = e.selectPivot<M, Ms...>();
+
+			auto& g = e.gets(pivot);
+			const auto end = g.index;
+
+			if constexpr (sizeof...(Ms) == 0) {
+				for (Index<game::RawData> i{ 1 }; i < end; i++) {
+					auto index = g.getIndex(i);
+					f(WeakObject{ index, &e }, g.get<M>(i));
+				}
+			}
+			else {
+				for (Index<game::RawData> i{ 1 }; i < end; i++) {
+					auto index = g.getIndex(i);
+
+					if (e.has<Ms...>(index)) {
+						f(WeakObject{ index, &e }, e.get<M>(index), e.get<Ms>(index)...);
+					}
+				}
+			}
+		};
+	};
+
+	template<class M, class... Ms>
+	struct MatchExpanded<te::list<M, Ms...>>
 	{
 		template<class F>
 		static inline void run(Everything& e, F f) {
