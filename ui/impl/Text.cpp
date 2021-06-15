@@ -98,7 +98,7 @@ namespace ui
 
 		void Text::invalidateCache() {
 			this->cachedRenderInfo = std::nullopt;
-			this->viewCache.invalidate();
+			//this->viewCache.invalidate();
 			this->cursorCache.invalidate();
 		}
 
