@@ -220,6 +220,10 @@ namespace game
 		Index<Everything> index{ 0 };
 		Everything* proxy{ nullptr };
 
+		Index<Everything> getIndex() const {
+			return this->index;
+		}
+
 		void deleteObject();
 
 		bool isNull() const;
@@ -248,7 +252,7 @@ namespace game
 	{
 		void release();
 
-		UniqueObject(WeakObject&& other);
+		UniqueObject(WeakObject const& other);
 
 		UniqueObject& operator=(UniqueObject&& other) noexcept;
 		UniqueObject(UniqueObject&& other) noexcept;
@@ -266,6 +270,12 @@ namespace game
 		Qualifier qualifier = 0;
 
 		void set(WeakObject obj);
+		WeakObject getObject() const {
+			return this->object;
+		}
+		WeakObject getObject() {
+			return this->object;
+		}
 
 		bool isQualified() const;
 

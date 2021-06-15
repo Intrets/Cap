@@ -13,10 +13,14 @@
 
 #include <misc/Misc.h>
 
+#include "Game.h"
+
 constexpr auto WORLD_SIZE = 70;
 
 namespace game
 {
+	struct WeakObject;
+	struct QualifiedObject;
 	struct Everything;
 
 	glm::ivec2 getDirectionFromIndex(std::integral auto index);
@@ -35,7 +39,20 @@ namespace game
 
 	struct WorldGrid
 	{
-		std::array<std::array<Index<Everything>, WORLD_SIZE>, WORLD_SIZE> grid;
+		struct Trace
+		{
+			std::vector<UniqueObject> data;
+
+			[[nodiscard]]
+			UniqueObject release(WeakObject const& obj);
+
+			void add(WeakObject const& obj);
+			void add(UniqueObject&& obj);
+
+			void clear();
+		};
+
+		std::array<std::array<Trace, WORLD_SIZE>, WORLD_SIZE> grid;
 		std::array<std::array<int32_t, WORLD_SIZE>, WORLD_SIZE> group;
 		std::array<std::array<Directions, WORLD_SIZE>, WORLD_SIZE> directions;
 
@@ -50,8 +67,8 @@ namespace game
 		void setGroup(glm::ivec2 pos, int32_t g);
 		int32_t getGroup(glm::ivec2 pos) const;
 
-		Index<Everything> get(int32_t x, int32_t y);
-		Index<Everything> get(glm::ivec2 pos);
+		std::optional<WeakObject> get(int32_t x, int32_t y);
+		std::optional<WeakObject> get(glm::ivec2 pos);
 
 		void place(Index<Everything> index, int32_t x, int32_t y);
 		void place(Index<Everything> index, glm::ivec2 pos);
@@ -104,6 +121,18 @@ namespace game
 	}
 
 }
+
+template<>
+struct serial::Serializable<game::WorldGrid::Trace>
+{
+	inline static const std::string_view typeName = "Trace";
+
+	ALL_DEF(game::WorldGrid::Trace) {
+		return serializer.runAll<Selector>(
+			ALL(data)
+			);
+	}
+};
 
 template<>
 struct serial::Serializable<game::WorldGrid>

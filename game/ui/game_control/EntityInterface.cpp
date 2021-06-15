@@ -40,13 +40,14 @@ namespace game
 			{ ui::CONTROL::KEY::MOUSE_POS_CHANGED },
 			[](PlayerInfo& playerInfo, ui::Base* self_) {
 				auto mousePos = playerInfo.uiState.getCursorPositionWorld();
-				auto const index = playerInfo.gameState.world->get(mousePos);
-				if (auto maybeObject = playerInfo.gameState.everything.maybeGetFromIndex(index)) {
-					static_cast<game::EntityInterface*>(self_)->highlight = mousePos;
-				}
-				else {
+				auto const maybeObject = playerInfo.gameState.world->get(mousePos);
+				if (!maybeObject.has_value()) {
 					static_cast<game::EntityInterface*>(self_)->highlight = std::nullopt;
 				}
+				else {
+					static_cast<game::EntityInterface*>(self_)->highlight = mousePos;
+				}
+
 				return ui::BIND::RESULT::CONTINUE;
 			}
 		);
@@ -55,15 +56,11 @@ namespace game
 			{ ui::CONTROL::KEY::ACTION0 },
 			[this](PlayerInfo& playerInfo, ui::Base* self_) -> ui::CallBackBindResult {
 				auto mousePos = playerInfo.uiState.getCursorPositionWorld();
-				auto const index = playerInfo.gameState.world->get(mousePos);
-				if (auto maybeObject = playerInfo.gameState.everything.maybeGetFromIndex(index)) {
-					static_cast<game::EntityInterface*>(self_)->controlled.set(maybeObject.value());
+				auto const maybeObject = playerInfo.gameState.world->get(mousePos);
+				if (!maybeObject.has_value()) {
+					return ui::BIND::RESULT::CONTINUE;
 				}
-				else {
-					if (index != 0) {
-						assert(0);
-					}
-				}
+				static_cast<game::EntityInterface*>(self_)->controlled.set(maybeObject.value());
 
 				playerInfo.uiState.addNamedUI("entity info", [this]() {
 					ui::Global::push();
@@ -110,16 +107,11 @@ namespace game
 			{ ui::CONTROL::KEY::X, ui::CONTROL::STATE::DOWN },
 			[](PlayerInfo& playerInfo, ui::Base* self_) {
 				auto mousePos = playerInfo.uiState.getCursorPositionWorld();
-				auto const index = playerInfo.gameState.world->get(mousePos);
-				if (auto maybeObject = playerInfo.gameState.everything.maybeGetFromIndex(index)) {
-					playerInfo.gameState.world->remove(mousePos);
-					maybeObject.value().deleteObject();
+				auto const maybeObject = playerInfo.gameState.world->get(mousePos);
+				if (!maybeObject.has_value()) {
+					return ui::BIND::RESULT::CONTINUE;
 				}
-				else {
-					if (index != 0) {
-						assert(0);
-					}
-				}
+				auto _ = playerInfo.gameState.removeFromWorld(maybeObject.value());
 
 				return ui::BIND::RESULT::CONTINUE;
 			}

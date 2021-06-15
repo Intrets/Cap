@@ -68,45 +68,34 @@ namespace game
 		return this->group[pos.x][pos.y];
 	}
 
-	Index<Everything> WorldGrid::get(int32_t x, int32_t y) {
+	std::optional<WeakObject> WorldGrid::get(int32_t x, int32_t y) {
 		if (0 <= x && x < WORLD_SIZE && 0 <= y && y < WORLD_SIZE) {
-			return this->grid[x][y];
+			if (this->grid[x][y].data.empty()) {
+				return std::nullopt;
+			}
+			else {
+				return this->grid[x][y].data.front();
+			}
 		}
 		else {
-			return Index<Everything>{ 0 };
+			return std::nullopt;
 		}
 	}
 
-	Index<Everything> WorldGrid::get(glm::ivec2 pos) {
+	std::optional<WeakObject> WorldGrid::get(glm::ivec2 pos) {
 		return this->get(pos.x, pos.y);
 	}
 
-	void WorldGrid::place(Index<Everything> index, int32_t x, int32_t y) {
-		this->grid[x][y] = index;
-	}
-
-	void WorldGrid::place(Index<Everything> index, glm::ivec2 pos) {
-		this->grid[pos.x][pos.y] = index;
-	}
-
-	void WorldGrid::remove(int32_t x, int32_t y) {
-		this->grid[x][y].set(0);
-	}
-
-	void WorldGrid::remove(glm::ivec2 pos) {
-		this->grid[pos.x][pos.y].set(0);
-	}
-
 	bool WorldGrid::occupied(int32_t x, int32_t y) {
-		return this->get(x, y) != 0;
+		return this->occupied({ x, y });
 	}
 
 	bool WorldGrid::occupied(glm::ivec2 pos) {
-		return this->get(pos) != 0;
+		return !this->empty(pos);
 	}
 
 	bool WorldGrid::empty(glm::ivec2 pos) {
-		return this->get(pos) == 0;
+		return !this->get(pos).has_value();
 	}
 
 	glm::ivec2 Directions::getDirection(int32_t index) const {
@@ -133,5 +122,34 @@ namespace game
 		};
 
 		return i[vec.y + 1][vec.x + 1];
+	}
+
+	UniqueObject WorldGrid::Trace::release(WeakObject const& obj) {
+		assert(obj.isNotNull());
+
+		auto it = std::find_if(this->data.begin(), this->data.end(), [i = obj.index](UniqueObject const& o) {
+			return o.index == i;
+		});
+		assert(it != this->data.end());
+		it->release();
+
+		if (it != this->data.end() - 1) {
+			*it = std::move(this->data.back());
+		}
+		this->data.pop_back();
+
+		return obj;
+	}
+
+	void WorldGrid::Trace::add(WeakObject const& obj) {
+		this->data.push_back(obj);
+	}
+
+	void WorldGrid::Trace::add(UniqueObject&& obj) {
+		this->data.push_back(std::move(obj));
+	}
+
+	void WorldGrid::Trace::clear() {
+		this->data.clear();
 	}
 }

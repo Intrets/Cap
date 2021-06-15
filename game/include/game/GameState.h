@@ -107,12 +107,11 @@ namespace game
 
 		bool empty(glm::ivec2 p);
 
-		void removeFromWorld(glm::ivec2 pos);
-		void moveInWorld(glm::ivec2 from, glm::ivec2 to);
+		void moveInWorld(WeakObject obj, glm::ivec2 to);
 
-		void placeInWorld(Index<Everything> index, glm::ivec2 pos);
-		void placeInWorld(WeakObject& obj, glm::ivec2 pos);
-		void placeInWorld(UniqueObject& obj, glm::ivec2 pos);
+		[[nodiscard]]
+		UniqueObject removeFromWorld(WeakObject obj);
+		void placeInWorld(UniqueObject&& obj);
 
 		void init();
 		void clearWorld();

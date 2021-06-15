@@ -12,7 +12,7 @@ namespace game
 		this->index.set(0);
 	}
 
-	UniqueObject::UniqueObject(WeakObject&& other) {
+	UniqueObject::UniqueObject(WeakObject const& other) {
 		this->index = other.index;
 		this->proxy = other.proxy;
 	}
