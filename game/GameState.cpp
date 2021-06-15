@@ -21,14 +21,8 @@ namespace game
 {
 	void GameState::addRenderInfo(render::RenderInfo& renderInfo) {
 		this->everything.match([this, &renderInfo](GamePosition const& pos, GraphicsTile const& tile) {
-			float scale = static_cast<float>(this->tick - pos.startMovement) / static_cast<float>(pos.pace);
-
-			scale = glm::clamp(scale, 0.0f, 1.0f);
-
-			glm::vec2 p = glm::vec2(pos.previousPos) + scale * glm::vec2(pos.pos - pos.previousPos);
-
 			renderInfo.tileRenderInfo.addBlitInfo(
-				glm::vec4(p, 1, 1),
+				glm::vec4(pos.getInterpolatedPosition(this->tick), 1, 1),
 				0,
 				tile.blockID
 			);
@@ -84,7 +78,7 @@ namespace game
 		this->everything.match([this](GamePosition& pos, Spawner& spawner) {
 			if (spawner.lastSpawn == 0) {
 				if (!this->world->occupied(pos.pos + glm::ivec2(1, 0))) {
-					spawner.lastSpawn = spawner.interval;
+					spawner.lastSpawn = 0;
 					auto obj = this->everything.cloneAll(spawner.object);
 					auto& walker = obj.add<RandomWalker>();
 
@@ -93,6 +87,7 @@ namespace game
 					walker.indexTarget = 0;
 
 					obj.add<GamePosition>().pos = pos.pos + glm::ivec2(1, 0);
+					obj.get<GamePosition>().pace = 2 + rand() % 50;
 
 					this->placeInWorld(std::move(obj));
 				}
@@ -102,9 +97,9 @@ namespace game
 			}
 			});
 
-		const auto pace = 10;
-		if (this->tick > 30 && this->tick % pace == 0) {
-			this->everything.match([this, pace](WeakObject obj, RandomWalker& walker, GamePosition& pos) {
+		//const auto pace = 10;
+		if (this->tick > 30) {
+			this->everything.match([this](WeakObject obj, RandomWalker& walker, GamePosition& pos) {
 				auto& merger = this->everything.gets<Merger>().get<Merger>(Index<game::RawData>{ 1 });
 				auto currentGroup = this->world->getGroup(pos.pos);
 
@@ -116,14 +111,15 @@ namespace game
 					walker.indexTarget = target;
 				}
 
-				auto d = this->world->getDirection(pos.pos, walker.indexTarget);
-				auto targetPos = pos.pos + d;
+				if (pos.startMovement + pos.pace <= this->tick) {
+					auto d = this->world->getDirection(pos.pos, walker.indexTarget);
+					auto targetPos = pos.pos + d;
 
-				pos.pace = pace;
-				pos.startMovement = this->tick;
-				pos.previousPos = pos.pos;
+					pos.startMovement = this->tick;
+					pos.previousPos = pos.pos;
 
-				this->moveInWorld(obj, targetPos);
+					this->moveInWorld(obj, targetPos);
+				}
 				});
 		}
 
@@ -207,7 +203,7 @@ namespace game
 			spawner.interval = 120;
 			auto www = this->everything.makeUnique();
 			spawner.object = std::move(www);
-			spawner.object.add<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("s_block.dds");
+			spawner.object.add<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("gnome.dds");
 
 			this->placeInWorld(std::move(p));
 

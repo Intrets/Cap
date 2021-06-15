@@ -17,17 +17,16 @@
 namespace game
 {
 	int32_t EntityInterface::addRenderInfo(game::GameState& gameState, render::RenderInfo& renderInfo, int32_t depth) {
-		if (this->controlled.isQualified()) {
-			if (auto posMaybe = this->controlled->getMaybe<GamePosition>()) {
-				auto& pos = *posMaybe.value();
-				renderInfo.highlightRenderInfo.addBox(pos.pos, pos.pos + 1);
-			}
-		}
+		renderInfo.highlightRenderInfo.addBox(
+			glm::vec2(this->selected),
+			glm::vec2(this->selected) + 1.0f,
+			colors::alpha(colors::green, 80)
+		);
 
 		if (this->highlight) {
 			renderInfo.highlightRenderInfo.addBox(
 				this->highlight.value(),
-				this->highlight.value() + 1,
+				this->highlight.value() + 1.0f,
 				colors::alpha(colors::yellow, 80)
 			);
 		}
@@ -40,12 +39,12 @@ namespace game
 			{ ui::CONTROL::KEY::MOUSE_POS_CHANGED },
 			[](PlayerInfo& playerInfo, ui::Base* self_) {
 				auto mousePos = playerInfo.uiState.getCursorPositionWorld();
-				auto const maybeObject = playerInfo.gameState.world->get(mousePos);
+				auto maybeObject = playerInfo.gameState.world->get(glm::floor(mousePos));
 				if (!maybeObject.has_value()) {
 					static_cast<game::EntityInterface*>(self_)->highlight = std::nullopt;
 				}
 				else {
-					static_cast<game::EntityInterface*>(self_)->highlight = mousePos;
+					static_cast<game::EntityInterface*>(self_)->highlight = maybeObject.value().get<GamePosition>().getInterpolatedPosition(playerInfo.gameState.tick);
 				}
 
 				return ui::BIND::RESULT::CONTINUE;
@@ -56,11 +55,7 @@ namespace game
 			{ ui::CONTROL::KEY::ACTION0 },
 			[this](PlayerInfo& playerInfo, ui::Base* self_) -> ui::CallBackBindResult {
 				auto mousePos = playerInfo.uiState.getCursorPositionWorld();
-				auto const maybeObject = playerInfo.gameState.world->get(mousePos);
-				if (!maybeObject.has_value()) {
-					return ui::BIND::RESULT::CONTINUE;
-				}
-				static_cast<game::EntityInterface*>(self_)->controlled.set(maybeObject.value());
+				static_cast<game::EntityInterface*>(self_)->selected = glm::floor(mousePos);
 
 				playerInfo.uiState.addNamedUI("entity info", [this]() {
 					ui::Global::push();
@@ -77,21 +72,17 @@ namespace game
 					text.get()->addGlobalBind(
 						{ ui::CONTROL::KEY::EVERY_TICK },
 						[this](PlayerInfo& playerInfo, ui::Base* self_) {
-							if (this->controlled.isQualified()) {
-								std::stringstream stream;
-								serial::Serializer serializer;
-								serializer.writeStream = &stream;
+							std::stringstream stream;
+							serial::Serializer serializer;
+							serializer.writeStream = &stream;
 
-								serializer.print(this->controlled);
+							if (this->selected.x >= 0 && this->selected.x < WORLD_SIZE && this->selected.y >= 0 && this->selected.y < WORLD_SIZE) {
+								serializer.print(playerInfo.gameState.world->grid[this->selected.x][this->selected.y]);
 								static_cast<ui::TextDisplay*>(self_)->setText(
 									stream.str()
 								);
 							}
-							else {
-								static_cast<ui::TextDisplay*>(self_)->setText(
-									"Nothing selected"
-								);
-							}
+
 							return ui::BIND::RESULT::CONTINUE;
 						}
 					);

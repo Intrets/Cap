@@ -531,16 +531,8 @@ bool PathFinding::stage3(game::WorldGrid& grid) {
 	return false;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+glm::vec2 GamePosition::getInterpolatedPosition(int32_t tick) const {
+	float scale = static_cast<float>(tick - this->startMovement) / static_cast<float>(this->pace);
+	scale = glm::clamp(scale, 0.0f, 1.0f);
+	return glm::vec2(this->previousPos) + scale * glm::vec2(this->pos - this->previousPos);
+}

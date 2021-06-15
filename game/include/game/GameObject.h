@@ -143,6 +143,8 @@ struct GamePosition
 	glm::ivec2 previousPos;
 	int32_t startMovement;
 	int32_t pace;
+
+	glm::vec2 getInterpolatedPosition(int32_t tick) const;
 };
 
 template<>
