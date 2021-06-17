@@ -3,16 +3,21 @@
 
 #include <iostream>
 #include <filesystem>
+#include <chrono>
 
 #include "MainLoop.h"
 #include "Setup.h"
+
+#include <sstream>
 
 // TODO: keep runtime option, get value from config/command line argument
 bool OPENGL_DEBUG = true;
 
 GLFWwindow* window;
 
+
 int main(int argc, char* argv[]) {
+	std::chrono::steady_clock::time_point startTime = std::chrono::steady_clock::now();
 	std::filesystem::path resourcesPath;
 	if (argc > 1) {
 		resourcesPath = std::filesystem::path(argv[1]);
@@ -57,7 +62,7 @@ int main(int argc, char* argv[]) {
 
 	initManagers(std::filesystem::absolute(resourcesPath).string());
 
-	mainLoop(window);
+	mainLoop(window, startTime);
 
 	glfwTerminate();
 }

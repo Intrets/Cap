@@ -41,7 +41,7 @@ struct StructInformation
 
 struct StoredStructInformations
 {
-	inline static std::unordered_map<std::string, StructInformation> infos{};
+	static std::unordered_map<std::string, StructInformation> infos;
 };
 
 template<>
@@ -293,6 +293,10 @@ namespace game
 	struct NewEverything
 	{
 		Everything* ptr = nullptr;
+
+		NewEverything(Everything* p) : ptr(p) {};
+		NewEverything() = default;
+		~NewEverything() = default;
 	};
 
 	struct Everything
@@ -638,7 +642,7 @@ namespace game
 			if constexpr (sizeof...(Ms) == 0) {
 				for (Index<game::RawData> i{ 1 }; i < end; i++) {
 					auto index = g.getIndex(i);
-					f(WeakObject{ index, &e }, g.get<M>(i));
+					f(WeakObject{ index, &e }, g.template get<M>(i));
 				}
 			}
 			else {
@@ -646,7 +650,7 @@ namespace game
 					auto index = g.getIndex(i);
 
 					if (e.has<Ms...>(index)) {
-						f(WeakObject{ index, &e }, e.get<M>(index), e.get<Ms>(index)...);
+						f(WeakObject{ index, &e }, e.template get<M>(index), e.get<Ms>(index)...);
 					}
 				}
 			}
@@ -665,7 +669,7 @@ namespace game
 
 			if constexpr (sizeof...(Ms) == 0) {
 				for (Index<game::RawData> i{ 1 }; i < end; i++) {
-					f(g.get<M>(i));
+					f(g.template get<M>(i));
 				}
 			}
 			else {
@@ -673,7 +677,7 @@ namespace game
 					auto index = g.getIndex(i);
 
 					if (e.has<Ms...>(index)) {
-						f(e.get<M>(index), e.get<Ms>(index)...);
+						f(e.template get<M>(index), e.get<Ms>(index)...);
 					}
 				}
 			}
@@ -924,7 +928,7 @@ namespace game
 
 	template<class F>
 	inline void Everything::match(F f) {
-		using arguments_list = typename te::remove_ref_and_const_t<te::arguments_list_t<F>>;
+		using arguments_list = te::map_t<std::remove_cvref_t, te::arguments_list_t<F>>;
 		MatchExpanded<arguments_list>::run(*this, f);
 	}
 

@@ -73,7 +73,7 @@ void prepareRender(
 	Locator<misc::Timer>::ref().endTiming("Prepare UI");
 }
 
-void mainLoop(GLFWwindow* window) {
+void mainLoop(GLFWwindow* window, std::chrono::steady_clock::time_point startTime) {
 	game::GameState gameState;
 	gameState.init();
 
@@ -113,6 +113,9 @@ void mainLoop(GLFWwindow* window) {
 	glfwSetKeyCallback(window, key_callback);
 	glfwSetMouseButtonCallback(window, mouse_callback);
 	glfwSetScrollCallback(window, scroll_callback);
+
+	std::chrono::duration<double> startUpDuration = std::chrono::steady_clock::now() - startTime;
+	Locator<misc::Log>::ref().putLine(std::format("Startup time: {} seconds\n", startUpDuration));
 
 	for (;;) {
 		if (uiState.loadGame.has_value()) {
