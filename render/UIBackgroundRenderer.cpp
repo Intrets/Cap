@@ -16,7 +16,7 @@ namespace render
 			return;
 		}
 
-		Global<ogs::State>::ref().setState(ogs::UIBackground());
+		Global<ogs::State>()->setState(ogs::UIBackground());
 
 		this->VAO.bind();
 		this->program.use();

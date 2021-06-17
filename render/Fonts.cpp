@@ -12,7 +12,7 @@
 namespace render
 {
 	FontInfo Fonts::loadMonospacedFont(std::string name, glm::ivec2 charDim, glm::ivec2 gridDim) {
-		auto tex = Global<misc::PathManager>::ref().LoadFont(name);
+		auto tex = Global<misc::PathManager>()->LoadFont(name);
 
 		render::BlitRenderInfo blitInfo;
 
@@ -70,7 +70,7 @@ namespace render
 
 		auto config = ogs::FontAtlasConfiguration();
 
-		Global<render::BlitRenderer>::ref().render(
+		Global<render::BlitRenderer>()->render(
 			config,
 			blitInfo,
 			this->buffer,

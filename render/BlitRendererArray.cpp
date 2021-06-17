@@ -18,7 +18,7 @@ namespace render
 		this->VAO.bind();
 		this->program.use();
 
-		Global<ogs::State>::ref().setState(config);
+		Global<ogs::State>()->setState(config);
 
 		if (depth_.has_value()) {
 			this->depth.set(depth_.value());

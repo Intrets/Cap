@@ -14,7 +14,7 @@ void render::HighlightRenderer::render(
 		return;
 	}
 
-	Global<ogs::State>::ref().setState(ogs::HighlightConfiguration());
+	Global<ogs::State>()->setState(ogs::HighlightConfiguration());
 
 	this->VAO.bind();
 	this->program.use();

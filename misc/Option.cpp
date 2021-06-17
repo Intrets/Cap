@@ -26,7 +26,7 @@ namespace misc
 	void OptionManager::readFromFile() {
 		std::ifstream file;
 
-		if (Global<PathManager>::get()->openFile(file, RESOURCE_FILE::OPTIONS)) {
+		if (Global<PathManager>()->openFile(file, RESOURCE_FILE::OPTIONS)) {
 			std::string line;
 			while (std::getline(file, line)) {
 				std::vector<std::string> parts;
@@ -53,7 +53,7 @@ namespace misc
 
 	void OptionManager::writeToFile() {
 		std::ofstream file;
-		if (Global<PathManager>::get()->openFile(file, RESOURCE_FILE::OPTIONS)) {
+		if (Global<PathManager>()->openFile(file, RESOURCE_FILE::OPTIONS)) {
 			for (auto& obj : data) {
 				file << obj->toString() << "\n";
 			}

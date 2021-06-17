@@ -20,7 +20,7 @@ void render::DebugRenderer::render(
 
 	if (!info.world.lines.lines.empty()) {
 		auto config = ogs::DebugLineConfiguration();
-		Global<ogs::State>::ref().setState(config);
+		Global<ogs::State>()->setState(config);
 
 		this->VP.set(cameraInfo.VP);
 		this->pointSize.set(1.0f);
@@ -38,7 +38,7 @@ void render::DebugRenderer::render(
 	if (!info.world.points.points.empty()) {
 		auto config = ogs::DebugPointConfiguration();
 
-		Global<ogs::State>::ref().setState(config);
+		Global<ogs::State>()->setState(config);
 
 		this->VP.set(cameraInfo.VP);
 		this->pointSize.set(200.0f / scale);
@@ -55,7 +55,7 @@ void render::DebugRenderer::render(
 	}
 	if (!info.screen.lines.lines.empty()) {
 		auto config = ogs::DebugLineConfiguration();
-		Global<ogs::State>::ref().setState(config);
+		Global<ogs::State>()->setState(config);
 
 		this->VP.set(glm::mat4(1.0f));
 		this->pointSize.set(1.0f);
@@ -73,7 +73,7 @@ void render::DebugRenderer::render(
 	if (!info.screen.points.points.empty()) {
 		auto config = ogs::DebugPointConfiguration();
 
-		Global<ogs::State>::ref().setState(config);
+		Global<ogs::State>()->setState(config);
 
 		this->VP.set(glm::mat4(10.0f));
 		this->pointSize.set(1.0f);

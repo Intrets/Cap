@@ -40,18 +40,18 @@ namespace misc
 
 	template<OPTION A, class T>
 	inline T Option<A, T>::getVal() {
-		return Global<OptionManager>::get()->getVal<T>(A);
+		return Global<OptionManager>()->getVal<T>(A);
 	}
 
 	template<OPTION A, class T>
 	inline void Option<A, T>::setVal(T val) {
-		Global<OptionManager>::get()->setVal(A, val);
+		Global<OptionManager>()->setVal(A, val);
 	}
 
 	template<OPTION A, class T>
 	inline void Option<A, T>::toggle() {
 		static_assert(std::is_same_v<T, bool>);
-		Global<OptionManager>::get()->toggle(A);
+		Global<OptionManager>()->toggle(A);
 	}
 
 	class _OptionValueBase
