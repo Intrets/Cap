@@ -10,7 +10,7 @@
 #include <misc/Option.h>
 #include <misc/PathManager.h>
 
-#include <mem/Locator.h>
+#include <mem/Global.h>
 
 #include <render/Fonts.h>
 #include <render/BlitRenderer.h>
@@ -193,27 +193,27 @@ bool initGLFW(GLFWwindow*& window, bool OPENGL_DEBUG) {
 }
 
 void initManagers(std::string const& resourceRootPath) {
-	Locator<ogs::State>::init();
+	Global<ogs::State>::init();
 
-	Locator<misc::PathManager>::init(resourceRootPath);
-	Locator<misc::OptionManager>::init();
+	Global<misc::PathManager>::init(resourceRootPath);
+	Global<misc::OptionManager>::init();
 
-	Locator<render::BlitRenderer>::init();
-	Locator<render::BlitRendererArrayTexture>::init();
-	Locator<render::DebugRenderInfo>::init();
+	Global<render::BlitRenderer>::init();
+	Global<render::BlitRendererArrayTexture>::init();
+	Global<render::DebugRenderInfo>::init();
 
-	Locator<render::BlockIDTextures>::init();
+	Global<render::BlockIDTextures>::init();
 
 	auto soundPlayer = sound::SoundPlayer::makeSoundPlayer(44100, 128);
 
 	assert(soundPlayer.has_value());
 
 	if (soundPlayer.has_value()) {
-		Locator<sound::SoundPlayer>::provide(soundPlayer.value().release());
+		Global<sound::SoundPlayer>::provide(soundPlayer.value().release());
 	}
 
-	Locator<render::Fonts>::init();
+	Global<render::Fonts>::init();
 
-	Locator<misc::Timer>::init();
-	Locator<misc::Log>::init();
+	Global<misc::Timer>::init();
+	Global<misc::Log>::init();
 }

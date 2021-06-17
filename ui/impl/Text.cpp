@@ -6,7 +6,7 @@
 #include <render/Fonts.h>
 #include <misc/Misc.h>
 #include <misc/FunctionHelpers.h>
-#include <mem/Locator.h>
+#include <mem/Global.h>
 
 namespace ui
 {
@@ -433,7 +433,7 @@ namespace ui
 		}
 
 		void Text::moveView(glm::ivec2 p) {
-			int32_t pxHeight = Locator<render::Fonts>::ref().getFont(this->lastFont).charSize[0].y;
+			int32_t pxHeight = Global<render::Fonts>::ref().getFont(this->lastFont).charSize[0].y;
 
 			if (this->lastScreenRectangle.getPixelSize().y == 0) {
 				return;

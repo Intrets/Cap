@@ -3,7 +3,7 @@
 #include "infos/RenderInfo.h"
 #include "infos/CameraInfo.h"
 
-#include <mem/Locator.h>
+#include <mem/Global.h>
 
 namespace render
 {
@@ -16,7 +16,7 @@ namespace render
 			return;
 		}
 
-		Locator<ogs::State>::ref().setState(ogs::UIBackground());
+		Global<ogs::State>::ref().setState(ogs::UIBackground());
 
 		this->VAO.bind();
 		this->program.use();

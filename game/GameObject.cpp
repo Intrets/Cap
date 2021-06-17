@@ -4,7 +4,7 @@
 
 #include <wglm/gtc/matrix_integer.hpp>
 #include <misc/Misc.h>
-#include <mem/Locator.h>
+#include <mem/Global.h>
 #include <misc/Log.h>
 
 #include <render/infos/DebugRenderInfo.h>
@@ -45,7 +45,7 @@ void PathFinding::debugRender() {
 				auto kk = k;
 				glm::vec2 p = std::bit_cast<glm::ivec2>(kk);
 
-				Locator<render::DebugRenderInfo>::ref().world.addBox(
+				Global<render::DebugRenderInfo>::ref().world.addBox(
 					p + 0.2f,
 					p + 0.8f,
 					colors::green
@@ -54,7 +54,7 @@ void PathFinding::debugRender() {
 
 			float size = 0.9f;
 			for (auto p : this->searched) {
-				Locator<render::DebugRenderInfo>::ref().world.addBox(
+				Global<render::DebugRenderInfo>::ref().world.addBox(
 					p + size,
 					p + 1.0f - size,
 					colors::yellow
@@ -64,7 +64,7 @@ void PathFinding::debugRender() {
 
 			size = 1.0f;
 			for (glm::vec2 p : this->waypoints) {
-				Locator<render::DebugRenderInfo>::ref().world.addBox(
+				Global<render::DebugRenderInfo>::ref().world.addBox(
 					p + size,
 					p + 1.0f - size,
 					colors::blue
@@ -76,7 +76,7 @@ void PathFinding::debugRender() {
 		{
 			for (glm::vec2 p : this->path) {
 
-				Locator<render::DebugRenderInfo>::ref().world.addBox(
+				Global<render::DebugRenderInfo>::ref().world.addBox(
 					p + 0.2f,
 					p + 0.8f,
 					colors::green
@@ -84,7 +84,7 @@ void PathFinding::debugRender() {
 			}
 
 			for (glm::vec2 p : this->prunedPath) {
-				Locator<render::DebugRenderInfo>::ref().world.addBox(
+				Global<render::DebugRenderInfo>::ref().world.addBox(
 					p + 0.2f,
 					p + 0.8f,
 					colors::cyan
@@ -93,7 +93,7 @@ void PathFinding::debugRender() {
 
 			float size = 1.0f;
 			for (glm::vec2 p : this->waypoints) {
-				Locator<render::DebugRenderInfo>::ref().world.addBox(
+				Global<render::DebugRenderInfo>::ref().world.addBox(
 					p + size,
 					p + 1.0f - size,
 					colors::blue
@@ -103,7 +103,7 @@ void PathFinding::debugRender() {
 			{
 				if (!this->waypoints.empty()) {
 					glm::vec2 p = this->waypoints.back();
-					Locator<render::DebugRenderInfo>::ref().world.addBox(
+					Global<render::DebugRenderInfo>::ref().world.addBox(
 						p + size,
 						p + 1.0f - size,
 						colors::yellow
@@ -115,7 +115,7 @@ void PathFinding::debugRender() {
 
 			size = 0.2f;
 			for (glm::vec2 p : this->newWaypoints) {
-				Locator<render::DebugRenderInfo>::ref().world.addBox(
+				Global<render::DebugRenderInfo>::ref().world.addBox(
 					p + size,
 					p + 1.0f - size,
 					colors::red
@@ -128,7 +128,7 @@ void PathFinding::debugRender() {
 		{
 			float size = 0.7f;
 			for (glm::vec2 p : this->finalPath) {
-				Locator<render::DebugRenderInfo>::ref().world.addBox(
+				Global<render::DebugRenderInfo>::ref().world.addBox(
 					p + size,
 					p + 1.0f - size,
 					colors::red
@@ -136,7 +136,7 @@ void PathFinding::debugRender() {
 			}
 			size = 0.2f;
 			for (glm::vec2 p : this->newWaypoints) {
-				Locator<render::DebugRenderInfo>::ref().world.addBox(
+				Global<render::DebugRenderInfo>::ref().world.addBox(
 					p + size,
 					p + 1.0f - size,
 					colors::red
@@ -149,7 +149,7 @@ void PathFinding::debugRender() {
 					auto kk = k;
 					glm::vec2 p = std::bit_cast<glm::ivec2>(kk);
 
-					Locator<render::DebugRenderInfo>::ref().world.addBox(
+					Global<render::DebugRenderInfo>::ref().world.addBox(
 						p + 0.2f,
 						p + 0.8f,
 						colors::green
@@ -158,7 +158,7 @@ void PathFinding::debugRender() {
 
 				size = 0.9f;
 				for (auto p : this->F->searched) {
-					Locator<render::DebugRenderInfo>::ref().world.addBox(
+					Global<render::DebugRenderInfo>::ref().world.addBox(
 						p + size,
 						p + 1.0f - size,
 						colors::yellow
@@ -168,7 +168,7 @@ void PathFinding::debugRender() {
 
 				size = 1.0f;
 				for (glm::vec2 p : this->F->waypoints) {
-					Locator<render::DebugRenderInfo>::ref().world.addBox(
+					Global<render::DebugRenderInfo>::ref().world.addBox(
 						p + size,
 						p + 1.0f - size,
 						colors::blue
@@ -177,14 +177,14 @@ void PathFinding::debugRender() {
 
 				glm::vec2 p1 = this->highlight1;
 
-				Locator<render::DebugRenderInfo>::ref().world.addPoint(
+				Global<render::DebugRenderInfo>::ref().world.addPoint(
 					p1 + 0.5f,
 					colors::green
 				);
 
 				glm::vec2 p2 = this->highlight2;
 
-				Locator<render::DebugRenderInfo>::ref().world.addPoint(
+				Global<render::DebugRenderInfo>::ref().world.addPoint(
 					p2 + 0.5f,
 					colors::green
 				);
@@ -377,7 +377,7 @@ bool PathFinding::stage1(game::WorldGrid& grid) {
 			f.D = norm2(this->target - p);
 			this->front.push(f);
 
-			Locator<misc::Log>::ref().putStreamLine(std::stringstream() << "winding: " << f.winding << " i: " << i);
+			Global<misc::Log>::ref().putStreamLine(std::stringstream() << "winding: " << f.winding << " i: " << i);
 
 
 			return false;

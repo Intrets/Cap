@@ -6,7 +6,7 @@
 #include <render/infos/RenderInfo.h>
 #include <render/infos/DebugRenderInfo.h>
 
-#include <mem/Locator.h>
+#include <mem/Global.h>
 #include <render/textures/BlockIDTextures.h>
 
 #include <misc/Timer.h>
@@ -28,7 +28,7 @@ namespace game
 			);
 			});
 
-		auto& debugRender = Locator<render::DebugRenderInfo>::ref();
+		auto& debugRender = Global<render::DebugRenderInfo>::ref();
 
 		if (misc::Option<misc::OPTION::GR_DEBUG, bool>::getVal()) {
 			for (size_t i = 0; i < WORLD_SIZE; i++) {
@@ -48,8 +48,8 @@ namespace game
 						//debugRender.world.addBox(min, max, c2);
 					}
 					//if (this->world->occupied(i, j)) {
-					//	Locator<render::DebugRenderInfo>::ref().world.addPoint(i + 0.5f, j + 0.5f);
-					//	Locator<render::DebugRenderInfo>::ref().world.addBox(i, j, i + 1.0f, j + 1.0f);
+					//	Global<render::DebugRenderInfo>::ref().world.addPoint(i + 0.5f, j + 0.5f);
+					//	Global<render::DebugRenderInfo>::ref().world.addBox(i, j, i + 1.0f, j + 1.0f);
 					//}
 				}
 			}
@@ -131,11 +131,11 @@ namespace game
 
 		this->everything.match([&](Merger& merger) {
 			auto& grapher = this->everything.gets<Grapher>().get<Grapher>(Index<game::RawData>{ 1 });
-			Locator<misc::Timer>::ref().newTiming("Merge");
+			Global<misc::Timer>::ref().newTiming("Merge");
 			if (grapher.finished) {
 				if (!grapher.groups.empty()) {
 					merger.initialize(grapher.groups, *this->world);
-					auto& log = Locator<misc::Log>::ref();
+					auto& log = Global<misc::Log>::ref();
 					log.putLine(std::format("number of regions: {}", merger.groups.size()));
 					int32_t smallCount = 0;
 					for (auto& group : merger.groups) {
@@ -160,7 +160,7 @@ namespace game
 					//}
 				}
 			}
-			Locator<misc::Timer>::ref().endTiming("Merge");
+			Global<misc::Timer>::ref().endTiming("Merge");
 			});
 
 		this->everything.collectRemoved();
@@ -195,7 +195,7 @@ namespace game
 	void GameState::init() {
 		{
 			auto p = this->everything.makeUnique();
-			p.add<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("gnome.dds");
+			p.add<GraphicsTile>().blockID = Global<render::BlockIDTextures>::ref().getBlockTextureID("gnome.dds");
 			p.add<GamePosition>().pos = { 3,3 };
 
 			auto& spawner = p.add<Spawner>();
@@ -203,7 +203,7 @@ namespace game
 			spawner.interval = 120;
 			auto www = this->everything.makeUnique();
 			spawner.object = std::move(www);
-			spawner.object.add<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("gnome.dds");
+			spawner.object.add<GraphicsTile>().blockID = Global<render::BlockIDTextures>::ref().getBlockTextureID("gnome.dds");
 
 			this->placeInWorld(std::move(p));
 
@@ -220,7 +220,7 @@ namespace game
 				}
 				auto p2 = this->everything.makeUnique();
 				p2.add<GamePosition>().pos = { i, j };
-				p2.add<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
+				p2.add<GraphicsTile>().blockID = Global<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
 
 				this->placeInWorld(std::move(p2));
 			};
@@ -287,7 +287,7 @@ namespace game
 		for (size_t i = 0; i < 1; i++) {
 			auto p = this->everything.makeUnique();
 			p.add<GamePosition>().pos = { 2, 2 };
-			p.add<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("gnome.dds");
+			p.add<GraphicsTile>().blockID = Global<render::BlockIDTextures>::ref().getBlockTextureID("gnome.dds");
 			this->placeInWorld(std::move(p));
 		}
 
@@ -297,7 +297,7 @@ namespace game
 				size_t j = 0;
 				auto p2 = this->everything.makeUnique();
 				p2.add<GamePosition>().pos = { i, j };
-				p2.add<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
+				p2.add<GraphicsTile>().blockID = Global<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
 				this->placeInWorld(std::move(p2));
 			}
 		}
@@ -308,7 +308,7 @@ namespace game
 				int j = WORLD_SIZE - 1;
 				auto p2 = this->everything.makeUnique();
 				p2.add<GamePosition>().pos = { i, j };
-				p2.add<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
+				p2.add<GraphicsTile>().blockID = Global<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
 				this->placeInWorld(std::move(p2));
 			}
 		}
@@ -319,7 +319,7 @@ namespace game
 			for (size_t j = 0; j < WORLD_SIZE; j++) {
 				auto p2 = this->everything.makeUnique();
 				p2.add<GamePosition>().pos = { i, j };
-				p2.add<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
+				p2.add<GraphicsTile>().blockID = Global<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
 				this->placeInWorld(std::move(p2));
 			}
 		}
@@ -330,7 +330,7 @@ namespace game
 			for (size_t j = 0; j < WORLD_SIZE; j++) {
 				auto p2 = this->everything.makeUnique();
 				p2.add<GamePosition>().pos = { i, j };
-				p2.add<GraphicsTile>().blockID = Locator<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
+				p2.add<GraphicsTile>().blockID = Global<render::BlockIDTextures>::ref().getBlockTextureID("weird_ground.dds");
 
 				this->placeInWorld(std::move(p2));
 			}

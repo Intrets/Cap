@@ -8,7 +8,7 @@
 
 #include "WorldGrid.h"
 
-#include <mem/Locator.h>
+#include <mem/Global.h>
 #include <render/infos/DebugRenderInfo.h>
 
 void Merger::initialize(std::vector<glm::ivec2>& seedPoints, game::WorldGrid& grid) {
@@ -244,7 +244,7 @@ void Merger::mergeGroups(game::WorldGrid& grid, int32_t group, int32_t into) {
 }
 
 void Merger::debugRender() {
-	auto& debugRender = Locator<render::DebugRenderInfo>::ref();
+	auto& debugRender = Global<render::DebugRenderInfo>::ref();
 
 	for (auto& group : this->groups) {
 		//if (group.neighbours.size() < 10) {

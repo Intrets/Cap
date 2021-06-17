@@ -61,16 +61,16 @@ void prepareRender(
 	renderInfo.frameSize = { frameSizeX, frameSizeY };
 	renderInfo.cameraInfo = { frameSizeX, frameSizeY, playerInfo.pos, glm::vec3(viewport, 200.0f) };
 
-	//Locator<Timer>::ref().newTiming("Prepare Debug");
-	//renderInfo.debugRenderInfo = *Locator<DebugRenderInfo>::get();
-	//Locator<DebugRenderInfo>::provide(new DebugRenderInfo());
-	//Locator<Timer>::ref().endTiming("Prepare Debug");
+	//Global<Timer>::ref().newTiming("Prepare Debug");
+	//renderInfo.debugRenderInfo = *Global<DebugRenderInfo>::get();
+	//Global<DebugRenderInfo>::provide(new DebugRenderInfo());
+	//Global<Timer>::ref().endTiming("Prepare Debug");
 
 	gameState.addRenderInfo(renderInfo);
 
-	Locator<misc::Timer>::ref().newTiming("Prepare UI");
+	Global<misc::Timer>::ref().newTiming("Prepare UI");
 	uiState.appendRenderInfo(gameState, renderInfo);
-	Locator<misc::Timer>::ref().endTiming("Prepare UI");
+	Global<misc::Timer>::ref().endTiming("Prepare UI");
 }
 
 void mainLoop(GLFWwindow* window, std::chrono::steady_clock::time_point startTime) {
@@ -115,31 +115,31 @@ void mainLoop(GLFWwindow* window, std::chrono::steady_clock::time_point startTim
 	glfwSetScrollCallback(window, scroll_callback);
 
 	std::chrono::duration<double> startUpDuration = std::chrono::steady_clock::now() - startTime;
-	Locator<misc::Log>::ref().putLine(std::format("Startup time: {} seconds\n", startUpDuration));
+	Global<misc::Log>::ref().putLine(std::format("Startup time: {} seconds\n", startUpDuration));
 
 	for (;;) {
 		if (uiState.loadGame.has_value()) {
 			game::GameState newGameState;
 
 			std::ifstream file;
-			Locator<misc::PathManager>::ref().openSave(file, uiState.loadGame.value());
+			Global<misc::PathManager>::ref().openSave(file, uiState.loadGame.value());
 			if (!file.good()) {
-				Locator<misc::Log>::ref().putLine(std::format("failed to open save file: {}", uiState.loadGame.value()));
+				Global<misc::Log>::ref().putLine(std::format("failed to open save file: {}", uiState.loadGame.value()));
 			}
 			else {
 				serial::Serializer serializer{ file };
 
 				auto start = glfwGetTime();
 
-				Locator<game::NewEverything>::init(&gameState.everything);
+				Global<game::NewEverything>::init(&gameState.everything);
 				if (!serializer.read(newGameState)) {
-					Locator<misc::Log>::ref().putLine(std::format("failed to load game from: {}", uiState.loadGame.value()));
+					Global<misc::Log>::ref().putLine(std::format("failed to load game from: {}", uiState.loadGame.value()));
 				}
 				else {
 					gameState = std::move(newGameState);
-					Locator<misc::Log>::ref().putLine(std::format("loaded game from {} in {:.4f} seconds", uiState.loadGame.value(), glfwGetTime() - start));
+					Global<misc::Log>::ref().putLine(std::format("loaded game from {} in {:.4f} seconds", uiState.loadGame.value(), glfwGetTime() - start));
 				}
-				Locator<game::NewEverything>::destroy();
+				Global<game::NewEverything>::destroy();
 			}
 
 			uiState.loadGame.reset();
@@ -148,19 +148,19 @@ void mainLoop(GLFWwindow* window, std::chrono::steady_clock::time_point startTim
 
 		if (uiState.saveGame.has_value()) {
 			std::ofstream file;
-			Locator<misc::PathManager>::ref().openSave(file, uiState.saveGame.value());
+			Global<misc::PathManager>::ref().openSave(file, uiState.saveGame.value());
 			if (!file.good()) {
-				Locator<misc::Log>::ref().putLine(std::format("failed to open save file: {}", uiState.saveGame.value()));
+				Global<misc::Log>::ref().putLine(std::format("failed to open save file: {}", uiState.saveGame.value()));
 			}
 			else {
 				serial::Serializer serializer{ file };
 
 				auto start = glfwGetTime();
 				if (!serializer.write(gameState)) {
-					Locator<misc::Log>::ref().putLine(std::format("failed to save game to: {}", uiState.saveGame.value()));
+					Global<misc::Log>::ref().putLine(std::format("failed to save game to: {}", uiState.saveGame.value()));
 				}
 				else {
-					Locator<misc::Log>::ref().putLine(std::format("saved game to {} in {:.4f} seconds", uiState.saveGame.value(), glfwGetTime() - start));
+					Global<misc::Log>::ref().putLine(std::format("saved game to {} in {:.4f} seconds", uiState.saveGame.value(), glfwGetTime() - start));
 				}
 			}
 
@@ -168,16 +168,16 @@ void mainLoop(GLFWwindow* window, std::chrono::steady_clock::time_point startTim
 			file.close();
 		}
 
-		Locator<misc::Timer>::ref().newTiming("game logic");
+		Global<misc::Timer>::ref().newTiming("game logic");
 		gameState.runTick();
-		Locator<misc::Timer>::ref().endTiming("game logic");
+		Global<misc::Timer>::ref().endTiming("game logic");
 
 		uiState.updateSize(window);
 
 		render::RenderInfo renderInfo;
-		Locator<misc::Timer>::ref().newTiming("prep render");
+		Global<misc::Timer>::ref().newTiming("prep render");
 		prepareRender(window, renderInfo, playerInfo);
-		Locator<misc::Timer>::ref().endTiming("prep render");
+		Global<misc::Timer>::ref().endTiming("prep render");
 
 		controlState.cycleStates();
 		glfwPollEvents();

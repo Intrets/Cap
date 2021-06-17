@@ -1,6 +1,6 @@
 #include "HighlightRenderer.h"
 
-#include <mem/Locator.h>
+#include <mem/Global.h>
 
 #include "GLStateWrapper.h"
 
@@ -14,7 +14,7 @@ void render::HighlightRenderer::render(
 		return;
 	}
 
-	Locator<ogs::State>::ref().setState(ogs::HighlightConfiguration());
+	Global<ogs::State>::ref().setState(ogs::HighlightConfiguration());
 
 	this->VAO.bind();
 	this->program.use();

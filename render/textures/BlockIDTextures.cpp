@@ -2,7 +2,7 @@
 
 #include <wglm/glm.hpp>
 
-#include <mem/Locator.h>
+#include <mem/Global.h>
 #include <misc/PathManager.h>
 
 #include "BlitRenderer.h"
@@ -24,7 +24,7 @@ namespace render
 	}
 
 	void BlockIDTextures::loadBlockTexture(std::string name) {
-		bwo::Texture2D newTex(Locator<misc::PathManager>::get()->LoadTexture2DP(name));
+		bwo::Texture2D newTex(Global<misc::PathManager>::get()->LoadTexture2DP(name));
 
 		// Failed to load texture
 		if (newTex.ID == 0) {
@@ -41,7 +41,7 @@ namespace render
 
 		auto  config = ogs::BlockIDConfiguration();
 
-		Locator<BlitRenderer>::ref().render(
+		Global<BlitRenderer>::ref().render(
 			config,
 			info,
 			target,

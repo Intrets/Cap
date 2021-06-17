@@ -2,7 +2,7 @@
 
 #include "GLStateWrapper.h"
 
-#include <mem/Locator.h>
+#include <mem/Global.h>
 
 #include <misc/PathManager.h>
 
@@ -12,7 +12,7 @@
 namespace render
 {
 	FontInfo Fonts::loadMonospacedFont(std::string name, glm::ivec2 charDim, glm::ivec2 gridDim) {
-		auto tex = Locator<misc::PathManager>::ref().LoadFont(name);
+		auto tex = Global<misc::PathManager>::ref().LoadFont(name);
 
 		render::BlitRenderInfo blitInfo;
 
@@ -70,7 +70,7 @@ namespace render
 
 		auto config = ogs::FontAtlasConfiguration();
 
-		Locator<render::BlitRenderer>::ref().render(
+		Global<render::BlitRenderer>::ref().render(
 			config,
 			blitInfo,
 			this->buffer,

@@ -10,7 +10,7 @@
 #include <game/player/PlayerInfo.h>
 #include <game/GameState.h>
 
-#include <mem/Locator.h>
+#include <mem/Global.h>
 
 #include <misc/Timer.h>
 

@@ -1,6 +1,6 @@
 #include "BlitRendererArray.h"
 
-#include <mem/Locator.h>
+#include <mem/Global.h>
 
 #include "GLStateWrapper.h"
 
@@ -18,7 +18,7 @@ namespace render
 		this->VAO.bind();
 		this->program.use();
 
-		Locator<ogs::State>::ref().setState(config);
+		Global<ogs::State>::ref().setState(config);
 
 		if (depth_.has_value()) {
 			this->depth.set(depth_.value());

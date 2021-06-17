@@ -11,7 +11,7 @@
 
 #include "IOWrapped.h"
 
-#include <mem/Locator.h>
+#include <mem/Global.h>
 
 namespace misc
 {
@@ -40,18 +40,18 @@ namespace misc
 
 	template<OPTION A, class T>
 	inline T Option<A, T>::getVal() {
-		return Locator<OptionManager>::get()->getVal<T>(A);
+		return Global<OptionManager>::get()->getVal<T>(A);
 	}
 
 	template<OPTION A, class T>
 	inline void Option<A, T>::setVal(T val) {
-		Locator<OptionManager>::get()->setVal(A, val);
+		Global<OptionManager>::get()->setVal(A, val);
 	}
 
 	template<OPTION A, class T>
 	inline void Option<A, T>::toggle() {
 		static_assert(std::is_same_v<T, bool>);
-		Locator<OptionManager>::get()->toggle(A);
+		Global<OptionManager>::get()->toggle(A);
 	}
 
 	class _OptionValueBase

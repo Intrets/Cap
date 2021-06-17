@@ -16,7 +16,7 @@
 #include <render/Colors.h>
 #include <render/BufferWrappers.h>
 
-#include <mem/Locator.h>
+#include <mem/Global.h>
 
 #include <misc/Timer.h>
 #include <misc/Option.h>
@@ -157,7 +157,7 @@ namespace game
 			[](PlayerInfo& playerInfo, ui::Base* self_) -> ui::CallBackBindResult
 			{
 				auto self = static_cast<ui::TextDisplay*>(self_);
-				self->setText(Locator<misc::Timer>::ref().print());
+				self->setText(Global<misc::Timer>::ref().print());
 				return ui::BIND::RESULT::CONTINUE;
 			});
 
@@ -188,7 +188,7 @@ namespace game
 					vec.erase(vec.begin(), vec.begin() + 50);
 				}
 
-				auto newLines = Locator<misc::Log>::ref().getLines();
+				auto newLines = Global<misc::Log>::ref().getLines();
 				for (auto& newLine : newLines) {
 					self->text.addLine(newLine);
 				}

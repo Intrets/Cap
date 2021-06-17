@@ -1,6 +1,6 @@
 #include "BlitRenderer.h"
 
-#include <mem/Locator.h>
+#include <mem/Global.h>
 #include "GLStateWrapper.h"
 
 namespace render
@@ -20,7 +20,7 @@ namespace render
 			return;
 		}
 
-		Locator<ogs::State>::ref().setState(config);
+		Global<ogs::State>::ref().setState(config);
 
 		this->VAO.bind();
 		this->program.use();

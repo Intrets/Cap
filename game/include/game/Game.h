@@ -17,7 +17,7 @@
 #include <misc/Misc.h>
 
 #include <mem/Index.h>
-#include <mem/Locator.h>
+#include <mem/Global.h>
 
 #include <serial/Serializer.h>
 
@@ -504,8 +504,8 @@ struct serial::Serializable<game::WeakObject>
 			ALL(index)
 		);
 
-		assert(Locator<game::NewEverything>::ref().ptr != nullptr);
-		obj.proxy = Locator<game::NewEverything>::ref().ptr;
+		assert(Global<game::NewEverything>::ref().ptr != nullptr);
+		obj.proxy = Global<game::NewEverything>::ref().ptr;
 
 		return b;
 	}

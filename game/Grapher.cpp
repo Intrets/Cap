@@ -3,7 +3,7 @@
 #include <render/infos/DebugRenderInfo.h>
 #include <vector>
 
-#include <mem/Locator.h>
+#include <mem/Global.h>
 
 bool Grapher::incrementLastPos() {
 	//this->lastPos.x++;

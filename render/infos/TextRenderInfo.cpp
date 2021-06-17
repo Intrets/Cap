@@ -1,6 +1,6 @@
 #include "infos/TextRenderInfo.h"
 
-#include <mem/Locator.h>
+#include <mem/Global.h>
 
 #include "Enums.h"
 #include "Fonts.h"
@@ -15,7 +15,7 @@ namespace render
 	}
 
 	void WindowTextRenderInfo::addString(FONT font, std::string text) {
-		FontInfo& fontInfo = Locator<Fonts>::ref().getFont(font);
+		FontInfo& fontInfo = Global<Fonts>::ref().getFont(font);
 
 		glm::ivec2 sizei = this->screenRectangle.getSize();
 

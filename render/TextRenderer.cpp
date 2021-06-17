@@ -1,7 +1,7 @@
 #include "TextRenderer.h"
 
 #include <wglm/glm.hpp>
-#include <mem/Locator.h>
+#include <mem/Global.h>
 
 #include "GLStateWrapper.h"
 #include "infos/TextRenderInfo.h"
@@ -21,7 +21,7 @@ namespace render
 
 			ogs::Configuration config = ogs::TextConfiguration();
 
-			Locator<BlitRenderer>::ref().render(
+			Global<BlitRenderer>::ref().render(
 				config,
 				info.textRenderInfo,
 				target,

@@ -4,7 +4,7 @@
 
 #include <render/infos/RenderInfo.h>
 
-#include <mem/Locator.h>
+#include <mem/Global.h>
 
 #include <sound/SoundPlayer.h>
 
@@ -57,7 +57,7 @@ namespace ui
 			[](PlayerInfo& playerInfo, Base* self_) -> CallBackBindResult
 			{
 				if (!static_cast<Button*>(self_)->isDown() && !self_->isActive()) {
-					Locator<sound::SoundPlayer>::ref().playSound(sound::Sample::BUTTON_HOVER, 30);
+					Global<sound::SoundPlayer>::ref().playSound(sound::Sample::BUTTON_HOVER, 30);
 				}
 				self_->activate();
 				return BIND::RESULT::CONSUME;
@@ -77,7 +77,7 @@ namespace ui
 				auto self = static_cast<Button*>(self_);
 				self->down = true;
 				self->mousePressOffset = playerInfo.uiState.getCursor() - self->getScreenRectangle().getTopLeft();
-				Locator<sound::SoundPlayer>::ref().playSound(sound::Sample::BUTTON_CLICK, 80);
+				Global<sound::SoundPlayer>::ref().playSound(sound::Sample::BUTTON_CLICK, 80);
 				return self->onPress(playerInfo, self_) | BIND::RESULT::FOCUS | BIND::RESULT::CONSUME;
 			});
 
