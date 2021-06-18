@@ -18,6 +18,7 @@
 
 #include <mem/Index.h>
 #include <mem/Global.h>
+#include <mem/LazyGlobal.h>
 
 #include <serial/Serializer.h>
 
@@ -41,7 +42,7 @@ struct StructInformation
 
 struct StoredStructInformations
 {
-	static std::unordered_map<std::string, StructInformation> infos;
+	std::unordered_map<std::string, StructInformation> infos{};
 };
 
 template<>
@@ -53,8 +54,8 @@ struct serial::Serializable<StructInformation>
 		std::string name;
 		READ(name);
 		if (name != "") {
-			assert(StoredStructInformations::infos.contains(name));
-			val = StoredStructInformations::infos[name];
+			assert(LazyGlobal<StoredStructInformations>->infos.contains(name));
+			val = LazyGlobal<StoredStructInformations>->infos[name];
 		}
 		return true;
 	};
@@ -301,21 +302,35 @@ namespace game
 
 	struct Everything
 	{
-		struct component_counter
+		struct ComponentCounter
 		{
-			static inline size_t t = 0;
+			size_t t = 0;
+
+			Index<Component> increment() {
+				return { t++ };
+			}
+
+			size_t size() {
+				return t;
+			}
 		};
 
 		template<class T>
-		struct component_index : component_counter
+		struct ComponentIndex
+		{
+			Index<Component> val = LazyGlobal<ComponentCounter>->increment();
+		};
+
+		template<class T>
+		struct component_index
 		{
 			static inline Index<Component> getVal() {
-				assert(t < SIZE);
+				assert(LazyGlobal<ComponentCounter>->size() < SIZE);
 
 				StructInformation info;
 				static_assert(serial::has_type_name<T>);
 				info.name = serial::Serializable<T>::typeName;
-				info.index = Index<Component>{ t++ };
+				info.index = LazyGlobal<ComponentIndex<T>>->val;
 				info.width = RawData::aligned_sizeof<T>::get();
 				info.objectDestructor = [](void* obj) {
 					reinterpret_cast<T*>(obj)->~T();
@@ -337,7 +352,7 @@ namespace game
 					new (target) T(*reinterpret_cast<T*>(source));
 				};
 
-				StoredStructInformations::infos.insert({ info.name, info });
+				LazyGlobal<StoredStructInformations>->infos.insert({ info.name, info });
 
 				return info.index;
 			};
@@ -354,10 +369,10 @@ namespace game
 			static const inline SignatureType fillSignature() {
 				SignatureType res{};
 				if constexpr (sizeof...(Ms) == 0) {
-					res.set(Everything::component_index<M>::val);
+					res.set(LazyGlobal<ComponentIndex<M>>->val);
 				}
 				else {
-					for (auto s : { Everything::component_index<M>::val, Everything::component_index<Ms>::val... }) {
+					for (auto s : { LazyGlobal<ComponentIndex<M>>->val, LazyGlobal<ComponentIndex<Ms>>->val... }) {
 						res.set(s);
 					}
 				}
@@ -794,8 +809,7 @@ namespace game
 			this->indices.push_back(Index<Everything>{ 0 });
 			this->data.resize(this->reservedObjects * aligned_sizeof<T>::get());
 
-			this->structInformation = StoredStructInformations::infos[std::string(serial::Serializable<T>::typeName)];
-
+			this->structInformation = LazyGlobal<StoredStructInformations>->infos[std::string(serial::Serializable<T>::typeName)];
 		}
 		else if (this->index >= this->reservedObjects) {
 			this->increaseSize();
@@ -871,7 +885,7 @@ namespace game
 	}
 
 	inline size_t Everything::getTypeCount() {
-		return component_counter::t;
+		return LazyGlobal<ComponentCounter>->size();
 	}
 
 	inline Everything::Everything() {

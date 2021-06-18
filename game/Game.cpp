@@ -1,7 +1,5 @@
 #include "Game.h"
 
-std::unordered_map<std::string, StructInformation> StoredStructInformations::infos{};
-
 namespace game
 {
 	UniqueObject::~UniqueObject() {
