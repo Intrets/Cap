@@ -894,11 +894,11 @@ namespace game
 		}
 	}
 
-	template<class ...Ms>
+	template<class... Ms>
 	inline UniqueObject Everything::clone(WeakObject const& obj) {
 		std::vector<Index<Component>> components;
 
-		for (auto component : { Everything::component_index<Ms>::val... }) {
+		for (auto component : { Everything::component_index_v<Ms>... }) {
 			components.push_back(component);
 		}
 
@@ -931,8 +931,17 @@ namespace game
 
 	template<class... Ts>
 	inline bool Everything::has(Index<Everything> i) const {
-		auto const sig = group_signature_v<Ts...>;
-		return (this->signatures[i] & sig) == sig;
+		if constexpr (sizeof...(Ts) == 0) {
+			assert(0);
+			return true;
+		}
+		if constexpr (sizeof...(Ts) == 1) {
+			return this->signatures[i].test(Everything::component_index_v<typename te::list<Ts...>::head>);
+		}
+		else {
+			auto const sig = group_signature_v<Ts...>;
+			return (this->signatures[i] & sig) == sig;
+		}
 	}
 
 	template<class F>
@@ -950,7 +959,7 @@ namespace game
 	inline Index<Component> Everything::selectPivot() {
 		Index<Component> pivot{ 0 };
 		size_t smallest = std::numeric_limits<size_t>::max();
-		for (auto s : { Everything::component_index<Ms>::val... }) {
+		for (auto s : { Everything::component_index_v<Ms>... }) {
 			size_t typeSize = this->data[s].index;
 
 			if (typeSize < smallest) {

@@ -79,14 +79,15 @@ namespace game
 			if (spawner.lastSpawn == 0) {
 				if (!this->world->occupied(pos.pos + glm::ivec2(1, 0))) {
 					spawner.lastSpawn = 0;
+					auto p = pos.pos;
 					auto obj = this->everything.cloneAll(spawner.object);
 					auto& walker = obj.add<RandomWalker>();
 
-					auto currentGroup = this->world->getGroup(pos.pos + glm::ivec2(1, 0));
+					auto currentGroup = this->world->getGroup(p + glm::ivec2(1, 0));
 					walker.groupTarget = currentGroup;
 					walker.indexTarget = 0;
 
-					obj.add<GamePosition>().pos = pos.pos + glm::ivec2(1, 0);
+					obj.add<GamePosition>().pos = p + glm::ivec2(1, 0);
 					obj.get<GamePosition>().pace = 2 + rand() % 50;
 
 					this->placeInWorld(std::move(obj));
