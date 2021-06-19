@@ -24,7 +24,7 @@ namespace render
 	}
 
 	void BlockIDTextures::loadBlockTexture(std::string name) {
-		bwo::Texture2D newTex(Global<misc::PathManager>()->LoadTexture2DP(name));
+		bwo::Texture2D newTex(Global<misc::PathManager>->LoadTexture2DP(name));
 
 		// Failed to load texture
 		if (newTex.ID == 0) {
@@ -41,7 +41,7 @@ namespace render
 
 		auto  config = ogs::BlockIDConfiguration();
 
-		Global<BlitRenderer>()->render(
+		Global<BlitRenderer>->render(
 			config,
 			info,
 			target,

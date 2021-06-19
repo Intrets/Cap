@@ -157,7 +157,7 @@ namespace game
 			[](PlayerInfo& playerInfo, ui::Base* self_) -> ui::CallBackBindResult
 			{
 				auto self = static_cast<ui::TextDisplay*>(self_);
-				self->setText(Global<misc::Timer>()->print());
+				self->setText(Global<misc::Timer>->print());
 				return ui::BIND::RESULT::CONTINUE;
 			});
 
@@ -188,7 +188,7 @@ namespace game
 					vec.erase(vec.begin(), vec.begin() + 50);
 				}
 
-				auto newLines = Global<misc::Log>()->getLines();
+				auto newLines = Global<misc::Log>->getLines();
 				for (auto& newLine : newLines) {
 					self->text.addLine(newLine);
 				}

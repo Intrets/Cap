@@ -244,7 +244,7 @@ void Merger::mergeGroups(game::WorldGrid& grid, int32_t group, int32_t into) {
 }
 
 void Merger::debugRender() {
-	auto& debugRender = *Global<render::DebugRenderInfo>();
+	auto& debugRender = *Global<render::DebugRenderInfo>;
 
 	for (auto& group : this->groups) {
 		//if (group.neighbours.size() < 10) {

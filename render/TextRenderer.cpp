@@ -21,7 +21,7 @@ namespace render
 
 			ogs::Configuration config = ogs::TextConfiguration();
 
-			Global<BlitRenderer>()->render(
+			Global<BlitRenderer>->render(
 				config,
 				info.textRenderInfo,
 				target,

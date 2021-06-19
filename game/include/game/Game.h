@@ -519,8 +519,8 @@ struct serial::Serializable<game::WeakObject>
 			ALL(index)
 		);
 
-		assert(Global<game::NewEverything>()->ptr != nullptr);
-		obj.proxy = Global<game::NewEverything>()->ptr;
+		assert(Global<game::NewEverything>->ptr != nullptr);
+		obj.proxy = Global<game::NewEverything>->ptr;
 
 		return b;
 	}

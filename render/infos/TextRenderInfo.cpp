@@ -15,7 +15,7 @@ namespace render
 	}
 
 	void WindowTextRenderInfo::addString(FONT font, std::string text) {
-		FontInfo& fontInfo = Global<Fonts>()->getFont(font);
+		FontInfo& fontInfo = Global<Fonts>->getFont(font);
 
 		glm::ivec2 sizei = this->screenRectangle.getSize();
 

@@ -45,7 +45,7 @@ void PathFinding::debugRender() {
 				auto kk = k;
 				glm::vec2 p = std::bit_cast<glm::ivec2>(kk);
 
-				Global<render::DebugRenderInfo>()->world.addBox(
+				Global<render::DebugRenderInfo>->world.addBox(
 					p + 0.2f,
 					p + 0.8f,
 					colors::green
@@ -54,7 +54,7 @@ void PathFinding::debugRender() {
 
 			float size = 0.9f;
 			for (auto p : this->searched) {
-				Global<render::DebugRenderInfo>()->world.addBox(
+				Global<render::DebugRenderInfo>->world.addBox(
 					p + size,
 					p + 1.0f - size,
 					colors::yellow
@@ -64,7 +64,7 @@ void PathFinding::debugRender() {
 
 			size = 1.0f;
 			for (glm::vec2 p : this->waypoints) {
-				Global<render::DebugRenderInfo>()->world.addBox(
+				Global<render::DebugRenderInfo>->world.addBox(
 					p + size,
 					p + 1.0f - size,
 					colors::blue
@@ -76,7 +76,7 @@ void PathFinding::debugRender() {
 		{
 			for (glm::vec2 p : this->path) {
 
-				Global<render::DebugRenderInfo>()->world.addBox(
+				Global<render::DebugRenderInfo>->world.addBox(
 					p + 0.2f,
 					p + 0.8f,
 					colors::green
@@ -84,7 +84,7 @@ void PathFinding::debugRender() {
 			}
 
 			for (glm::vec2 p : this->prunedPath) {
-				Global<render::DebugRenderInfo>()->world.addBox(
+				Global<render::DebugRenderInfo>->world.addBox(
 					p + 0.2f,
 					p + 0.8f,
 					colors::cyan
@@ -93,7 +93,7 @@ void PathFinding::debugRender() {
 
 			float size = 1.0f;
 			for (glm::vec2 p : this->waypoints) {
-				Global<render::DebugRenderInfo>()->world.addBox(
+				Global<render::DebugRenderInfo>->world.addBox(
 					p + size,
 					p + 1.0f - size,
 					colors::blue
@@ -103,7 +103,7 @@ void PathFinding::debugRender() {
 			{
 				if (!this->waypoints.empty()) {
 					glm::vec2 p = this->waypoints.back();
-					Global<render::DebugRenderInfo>()->world.addBox(
+					Global<render::DebugRenderInfo>->world.addBox(
 						p + size,
 						p + 1.0f - size,
 						colors::yellow
@@ -115,7 +115,7 @@ void PathFinding::debugRender() {
 
 			size = 0.2f;
 			for (glm::vec2 p : this->newWaypoints) {
-				Global<render::DebugRenderInfo>()->world.addBox(
+				Global<render::DebugRenderInfo>->world.addBox(
 					p + size,
 					p + 1.0f - size,
 					colors::red
@@ -128,7 +128,7 @@ void PathFinding::debugRender() {
 		{
 			float size = 0.7f;
 			for (glm::vec2 p : this->finalPath) {
-				Global<render::DebugRenderInfo>()->world.addBox(
+				Global<render::DebugRenderInfo>->world.addBox(
 					p + size,
 					p + 1.0f - size,
 					colors::red
@@ -136,7 +136,7 @@ void PathFinding::debugRender() {
 			}
 			size = 0.2f;
 			for (glm::vec2 p : this->newWaypoints) {
-				Global<render::DebugRenderInfo>()->world.addBox(
+				Global<render::DebugRenderInfo>->world.addBox(
 					p + size,
 					p + 1.0f - size,
 					colors::red
@@ -149,7 +149,7 @@ void PathFinding::debugRender() {
 					auto kk = k;
 					glm::vec2 p = std::bit_cast<glm::ivec2>(kk);
 
-					Global<render::DebugRenderInfo>()->world.addBox(
+					Global<render::DebugRenderInfo>->world.addBox(
 						p + 0.2f,
 						p + 0.8f,
 						colors::green
@@ -158,7 +158,7 @@ void PathFinding::debugRender() {
 
 				size = 0.9f;
 				for (auto p : this->F->searched) {
-					Global<render::DebugRenderInfo>()->world.addBox(
+					Global<render::DebugRenderInfo>->world.addBox(
 						p + size,
 						p + 1.0f - size,
 						colors::yellow
@@ -168,7 +168,7 @@ void PathFinding::debugRender() {
 
 				size = 1.0f;
 				for (glm::vec2 p : this->F->waypoints) {
-					Global<render::DebugRenderInfo>()->world.addBox(
+					Global<render::DebugRenderInfo>->world.addBox(
 						p + size,
 						p + 1.0f - size,
 						colors::blue
@@ -177,14 +177,14 @@ void PathFinding::debugRender() {
 
 				glm::vec2 p1 = this->highlight1;
 
-				Global<render::DebugRenderInfo>()->world.addPoint(
+				Global<render::DebugRenderInfo>->world.addPoint(
 					p1 + 0.5f,
 					colors::green
 				);
 
 				glm::vec2 p2 = this->highlight2;
 
-				Global<render::DebugRenderInfo>()->world.addPoint(
+				Global<render::DebugRenderInfo>->world.addPoint(
 					p2 + 0.5f,
 					colors::green
 				);
@@ -377,7 +377,7 @@ bool PathFinding::stage1(game::WorldGrid& grid) {
 			f.D = norm2(this->target - p);
 			this->front.push(f);
 
-			Global<misc::Log>()->putStreamLine(std::stringstream() << "winding: " << f.winding << " i: " << i);
+			Global<misc::Log>->putStreamLine(std::stringstream() << "winding: " << f.winding << " i: " << i);
 
 
 			return false;

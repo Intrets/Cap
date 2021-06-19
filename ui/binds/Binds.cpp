@@ -61,7 +61,7 @@ namespace ui
 				{
 					auto ptr = static_cast<TextDisplay*>(self_);
 
-					Global<sound::SoundPlayer>()->playSound(sound::Sample::BUTTON_CLICK, 80);
+					Global<sound::SoundPlayer>->playSound(sound::Sample::BUTTON_CLICK, 80);
 
 					glm::ivec2 click = playerInfo.uiState.getCursor() - ptr->getScreenRectangle().getBottomLeft();
 
@@ -72,7 +72,7 @@ namespace ui
 						auto maybeIndex = ptr->text.cachedRenderInfo.value().getIndex(screenClick);
 						if (maybeIndex.has_value()) {
 							ptr->text.selectIndex(maybeIndex.value());
-							Global<misc::Log>()->putStreamLine(std::stringstream() << maybeIndex.value());
+							Global<misc::Log>->putStreamLine(std::stringstream() << maybeIndex.value());
 						}
 					}
 
@@ -86,7 +86,7 @@ namespace ui
 				{
 					auto ptr = static_cast<TextDisplay*>(self_);
 					if (ptr->mode == TEXTDISPLAY::MODE::INSERT) {
-						Global<sound::SoundPlayer>()->playSound(sound::Sample::TEXT_EDIT);
+						Global<sound::SoundPlayer>->playSound(sound::Sample::TEXT_EDIT);
 
 						auto lines = misc::split(0, playerInfo.controlState.getCharBuffer(), '\n', true, true);
 						for (size_t i = 0; i < lines.size() - 1; i++) {
@@ -115,7 +115,7 @@ namespace ui
 							return c == '\n';
 						}));
 					ptr->insertText(text);
-					Global<sound::SoundPlayer>()->playSound(sound::Sample::TEXT_EDIT);
+					Global<sound::SoundPlayer>->playSound(sound::Sample::TEXT_EDIT);
 					return BIND::RESULT::CONTINUE | BIND::RESULT::CONSUME;
 				});
 		}
@@ -126,7 +126,7 @@ namespace ui
 				{
 					auto ptr = static_cast<TextDisplay*>(self_);
 					ptr->backspaceChar();
-					Global<sound::SoundPlayer>()->playSound(sound::Sample::TEXT_DELETE);
+					Global<sound::SoundPlayer>->playSound(sound::Sample::TEXT_DELETE);
 					return BIND::RESULT::CONTINUE | BIND::RESULT::CONSUME;
 				});
 		}
@@ -137,7 +137,7 @@ namespace ui
 				{
 					auto ptr = static_cast<TextDisplay*>(self_);
 					ptr->insertText("  ");
-					Global<sound::SoundPlayer>()->playSound(sound::Sample::TEXT_EDIT);
+					Global<sound::SoundPlayer>->playSound(sound::Sample::TEXT_EDIT);
 					return BIND::RESULT::CONTINUE | BIND::RESULT::CONSUME;
 				});
 		}
@@ -148,7 +148,7 @@ namespace ui
 				{
 					auto ptr = static_cast<TextDisplay*>(self_);
 					ptr->deleteChar();
-					Global<sound::SoundPlayer>()->playSound(sound::Sample::TEXT_DELETE);
+					Global<sound::SoundPlayer>->playSound(sound::Sample::TEXT_DELETE);
 					return BIND::RESULT::CONTINUE | BIND::RESULT::CONSUME;
 				});
 		}
@@ -159,7 +159,7 @@ namespace ui
 				{
 					auto ptr = static_cast<TextDisplay*>(self_);
 					ptr->moveCursor({ 0,1 });
-					Global<sound::SoundPlayer>()->playSound(sound::Sample::BUTTON_HOVER, 30);
+					Global<sound::SoundPlayer>->playSound(sound::Sample::BUTTON_HOVER, 30);
 					return BIND::RESULT::CONTINUE | BIND::RESULT::CONSUME;
 				});
 		}
@@ -170,7 +170,7 @@ namespace ui
 				{
 					auto ptr = static_cast<TextDisplay*>(self_);
 					ptr->moveCursor({ 0,-1 });
-					Global<sound::SoundPlayer>()->playSound(sound::Sample::BUTTON_HOVER, 30);
+					Global<sound::SoundPlayer>->playSound(sound::Sample::BUTTON_HOVER, 30);
 					return BIND::RESULT::CONTINUE | BIND::RESULT::CONSUME;
 				});
 		}
@@ -181,7 +181,7 @@ namespace ui
 				{
 					auto ptr = static_cast<TextDisplay*>(self_);
 					ptr->moveCursor({ 1,0 });
-					Global<sound::SoundPlayer>()->playSound(sound::Sample::BUTTON_HOVER, 30);
+					Global<sound::SoundPlayer>->playSound(sound::Sample::BUTTON_HOVER, 30);
 					return BIND::RESULT::CONTINUE | BIND::RESULT::CONSUME;
 				});
 		}
@@ -192,7 +192,7 @@ namespace ui
 				{
 					auto ptr = static_cast<TextDisplay*>(self_);
 					ptr->moveCursor({ -1,0 });
-					Global<sound::SoundPlayer>()->playSound(sound::Sample::BUTTON_HOVER, 30);
+					Global<sound::SoundPlayer>->playSound(sound::Sample::BUTTON_HOVER, 30);
 					return BIND::RESULT::CONTINUE | BIND::RESULT::CONSUME;
 				});
 		}
@@ -203,7 +203,7 @@ namespace ui
 				{
 					auto ptr = static_cast<TextDisplay*>(self_);
 					ptr->text.moveView({ 0,-1 });
-					Global<sound::SoundPlayer>()->playSound(sound::Sample::BUTTON_HOVER, 30);
+					Global<sound::SoundPlayer>->playSound(sound::Sample::BUTTON_HOVER, 30);
 					return BIND::RESULT::CONTINUE | BIND::RESULT::CONSUME;
 				});
 		}
@@ -214,7 +214,7 @@ namespace ui
 				{
 					auto ptr = static_cast<TextDisplay*>(self_);
 					ptr->text.moveView({ 0,1 });
-					Global<sound::SoundPlayer>()->playSound(sound::Sample::BUTTON_HOVER, 30);
+					Global<sound::SoundPlayer>->playSound(sound::Sample::BUTTON_HOVER, 30);
 					return BIND::RESULT::CONTINUE | BIND::RESULT::CONSUME;
 				});
 		}

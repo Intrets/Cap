@@ -433,7 +433,7 @@ namespace ui
 		}
 
 		void Text::moveView(glm::ivec2 p) {
-			int32_t pxHeight = Global<render::Fonts>()->getFont(this->lastFont).charSize[0].y;
+			int32_t pxHeight = Global<render::Fonts>->getFont(this->lastFont).charSize[0].y;
 
 			if (this->lastScreenRectangle.getPixelSize().y == 0) {
 				return;

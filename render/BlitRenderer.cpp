@@ -20,7 +20,7 @@ namespace render
 			return;
 		}
 
-		Global<ogs::State>()->setState(config);
+		Global<ogs::State>->setState(config);
 
 		this->VAO.bind();
 		this->program.use();

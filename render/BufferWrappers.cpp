@@ -153,7 +153,7 @@ namespace render
 	}
 
 	static auto getAttachmentEnum(int32_t number) {
-		assert(Global<ogs::State>()->MAX_COLOR_ATTACHMENTS > number);
+		assert(Global<ogs::State>->MAX_COLOR_ATTACHMENTS > number);
 
 		GLenum attachment = GL_COLOR_ATTACHMENT0;
 		switch (number) {
@@ -189,7 +189,7 @@ namespace render
 	}
 
 	void bwo::FrameBuffer::bindTextureColor(int32_t attachmentNumber, bwo::Texture2D const& texture, GLint mipmap) {
-		assert(Global<ogs::State>()->MAX_COLOR_ATTACHMENTS > attachmentNumber);
+		assert(Global<ogs::State>->MAX_COLOR_ATTACHMENTS > attachmentNumber);
 
 		this->size = texture.size;
 		glBindFramebuffer(GL_FRAMEBUFFER, this->ID);

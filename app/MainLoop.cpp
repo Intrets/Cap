@@ -61,16 +61,16 @@ void prepareRender(
 	renderInfo.frameSize = { frameSizeX, frameSizeY };
 	renderInfo.cameraInfo = { frameSizeX, frameSizeY, playerInfo.pos, glm::vec3(viewport, 200.0f) };
 
-	//Global<Timer>()->newTiming("Prepare Debug");
+	//Global<Timer>->newTiming("Prepare Debug");
 	//renderInfo.debugRenderInfo = *Global<DebugRenderInfo>();
 	//Global<DebugRenderInfo>::provide(new DebugRenderInfo());
-	//Global<Timer>()->endTiming("Prepare Debug");
+	//Global<Timer>->endTiming("Prepare Debug");
 
 	gameState.addRenderInfo(renderInfo);
 
-	Global<misc::Timer>()->newTiming("Prepare UI");
+	Global<misc::Timer>->newTiming("Prepare UI");
 	uiState.appendRenderInfo(gameState, renderInfo);
-	Global<misc::Timer>()->endTiming("Prepare UI");
+	Global<misc::Timer>->endTiming("Prepare UI");
 }
 
 struct TestStruct
@@ -126,31 +126,31 @@ void mainLoop(GLFWwindow* window, std::chrono::steady_clock::time_point startTim
 	glfwSetScrollCallback(window, scroll_callback);
 
 	std::chrono::duration<double> startUpDuration = std::chrono::steady_clock::now() - startTime;
-	Global<misc::Log>()->putLine(std::format("Startup time: {} seconds\n", startUpDuration));
+	Global<misc::Log>->putLine(std::format("Startup time: {} seconds\n", startUpDuration));
 
 	for (;;) {
 		if (uiState.loadGame.has_value()) {
 			game::GameState newGameState;
 
 			std::ifstream file;
-			Global<misc::PathManager>()->openSave(file, uiState.loadGame.value());
+			Global<misc::PathManager>->openSave(file, uiState.loadGame.value());
 			if (!file.good()) {
-				Global<misc::Log>()->putLine(std::format("failed to open save file: {}", uiState.loadGame.value()));
+				Global<misc::Log>->putLine(std::format("failed to open save file: {}", uiState.loadGame.value()));
 			}
 			else {
 				serial::Serializer serializer{ file };
 
 				auto start = glfwGetTime();
 
-				Global<game::NewEverything>::init(&gameState.everything);
+				Global<game::NewEverything>.init(&gameState.everything);
 				if (!serializer.read(newGameState)) {
-					Global<misc::Log>()->putLine(std::format("failed to load game from: {}", uiState.loadGame.value()));
+					Global<misc::Log>->putLine(std::format("failed to load game from: {}", uiState.loadGame.value()));
 				}
 				else {
 					gameState = std::move(newGameState);
-					Global<misc::Log>()->putLine(std::format("loaded game from {} in {:.4f} seconds", uiState.loadGame.value(), glfwGetTime() - start));
+					Global<misc::Log>->putLine(std::format("loaded game from {} in {:.4f} seconds", uiState.loadGame.value(), glfwGetTime() - start));
 				}
-				Global<game::NewEverything>::destroy();
+				Global<game::NewEverything>.destroy();
 			}
 
 			uiState.loadGame.reset();
@@ -159,19 +159,19 @@ void mainLoop(GLFWwindow* window, std::chrono::steady_clock::time_point startTim
 
 		if (uiState.saveGame.has_value()) {
 			std::ofstream file;
-			Global<misc::PathManager>()->openSave(file, uiState.saveGame.value());
+			Global<misc::PathManager>->openSave(file, uiState.saveGame.value());
 			if (!file.good()) {
-				Global<misc::Log>()->putLine(std::format("failed to open save file: {}", uiState.saveGame.value()));
+				Global<misc::Log>->putLine(std::format("failed to open save file: {}", uiState.saveGame.value()));
 			}
 			else {
 				serial::Serializer serializer{ file };
 
 				auto start = glfwGetTime();
 				if (!serializer.write(gameState)) {
-					Global<misc::Log>()->putLine(std::format("failed to save game to: {}", uiState.saveGame.value()));
+					Global<misc::Log>->putLine(std::format("failed to save game to: {}", uiState.saveGame.value()));
 				}
 				else {
-					Global<misc::Log>()->putLine(std::format("saved game to {} in {:.4f} seconds", uiState.saveGame.value(), glfwGetTime() - start));
+					Global<misc::Log>->putLine(std::format("saved game to {} in {:.4f} seconds", uiState.saveGame.value(), glfwGetTime() - start));
 				}
 			}
 
@@ -179,16 +179,16 @@ void mainLoop(GLFWwindow* window, std::chrono::steady_clock::time_point startTim
 			file.close();
 		}
 
-		Global<misc::Timer>()->newTiming("game logic");
+		Global<misc::Timer>->newTiming("game logic");
 		gameState.runTick();
-		Global<misc::Timer>()->endTiming("game logic");
+		Global<misc::Timer>->endTiming("game logic");
 
 		uiState.updateSize(window);
 
 		render::RenderInfo renderInfo;
-		Global<misc::Timer>()->newTiming("prep render");
+		Global<misc::Timer>->newTiming("prep render");
 		prepareRender(window, renderInfo, playerInfo);
-		Global<misc::Timer>()->endTiming("prep render");
+		Global<misc::Timer>->endTiming("prep render");
 
 		controlState.cycleStates();
 		glfwPollEvents();

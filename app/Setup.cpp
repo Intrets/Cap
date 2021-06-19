@@ -193,27 +193,27 @@ bool initGLFW(GLFWwindow*& window, bool OPENGL_DEBUG) {
 }
 
 void initManagers(std::string const& resourceRootPath) {
-	Global<ogs::State>::init();
+	Global<ogs::State>.init();
 
-	Global<misc::PathManager>::init(resourceRootPath);
-	Global<misc::OptionManager>::init();
+	Global<misc::PathManager>.init(resourceRootPath);
+	Global<misc::OptionManager>.init();
 
-	Global<render::BlitRenderer>::init();
-	Global<render::BlitRendererArrayTexture>::init();
-	Global<render::DebugRenderInfo>::init();
+	Global<render::BlitRenderer>.init();
+	Global<render::BlitRendererArrayTexture>.init();
+	Global<render::DebugRenderInfo>.init();
 
-	Global<render::BlockIDTextures>::init();
+	Global<render::BlockIDTextures>.init();
 
 	auto soundPlayer = sound::SoundPlayer::makeSoundPlayer(44100, 128);
 
 	assert(soundPlayer.has_value());
 
 	if (soundPlayer.has_value()) {
-		Global<sound::SoundPlayer>::provide(soundPlayer.value().release());
+		Global<sound::SoundPlayer>.provide(soundPlayer.value().release());
 	}
 
-	Global<render::Fonts>::init();
+	Global<render::Fonts>.init();
 
-	Global<misc::Timer>::init();
-	Global<misc::Log>::init();
+	Global<misc::Timer>.init();
+	Global<misc::Log>.init();
 }

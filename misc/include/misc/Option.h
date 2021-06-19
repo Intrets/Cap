@@ -15,7 +15,7 @@
 
 namespace misc
 {
-	class OptionManager;
+	class _OptionValueBase;
 
 	enum class OPTION
 	{
@@ -29,6 +29,34 @@ namespace misc
 		OPTIONS2_MAX
 	};
 
+
+	class OptionManager
+	{
+	private:
+		std::array<std::unique_ptr<_OptionValueBase>, static_cast<size_t>(OPTION::OPTIONS2_MAX)> data;
+		std::unordered_map<std::string, OPTION> nameMap;
+
+		void defaultValues();
+
+		template<class T>
+		void initVal(OPTION option, T val, std::string name, std::string description);
+
+	public:
+		template<class T>
+		T getVal(OPTION option);
+
+		template<class T>
+		void setVal(OPTION option, T val);
+
+		void toggle(OPTION option);
+
+		void readFromFile();
+		void writeToFile();
+
+		OptionManager();
+		~OptionManager();
+	};
+
 	template<OPTION A, class T>
 	class Option
 	{
@@ -40,18 +68,18 @@ namespace misc
 
 	template<OPTION A, class T>
 	inline T Option<A, T>::getVal() {
-		return Global<OptionManager>()->getVal<T>(A);
+		return Global<OptionManager>->getVal<T>(A);
 	}
 
 	template<OPTION A, class T>
 	inline void Option<A, T>::setVal(T val) {
-		Global<OptionManager>()->setVal(A, val);
+		Global<OptionManager>->setVal(A, val);
 	}
 
 	template<OPTION A, class T>
 	inline void Option<A, T>::toggle() {
 		static_assert(std::is_same_v<T, bool>);
-		Global<OptionManager>()->toggle(A);
+		Global<OptionManager>->toggle(A);
 	}
 
 	class _OptionValueBase
@@ -117,33 +145,6 @@ namespace misc
 		out << D.getName() << " " << D.type() << " " << D.getVal();
 		return out;
 	}
-
-	class OptionManager
-	{
-	private:
-		std::array<std::unique_ptr<_OptionValueBase>, static_cast<size_t>(OPTION::OPTIONS2_MAX)> data;
-		std::unordered_map<std::string, OPTION> nameMap;
-
-		void defaultValues();
-
-		template<class T>
-		void initVal(OPTION option, T val, std::string name, std::string description);
-
-	public:
-		template<class T>
-		T getVal(OPTION option);
-
-		template<class T>
-		void setVal(OPTION option, T val);
-
-		void toggle(OPTION option);
-
-		void readFromFile();
-		void writeToFile();
-
-		OptionManager();
-		~OptionManager();
-	};
 
 	template<class T>
 	inline T OptionManager::getVal(OPTION option) {
