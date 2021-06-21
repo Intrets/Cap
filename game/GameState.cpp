@@ -62,13 +62,14 @@ namespace game
 				merger.debugRender();
 				});
 
-			this->everything.match([&](RandomWalker& walker, GamePosition& pos) {
+			this->everything.match([this, &debugRender](RandomWalker& walker, GamePosition& pos) {
 				auto& merger = this->everything.gets<Merger>().get<Merger>(Index<game::RawData>{ 1 });
 				auto p = merger.groups[walker.groupTarget].approximation;
+				auto p2 = pos.getInterpolatedPosition(this->tick);
 
 				debugRender.world.addLine(
 					p + 0.5f,
-					glm::vec2(pos.pos) + 0.5f
+					p2 + 0.5f
 				);
 				});
 		}
