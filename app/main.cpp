@@ -24,6 +24,19 @@ GLFWwindow* window;
 
 using namespace std::string_view_literals;
 
+template<template<class> class, class Tuple>
+struct all;
+
+template<template<class> class P, class... Args>
+struct all<P, std::tuple<Args...>>
+{
+	static constexpr bool value = (P<Args>::value && ...);
+};
+
+template<template<class> class P, class Tuple>
+constexpr bool all_v = all<P, Tuple>::value;
+
+
 template<class P, class Tuple>
 struct prepend;
 
@@ -46,7 +59,7 @@ struct prepend<P, std::tuple<Args...>>
 };
 
 template<class P, class Tuple>
-using prepent_t = prepend<P, Tuple>::value;
+using prepend_t = prepend<P, Tuple>::value;
 
 
 template<class Tuple, template<class> class T>
@@ -125,7 +138,7 @@ struct GroupBy<std::tuple<Args...>, T>
 {
 	using Next1 = Take<std::tuple<Args...>, T>;
 	using Next2 = GroupBy2<typename Next1::R2, T>;
-	using R = prepent_t<typename Next1::R1, typename Next2::R>;
+	using R = prepend_t<typename Next1::R1, typename Next2::R>;
 };
 
 
@@ -146,7 +159,7 @@ struct GroupBy2<std::tuple<Args...>, T>
 {
 	using Next1 = TakeOne<std::tuple<Args...>>;
 	using Next2 = GroupBy<typename Next1::R2, T>;
-	using R = prepent_t<typename Next1::R1, typename Next2::R>;
+	using R = prepend_t<typename Next1::R1, typename Next2::R>;
 };
 
 template<class... Args>
@@ -165,6 +178,23 @@ struct AThing
 template<class... Args>
 AThing(Args&&... args)->AThing<Args...>;
 
+template<class T>
+struct is
+{
+	template<class>
+	struct is_type : std::false_type {};
+
+	template<class R>
+	requires std::is_same_v<typename R::type, T>
+	struct is_type<R> : std::true_type {};
+
+	template<class R>
+	static constexpr auto is_type_t = is_type<R>;
+};
+
+template<class T>
+constexpr auto is_t = is<T>::is_type;
+
 struct map_type {};
 
 template<class T, class = void>
@@ -182,6 +212,10 @@ struct Map
 	using type = map_type;
 
 	F f;
+
+	friend constexpr auto operator>>(auto x, Map<F>const& f) {
+		return f.f(x);
+	}
 };
 
 template<class F>
@@ -200,13 +234,148 @@ struct Filter
 template<class F>
 Filter(F const&)->Filter<F>;
 
+template<class N, class M>
+using add = std::integral_constant<typename N::value_type, N::value + M::value>;
+template<class N, class M>
+constexpr auto add_v = sub<N, M>::value;
+
+template<class N, class M>
+using sub = std::integral_constant<typename N::value_type, N::value - M::value>;
+template<class N, class M>
+constexpr auto sub_v = sub<N, M>::value;
+
+template<class N, class M>
+using comp = std::integral_constant<bool, N::value < M::value>;
+template<class N, class M>
+constexpr auto comp_v = comp<N, M>::value;
+
+template<class N, class M, class = void>
+struct FromTo
+{
+	using R = void;
+};
+
+template<class N, class M>
+struct FromTo<N, M, std::enable_if_t<comp_v<N, M>>>
+{
+	using Next = FromTo<std::integral_constant<int, N::value + 1>, M>;
+	using R = prepend_t<N, typename Next::R>;
+};
+
+template<class N, class Sequence>
+struct ShiftSequence;
+
+template<class N, int... Ints>
+struct ShiftSequence<N, std::integer_sequence<int, Ints...>>
+{
+	using value = std::integer_sequence<int, (Ints + N::value)...>;
+};
+
+template<class Start, class Length>
+struct Sequence
+{
+	using value = ShiftSequence<Start, std::make_integer_sequence<int, Length::value>>::value;
+};
+
+
+template<class T>
+struct Size;
+
+template<class... Args>
+struct Size<std::tuple<Args...>>
+{
+	using value = std::integral_constant<int, sizeof...(Args)>;
+};
+
+template<class T>
+struct Size
+{
+	using value = std::integral_constant<int, 1>;
+};
+
+template<class T>
+using Size_t = Size<T>::value;
+
+template<class N, class Tuple>
+struct Counts;
+
+template<class N, class Arg>
+struct Counts<N, std::tuple<Arg>>
+{
+	using c = Size_t<Arg>;
+	using C = Sequence<N, c>::value;
+	using R = std::tuple<C>;
+};
+
+template<class N, class Arg, class... Args>
+struct Counts<N, std::tuple<Arg, Args...>>
+{
+	using c = Size_t<Arg>;
+	using C = Sequence<N, c>::value;
+	using Next = Counts<add<N, c>, std::tuple<Args...>>;
+	using R = prepend_t<C, typename Next::R>;
+};
+
+
+//template<class A, class... Args>
+//struct Run<A, std::tuple<Args...>, std::enable_if_t<all<is_map, std::tuple<Args...>>::value>>
+struct Run2
+{
+	//template<class A, class Tuple, class Is>
+	//constexpr static auto apply(A x, Tuple tuple);
+
+	//template<class A, class Tuple, class Is...>
+	//constexpr static auto apply<A, Tuple, std::integer_sequence<int, Is...>>(A x, Tuple tuple) {
+	//	return 1;
+	//}
+
+	template<class A, class... Args, class = std::enable_if_t<all_v<is<map_type>::is_type, std::tuple<Args...>>>>
+	constexpr static auto apply2(A x, Args const&... maps) {
+		return (x >> ... >> maps);
+	};
+
+	//template<class A, class... Args, class = std::enable_if_t<true>>
+	//constexpr static auto apply2(A x, Args const&... maps) {
+	//	return (x >> ... >> maps);
+	//};
+};
+
+template<class A, class... Args>
+struct Run3;
+
+template<class A, class... Args>
+requires all_v<is_map, std::tuple<Args...>>
+struct Run3<A, Args...>
+{
+	constexpr static auto apply2(A x, Args const&... maps) {
+		return (x >> ... >> maps);
+	};
+};
+
+template<class A, class... Args>
+//requires all_v<is_filter, std::tuple<Args...>>
+struct Run3
+{
+
+};
+
+
+template<class A, class Tuple, class Is>
+struct Run;
+
+template<class A, class Tuple, int... Is>
+struct Run<A, Tuple, std::integer_sequence<int, Is...>>
+{
+	constexpr static auto apply(A x, Tuple const& tuple) {
+		return Run2::apply2(x, std::get<Is>(tuple)...);
+	}
+};
+
 
 using Z = std::tuple<Map<int>, Map<int>, int, int, Map<int>, Map<float>>;
 
 using Test = Take<Z, is_map>;
 using Test2 = GroupBy<Z, is_map>;
-
-
 
 int main(int argc, char* argv[]) {
 	[[maybe_unused]]
@@ -215,7 +384,17 @@ int main(int argc, char* argv[]) {
 
 	Test2::R t;
 
-	rand();
+	using RangeTest = FromTo<std::integral_constant<int, 2>, std::integral_constant<int, 3>>::R;
+	[[maybe_unused]]
+	RangeTest rangeTest;
+
+	using SequenceTest = Sequence<std::integral_constant<int, 3>, std::integral_constant<int, 5>>::value;
+	using CountsTest = Counts<std::integral_constant<int, 0>, Test2::R>::R;
+	//using RangesTest =
+
+	[[maybe_unused]]
+	SequenceTest aaa;
+	CountsTest aaa2;
 
 	auto add1 = [](auto x) {
 		return x + 1;
@@ -225,13 +404,34 @@ int main(int argc, char* argv[]) {
 		return x * 2;
 	};
 
-	auto even = [](auto i) {
-		return i % 2 == 0;
-	};
+	auto f = std::make_tuple(Map(add1), Map(mult2), Filter(1), Map(add1));
+	using FF = GroupBy<decltype(f), is_map>;
+	[[maybe_unused]]
+	FF ff;
 
-	auto e = Filter(even);
+	constexpr auto test = (2 >> Map(add1)) >> Map(mult2);
 
-	auto bv = AThing(Filter(even), Map(add1));
+	constexpr auto f1 = Map(add1);
+	constexpr auto f2 = Map(mult2);
+
+	constexpr auto g = std::make_tuple(f1, f2);
+
+	[[maybe_unused]]
+	constexpr auto test2 = Run<
+		int,
+		decltype(g),
+		std::integer_sequence<int, 1, 1, 1, 1, 1>>::apply(2, g);
+
+	rand();
+
+
+	//auto even = [](auto i) {
+	//	return i % 2 == 0;
+	//};
+
+	//auto e = Filter(even);
+
+	//auto bv = AThing(Filter(even), Map(add1));
 
 
 	rand();
