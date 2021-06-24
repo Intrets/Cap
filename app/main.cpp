@@ -11,7 +11,9 @@
 #include <sstream>
 #include <ranges>
 #include <concepts>
+#include <algorithm>
 #include <functional>
+#include <numeric>
 
 #include <tepp/tepp.h>
 #include <ranges>
@@ -67,7 +69,7 @@ struct prepend<P, std::tuple<Args...>>
 };
 
 template<class P, class Tuple>
-using prepend_t = prepend<P, Tuple>::value;
+using prepend_t = typename prepend<P, Tuple>::value;
 
 
 template<class Tuple, template<class> class T>
@@ -223,9 +225,6 @@ struct is_filter<T, std::void_t<typename T::type>>
 };
 
 
-using is_map_w = wrapped_function<is_map>;
-
-
 template<class F>
 struct Map
 {
@@ -258,13 +257,6 @@ Filter(F const&)->Filter<F>;
 
 template<class N, class M>
 using add = std::integral_constant<typename N::value_type, N::value + M::value>;
-template<class N, class M>
-constexpr auto add_v = sub<N, M>::value;
-
-template<class N, class M>
-using sub = std::integral_constant<typename N::value_type, N::value - M::value>;
-template<class N, class M>
-constexpr auto sub_v = sub<N, M>::value;
 
 template<class N, class M>
 using comp = std::integral_constant<bool, N::value < M::value>;
@@ -296,7 +288,7 @@ struct ShiftSequence<N, std::integer_sequence<int, Ints...>>
 template<class Start, class Length>
 struct Sequence
 {
-	using value = ShiftSequence<Start, std::make_integer_sequence<int, Length::value>>::value;
+	using value = typename ShiftSequence<Start, std::make_integer_sequence<int, Length::value>>::value;
 };
 
 
@@ -316,7 +308,7 @@ struct Size
 };
 
 template<class T>
-using Size_t = Size<T>::value;
+using Size_t = typename Size<T>::value;
 
 template<class N, class Tuple>
 struct Counts;
@@ -325,7 +317,7 @@ template<class N, class Arg>
 struct Counts<N, std::tuple<Arg>>
 {
 	using c = Size_t<Arg>;
-	using C = Sequence<N, c>::value;
+	using C = typename Sequence<N, c>::value;
 	using R = std::tuple<C>;
 };
 
@@ -333,7 +325,7 @@ template<class N, class Arg, class... Args>
 struct Counts<N, std::tuple<Arg, Args...>>
 {
 	using c = Size_t<Arg>;
-	using C = Sequence<N, c>::value;
+	using C = typename Sequence<N, c>::value;
 	using Next = Counts<add<N, c>, std::tuple<Args...>>;
 	using R = prepend_t<C, typename Next::R>;
 };
@@ -373,7 +365,7 @@ template<class A, class Tuple, int... Is>
 struct Run<A, Tuple, std::integer_sequence<int, Is...>>
 {
 	constexpr static auto apply(A x, Tuple const& tuple) {
-		return Run3<A, get_t<Is, Tuple>::type...>::apply2(x, std::get<Is>(tuple)...);
+		return Run3<A, typename get_t<Is, Tuple>::type...>::apply2(x, std::get<Is>(tuple)...);
 	}
 };
 
@@ -398,17 +390,19 @@ struct Whole<A, Tuple>
 template<class A, class Tuple, class Pair, class... Pairs>
 struct Whole<A, Tuple, Pair, Pairs...>
 {
-	using R = std::conditional_t<std::same_as<typename Pair::type, map_type>
-		, te::return_type_t<decltype(&Run<A, Tuple, Pair::Is>::apply)>
+	using a = std::conditional_t<std::same_as<typename Pair::type, map_type>
+		, te::return_type_t<decltype(&Run<A, Tuple, typename Pair::Is>::apply)>
 		, A
 	>;
+	using R = te::return_type_t<decltype(&Whole<a, Tuple, Pairs...>::run)>;
+
 	constexpr static std::optional<R> run(A x, Tuple tuple) {
-		if constexpr (std::same_as<Pair::type, map_type>) {
-			auto y = Run<A, Tuple, Pair::Is>::apply(x, tuple);
-			return Whole<R, Tuple, Pairs...>::run(y, tuple);
+		if constexpr (std::same_as<typename Pair::type, map_type>) {
+			auto y = Run<A, Tuple, typename Pair::Is>::apply(x, tuple);
+			return Whole<decltype(y), Tuple, Pairs...>::run(y, tuple);
 		}
-		else if constexpr (std::same_as<Pair::type, filter_type>) {
-			if (Run<A, Tuple, Pair::Is>::apply(x, tuple)) {
+		else if constexpr (std::same_as<typename Pair::type, filter_type>) {
+			if (Run<A, Tuple, typename Pair::Is>::apply(x, tuple)) {
 				return Whole<A, Tuple, Pairs...>::run(x, tuple);
 			}
 			else {
@@ -422,28 +416,50 @@ struct Whole<A, Tuple, Pair, Pairs...>
 };
 
 
+template<class Tuple>
+using head = get_t<0, Tuple>;
+
+template<class To, class From, class F>
+To run(From const& from, F fff) {
+	std::vector<To::value_type> res;
+
+	using FF = GroupBy<F, is_map>;
+	using GG = GroupBy<typename FF::R, is_filter>::R;
+	using C = Counts<std::integral_constant<int, 0>, GG>::R;
+	using D = te::map_t<head, GG>;
+
+	for (auto const& f : from) {
+		//auto res =
+		(void)f;
+
+	}
+
+	return res;
+};
+
+
 using Z = std::tuple<Map<int>, Map<int>, int, int, Map<int>, Map<float>>;
 
-using Test = Take<Z, is_map>;
-using Test2 = GroupBy<Z, is_map>;
+//using Test = Take<Z, is_map>;
+//using Test2 = GroupBy<Z, is_map>;
 
 int main(int argc, char* argv[]) {
-	[[maybe_unused]]
-	Test::R1 t1;
-	Test::R2 t2;
+	//[[maybe_unused]]
+	//Test::R1 t1;
+	//Test::R2 t2;
 
-	Test2::R t;
+	//Test2::R t;
 
-	using RangeTest = FromTo<std::integral_constant<int, 2>, std::integral_constant<int, 3>>::R;
-	[[maybe_unused]]
-	RangeTest rangeTest;
+	//using RangeTest = FromTo<std::integral_constant<int, 2>, std::integral_constant<int, 3>>::R;
+	//[[maybe_unused]]
+	//RangeTest rangeTest;
 
-	using SequenceTest = Sequence<std::integral_constant<int, 3>, std::integral_constant<int, 5>>::value;
-	using CountsTest = Counts<std::integral_constant<int, 0>, Test2::R>::R;
+	//using SequenceTest = Sequence<std::integral_constant<int, 3>, std::integral_constant<int, 5>>::value;
+	//using CountsTest = Counts<std::integral_constant<int, 0>, Test2::R>::R;
 
-	[[maybe_unused]]
-	SequenceTest aaa;
-	CountsTest aaa2;
+	//[[maybe_unused]]
+	//SequenceTest aaa;
+	//CountsTest aaa2;
 
 	auto add1 = [](auto x) {
 		return x + 1;
@@ -457,42 +473,40 @@ int main(int argc, char* argv[]) {
 		return x % 2 == 0;
 	};
 
-	auto f = std::make_tuple(Map(add1), Map(mult2), Filter(even), Filter(even), Map(add1));
-	using FF = GroupBy<decltype(f), is_map>;
-	using GG = GroupBy<FF::R, is_filter>::R;
-	[[maybe_unused]]
-	FF ff;
-	[[maybe_unused]]
-	GG gg;
+	auto f = std::make_tuple(Map{ add1 }, Map{ mult2 }, Filter{ even }, Filter{ even }, Map{ add1 });
+	//using FF = GroupBy<decltype(f), is_map>;
+	//using GG = GroupBy<FF::R, is_filter>::R;
+	//[[maybe_unused]]
+	//FF ff;
+	//[[maybe_unused]]
+	//GG gg;
 
-	constexpr auto test = (2 >> Map(add1)) >> Map(mult2);
+	constexpr auto test = (2 >> Map{ add1 }) >> Map{ mult2 };
 
 	auto toDouble = [](int i) -> double {
 		return i;
 	};
 
-	constexpr auto f1 = Map(add1);
-	constexpr auto f2 = Map(mult2);
-	constexpr auto f3 = Filter(even);
-	constexpr auto f4 = Map(toDouble);
-
-	auto constexpr bb = all_v<is_<map_type>, std::tuple<decltype(f3)>>;
-
-
-	constexpr auto g = std::make_tuple(f1, f2, f3, f4);
 
 	using TTT = get_t<1, std::tuple<int, float>>::type;
 	[[maybe_unused]]
 	TTT ttt;
 
-	[[maybe_unused]]
-	constexpr auto test2 = Run<
-		int,
-		decltype(g),
-		std::integer_sequence<int, 1, 1, 1, 1, 1>
-	>::apply(2, g);
 
-	constexpr auto ggg = std::make_tuple(g);
+	//[[maybe_unused]]
+	//constexpr auto test2 = Run<
+	//	int,
+	//	decltype(g),
+	//	std::integer_sequence<int, 1, 1, 1, 1, 1>
+	//>::apply(2, g);
+
+
+	constexpr auto f1 = Map{ add1 };
+	constexpr auto f2 = Map{ mult2 };
+	constexpr auto f3 = Filter{ even };
+	constexpr auto f4 = Map{ toDouble };
+
+	constexpr auto g = std::make_tuple(f1, f2, f3, f4);
 
 	[[maybe_unused]]
 	constexpr auto res =
@@ -502,7 +516,13 @@ int main(int argc, char* argv[]) {
 		Pair<map_type, std::integer_sequence<int, 1, 1, 1, 3>>
 		>::run(4, g);
 
+	std::vector<int> vec{ 1,2,3 };
+
+	auto res2 = run<std::vector<double>, std::vector<int>>(vec, g);
+
 	rand();
+
+
 
 
 
