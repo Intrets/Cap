@@ -24,17 +24,24 @@ GLFWwindow* window;
 
 using namespace std::string_view_literals;
 
-template<template<class> class, class Tuple>
+//template<template<class> class, class Tuple>
+//struct all;
+
+template<class, class>
 struct all;
 
+template<template<class> class T>
+struct wrapped_function {};
+
 template<template<class> class P, class... Args>
-struct all<P, std::tuple<Args...>>
+struct all<wrapped_function<P>, std::tuple<Args...>>
 {
 	static constexpr bool value = (P<Args>::value && ...);
 };
 
-template<template<class> class P, class Tuple>
+template<class P, class Tuple>
 constexpr bool all_v = all<P, Tuple>::value;
+
 
 
 template<class P, class Tuple>
@@ -182,18 +189,15 @@ template<class T>
 struct is
 {
 	template<class>
-	struct is_type : std::false_type {};
+	struct t : std::false_type {};
 
 	template<class R>
 	requires std::is_same_v<typename R::type, T>
-	struct is_type<R> : std::true_type {};
-
-	template<class R>
-	static constexpr auto is_type_t = is_type<R>;
+		struct t<R> : std::true_type {};
 };
 
 template<class T>
-constexpr auto is_t = is<T>::is_type;
+using is_ = wrapped_function<is<T>::template t>;
 
 struct map_type {};
 
@@ -205,6 +209,10 @@ struct is_map<T, std::void_t<typename T::type>>
 {
 	static constexpr bool value = std::is_same_v<map_type, T::type>;
 };
+
+
+using is_map_w = wrapped_function<is_map>;
+
 
 template<class F>
 struct Map
@@ -317,34 +325,11 @@ struct Counts<N, std::tuple<Arg, Args...>>
 };
 
 
-//template<class A, class... Args>
-//struct Run<A, std::tuple<Args...>, std::enable_if_t<all<is_map, std::tuple<Args...>>::value>>
-struct Run2
-{
-	//template<class A, class Tuple, class Is>
-	//constexpr static auto apply(A x, Tuple tuple);
-
-	//template<class A, class Tuple, class Is...>
-	//constexpr static auto apply<A, Tuple, std::integer_sequence<int, Is...>>(A x, Tuple tuple) {
-	//	return 1;
-	//}
-
-	template<class A, class... Args, class = std::enable_if_t<all_v<is<map_type>::is_type, std::tuple<Args...>>>>
-	constexpr static auto apply2(A x, Args const&... maps) {
-		return (x >> ... >> maps);
-	};
-
-	//template<class A, class... Args, class = std::enable_if_t<true>>
-	//constexpr static auto apply2(A x, Args const&... maps) {
-	//	return (x >> ... >> maps);
-	//};
-};
-
 template<class A, class... Args>
 struct Run3;
 
 template<class A, class... Args>
-requires all_v<is_map, std::tuple<Args...>>
+requires all_v<is_<map_type>, std::tuple<Args...>>
 struct Run3<A, Args...>
 {
 	constexpr static auto apply2(A x, Args const&... maps) {
@@ -352,13 +337,20 @@ struct Run3<A, Args...>
 	};
 };
 
-template<class A, class... Args>
-//requires all_v<is_filter, std::tuple<Args...>>
-struct Run3
+//template<class A, class... Args>
+//requires all_v<is_<filter_type>, std::tuple<Args...>>
+//struct Run3<A, Args...>
+//{
+//	//constexpr static auto apply2(A x, Args const&... maps) {
+//	//	return (x >> ... >> maps);
+//	//};
+//};
+
+template<int I, class Tuple>
+struct get_t
 {
-
+	using type = std::remove_cvref_t<decltype(std::get<I>(std::declval<Tuple>()))>;
 };
-
 
 template<class A, class Tuple, class Is>
 struct Run;
@@ -367,7 +359,7 @@ template<class A, class Tuple, int... Is>
 struct Run<A, Tuple, std::integer_sequence<int, Is...>>
 {
 	constexpr static auto apply(A x, Tuple const& tuple) {
-		return Run2::apply2(x, std::get<Is>(tuple)...);
+		return Run3<A, get_t<Is, Tuple>::type...>::apply2(x, std::get<Is>(tuple)...);
 	}
 };
 
@@ -413,14 +405,24 @@ int main(int argc, char* argv[]) {
 
 	constexpr auto f1 = Map(add1);
 	constexpr auto f2 = Map(mult2);
+	constexpr auto f3 = Filter(mult2);
+
+	auto constexpr bb = all_v<is_<map_type>, std::tuple<decltype(f3)>>;
+
 
 	constexpr auto g = std::make_tuple(f1, f2);
+
+	using TTT = get_t<1, std::tuple<int, float>>::type;
+	[[maybe_unused]]
+	TTT ttt;
 
 	[[maybe_unused]]
 	constexpr auto test2 = Run<
 		int,
 		decltype(g),
-		std::integer_sequence<int, 1, 1, 1, 1, 1>>::apply(2, g);
+		std::integer_sequence<int, 1, 1, 1, 1, 1>
+	>::apply(2, g);
+
 
 	rand();
 
