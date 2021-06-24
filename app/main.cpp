@@ -201,6 +201,8 @@ using is_ = wrapped_function<is<T>::template t>;
 
 struct map_type {};
 
+struct filter_type {};
+
 template<class T, class = void>
 struct is_map : std::false_type {};
 
@@ -208,6 +210,15 @@ template<class T>
 struct is_map<T, std::void_t<typename T::type>>
 {
 	static constexpr bool value = std::is_same_v<map_type, T::type>;
+};
+
+template<class T, class = void>
+struct is_filter : std::false_type {};
+
+template<class T>
+struct is_filter<T, std::void_t<typename T::type>>
+{
+	static constexpr bool value = std::is_same_v<filter_type, T::type>;
 };
 
 
@@ -229,14 +240,16 @@ struct Map
 template<class F>
 Map(F const&)->Map<F>;
 
-struct filter_type {};
-
 template<class F>
 struct Filter
 {
 	using type = filter_type;
 
 	F f;
+
+	constexpr bool operator()(auto x) const {
+		return this->f(x);
+	}
 };
 
 template<class F>
@@ -337,14 +350,14 @@ struct Run3<A, Args...>
 	};
 };
 
-//template<class A, class... Args>
-//requires all_v<is_<filter_type>, std::tuple<Args...>>
-//struct Run3<A, Args...>
-//{
-//	//constexpr static auto apply2(A x, Args const&... maps) {
-//	//	return (x >> ... >> maps);
-//	//};
-//};
+template<class A, class... Args>
+requires all_v<is_<filter_type>, std::tuple<Args...>>
+struct Run3<A, Args...>
+{
+	constexpr static bool apply2(A x, Args const&... filters) {
+		return (filters(x) && ...);
+	};
+};
 
 template<int I, class Tuple>
 struct get_t
@@ -360,6 +373,46 @@ struct Run<A, Tuple, std::integer_sequence<int, Is...>>
 {
 	constexpr static auto apply(A x, Tuple const& tuple) {
 		return Run3<A, get_t<Is, Tuple>::type...>::apply2(x, std::get<Is>(tuple)...);
+	}
+};
+
+template<class type_, class Is_>
+struct Pair
+{
+	using type = type_;
+	using Is = Is_;
+};
+
+template<class A, class Tuple, class... Pairs>
+struct Whole;
+
+template<class A, class Tuple>
+struct Whole<A, Tuple>
+{
+	constexpr static int run(A x, Tuple tuple) {
+		return x;
+	}
+};
+
+template<class A, class Tuple, class Pair, class... Pairs>
+struct Whole<A, Tuple, Pair, Pairs...>
+{
+	constexpr static std::optional<int> run(A x, Tuple tuple) {
+		if constexpr (std::same_as<Pair::type, map_type>) {
+			auto y = Run<A, Tuple, Pair::Is>::apply(x, tuple);
+			return Whole<decltype(y), Tuple, Pairs...>::run(y, tuple);
+		}
+		else if constexpr (std::same_as<Pair::type, filter_type>) {
+			if (Run<A, Tuple, Pair::Is>::apply(x, tuple)) {
+				return Whole<A, Tuple, Pairs...>::run(x, tuple);
+			}
+			else {
+				return std::nullopt;
+			}
+		}
+		else {
+			return 1;
+		}
 	}
 };
 
@@ -382,7 +435,6 @@ int main(int argc, char* argv[]) {
 
 	using SequenceTest = Sequence<std::integral_constant<int, 3>, std::integral_constant<int, 5>>::value;
 	using CountsTest = Counts<std::integral_constant<int, 0>, Test2::R>::R;
-	//using RangesTest =
 
 	[[maybe_unused]]
 	SequenceTest aaa;
@@ -396,21 +448,28 @@ int main(int argc, char* argv[]) {
 		return x * 2;
 	};
 
-	auto f = std::make_tuple(Map(add1), Map(mult2), Filter(1), Map(add1));
+	auto even = [](auto x) {
+		return x % 2 == 0;
+	};
+
+	auto f = std::make_tuple(Map(add1), Map(mult2), Filter(even), Filter(even), Map(add1));
 	using FF = GroupBy<decltype(f), is_map>;
+	using GG = GroupBy<FF::R, is_filter>::R;
 	[[maybe_unused]]
 	FF ff;
+	[[maybe_unused]]
+	GG gg;
 
 	constexpr auto test = (2 >> Map(add1)) >> Map(mult2);
 
 	constexpr auto f1 = Map(add1);
 	constexpr auto f2 = Map(mult2);
-	constexpr auto f3 = Filter(mult2);
+	constexpr auto f3 = Filter(even);
 
 	auto constexpr bb = all_v<is_<map_type>, std::tuple<decltype(f3)>>;
 
 
-	constexpr auto g = std::make_tuple(f1, f2);
+	constexpr auto g = std::make_tuple(f1, f2, f3);
 
 	using TTT = get_t<1, std::tuple<int, float>>::type;
 	[[maybe_unused]]
@@ -423,6 +482,15 @@ int main(int argc, char* argv[]) {
 		std::integer_sequence<int, 1, 1, 1, 1, 1>
 	>::apply(2, g);
 
+	constexpr auto ggg = std::make_tuple(g);
+
+	[[maybe_unused]]
+	constexpr auto res =
+		Whole<int, decltype(g),
+		Pair<map_type, std::integer_sequence<int, 0, 0, 0, 0>>,
+		Pair<filter_type, std::integer_sequence<int, 2>>,
+		Pair<map_type, std::integer_sequence<int, 1, 1, 1, 1>>
+		>::run(3, g);
 
 	rand();
 
