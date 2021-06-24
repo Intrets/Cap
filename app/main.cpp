@@ -14,6 +14,7 @@
 #include <functional>
 
 #include <tepp/tepp.h>
+#include <ranges>
 
 // TODO: keep runtime option, get value from config/command line argument
 bool OPENGL_DEBUG = true;
@@ -389,7 +390,7 @@ struct Whole;
 template<class A, class Tuple>
 struct Whole<A, Tuple>
 {
-	constexpr static int run(A x, Tuple tuple) {
+	constexpr static A run(A x, Tuple tuple) {
 		return x;
 	}
 };
@@ -397,10 +398,14 @@ struct Whole<A, Tuple>
 template<class A, class Tuple, class Pair, class... Pairs>
 struct Whole<A, Tuple, Pair, Pairs...>
 {
-	constexpr static std::optional<int> run(A x, Tuple tuple) {
+	using R = std::conditional_t<std::same_as<typename Pair::type, map_type>
+		, te::return_type_t<decltype(&Run<A, Tuple, Pair::Is>::apply)>
+		, A
+	>;
+	constexpr static std::optional<R> run(A x, Tuple tuple) {
 		if constexpr (std::same_as<Pair::type, map_type>) {
 			auto y = Run<A, Tuple, Pair::Is>::apply(x, tuple);
-			return Whole<decltype(y), Tuple, Pairs...>::run(y, tuple);
+			return Whole<R, Tuple, Pairs...>::run(y, tuple);
 		}
 		else if constexpr (std::same_as<Pair::type, filter_type>) {
 			if (Run<A, Tuple, Pair::Is>::apply(x, tuple)) {
@@ -411,7 +416,7 @@ struct Whole<A, Tuple, Pair, Pairs...>
 			}
 		}
 		else {
-			return 1;
+			return std::nullopt;
 		}
 	}
 };
@@ -462,14 +467,19 @@ int main(int argc, char* argv[]) {
 
 	constexpr auto test = (2 >> Map(add1)) >> Map(mult2);
 
+	auto toDouble = [](int i) -> double {
+		return i;
+	};
+
 	constexpr auto f1 = Map(add1);
 	constexpr auto f2 = Map(mult2);
 	constexpr auto f3 = Filter(even);
+	constexpr auto f4 = Map(toDouble);
 
 	auto constexpr bb = all_v<is_<map_type>, std::tuple<decltype(f3)>>;
 
 
-	constexpr auto g = std::make_tuple(f1, f2, f3);
+	constexpr auto g = std::make_tuple(f1, f2, f3, f4);
 
 	using TTT = get_t<1, std::tuple<int, float>>::type;
 	[[maybe_unused]]
@@ -489,10 +499,11 @@ int main(int argc, char* argv[]) {
 		Whole<int, decltype(g),
 		Pair<map_type, std::integer_sequence<int, 0, 0, 0, 0>>,
 		Pair<filter_type, std::integer_sequence<int, 2>>,
-		Pair<map_type, std::integer_sequence<int, 1, 1, 1, 1>>
-		>::run(3, g);
+		Pair<map_type, std::integer_sequence<int, 1, 1, 1, 3>>
+		>::run(4, g);
 
 	rand();
+
 
 
 	//auto even = [](auto i) {
@@ -558,4 +569,5 @@ int main(int argc, char* argv[]) {
 	mainLoop(window, startTime);
 
 	glfwTerminate();
+	return 0;
 }
