@@ -75,6 +75,7 @@ add_subdirectory(wrapped_glm)
 add_subdirectory(tepp)
 add_subdirectory(serial)
 add_subdirectory(sound)
+add_subdirectory(rangles)
 
 add_subdirectory(app)
 

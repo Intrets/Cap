@@ -255,6 +255,21 @@ struct Filter
 template<class F>
 Filter(F const&)->Filter<F>;
 
+template<class F>
+struct Fold1
+{
+	using type = filter_type;
+
+	F f;
+
+	constexpr bool operator()(auto x) const {
+		return this->f(x);
+	}
+};
+
+template<class F>
+Fold1(F const&)->Fold1<F>;
+
 template<class N, class M>
 using add = std::integral_constant<typename N::value_type, N::value + M::value>;
 
@@ -381,52 +396,6 @@ struct Run<A, Tuple, std::integer_sequence<int, Is...>>
 	}
 };
 
-template<class type_, class Is_>
-struct Pair
-{
-	using type = type_;
-	using Is = Is_;
-};
-
-template<class A, class Tuple, class... Pairs>
-struct Whole;
-
-template<class A, class Tuple>
-struct Whole<A, Tuple>
-{
-	constexpr static A run(A x, Tuple const& tuple) {
-		return x;
-	}
-};
-
-template<class A, class Tuple, class Pair, class... Pairs>
-struct Whole<A, Tuple, Pair, Pairs...>
-{
-	using a = std::conditional_t<std::same_as<typename Pair::type, map_type>
-		, te::return_type_t<decltype(&Run<A, Tuple, typename Pair::Is>::apply)>
-		, A
-	>;
-	using R = te::return_type_t<decltype(&Whole<a, Tuple, Pairs...>::run)>;
-
-	constexpr static std::optional<R> run(A x, Tuple const& tuple) {
-		if constexpr (std::same_as<typename Pair::type, map_type>) {
-			auto y = Run<A, Tuple, typename Pair::Is>::apply(x, tuple);
-			return Whole<decltype(y), Tuple, Pairs...>::run(y, tuple);
-		}
-		else if constexpr (std::same_as<typename Pair::type, filter_type>) {
-			if (Run<A, Tuple, typename Pair::Is>::apply(x, tuple)) {
-				return Whole<A, Tuple, Pairs...>::run(x, tuple);
-			}
-			else {
-				return std::nullopt;
-			}
-		}
-		else {
-			return std::nullopt;
-		}
-	}
-};
-
 template<class A, class Tuple, class... Iss>
 struct Whole3;
 
@@ -492,17 +461,12 @@ std::vector<To> run(std::vector<From> const& from, F fff) {
 	std::vector<To> res;
 	//res.reserve(100000000);
 
-	using FF = GroupBy<F, is_map>;
-	using GG = GroupBy<typename FF::R, is_filter>::R;
+	//using FF = GroupBy<F, is_map>;
+	//using GG = GroupBy<typename FF::R, is_filter>::R;
+	//using C = Counts<std::integral_constant<int, 0>, GG>::R;
+
+	using GG = te::map<std::tuple, F>::type;
 	using C = Counts<std::integral_constant<int, 0>, GG>::R;
-
-	//[[maybe_unused]]
-	//typename FF::R ff;
-	//[[maybe_unused]]
-	//GG gg;
-
-	//[[maybe_unused]]
-	//C c;
 
 	for (auto const& f : from) {
 		auto r = Whole4<decltype(f), F, C>::run(f, fff);
@@ -520,6 +484,19 @@ using Z = std::tuple<Map<int>, Map<int>, int, int, Map<int>, Map<float>>;
 
 //using Test = Take<Z, is_map>;
 //using Test2 = GroupBy<Z, is_map>;
+
+/*
+
+
+		        |-- 'c' --|
+		        |-- 'b' --|
+start "a b c"---|-- 'a' --|-----"abc"
+		     split(' ')  join
+
+
+
+
+*/
 
 int main(int argc, char* argv[]) {
 	//[[maybe_unused]]
