@@ -394,7 +394,7 @@ struct Whole;
 template<class A, class Tuple>
 struct Whole<A, Tuple>
 {
-	constexpr static A run(A x, Tuple tuple) {
+	constexpr static A run(A x, Tuple const& tuple) {
 		return x;
 	}
 };
@@ -408,7 +408,7 @@ struct Whole<A, Tuple, Pair, Pairs...>
 	>;
 	using R = te::return_type_t<decltype(&Whole<a, Tuple, Pairs...>::run)>;
 
-	constexpr static std::optional<R> run(A x, Tuple tuple) {
+	constexpr static std::optional<R> run(A x, Tuple const& tuple) {
 		if constexpr (std::same_as<typename Pair::type, map_type>) {
 			auto y = Run<A, Tuple, typename Pair::Is>::apply(x, tuple);
 			return Whole<decltype(y), Tuple, Pairs...>::run(y, tuple);
@@ -433,8 +433,8 @@ struct Whole3;
 template<class A, class Tuple>
 struct Whole3<A, Tuple>
 {
-	constexpr static std::optional<A> run(A x, Tuple tuple) {
-		return x;
+	constexpr static std::optional<A> run(A&& x, Tuple const& tuple) {
+		return std::optional(std::forward<A>(x));
 	}
 };
 
@@ -449,14 +449,14 @@ struct Whole3<A, Tuple, Is, Iss...>
 	>;
 	using R = te::return_type_t<decltype(&Whole3<a, Tuple, Iss...>::run)>::value_type;
 
-	constexpr static std::optional<R> run(A x, Tuple tuple) {
+	constexpr static std::optional<R> run(A&& x, Tuple const& tuple) {
 		if constexpr (std::same_as<t_type, map_type>) {
-			auto y = Run<A, Tuple, Is>::apply(x, tuple);
-			return Whole3<decltype(y), Tuple, Iss...>::run(y, tuple);
+			auto y = Run<A, Tuple, Is>::apply(std::forward<A>(x), tuple);
+			return Whole3<decltype(y), Tuple, Iss...>::run(std::forward<decltype(y)>(y), tuple);
 		}
 		else if constexpr (std::same_as<t_type, filter_type>) {
 			if (Run<A, Tuple, Is>::apply(x, tuple)) {
-				return Whole3<A, Tuple, Iss...>::run(x, tuple);
+				return Whole3<A, Tuple, Iss...>::run(std::forward<A>(x), tuple);
 			}
 			else {
 				return std::nullopt;
@@ -490,18 +490,19 @@ using head = get_t<0, Tuple>;
 template<class To, class From, class F>
 std::vector<To> run(std::vector<From> const& from, F fff) {
 	std::vector<To> res;
+	//res.reserve(100000000);
 
 	using FF = GroupBy<F, is_map>;
 	using GG = GroupBy<typename FF::R, is_filter>::R;
 	using C = Counts<std::integral_constant<int, 0>, GG>::R;
 
-	[[maybe_unused]]
-	typename FF::R ff;
-	[[maybe_unused]]
-	GG gg;
+	//[[maybe_unused]]
+	//typename FF::R ff;
+	//[[maybe_unused]]
+	//GG gg;
 
-	[[maybe_unused]]
-	C c;
+	//[[maybe_unused]]
+	//C c;
 
 	for (auto const& f : from) {
 		auto r = Whole4<decltype(f), F, C>::run(f, fff);
@@ -578,12 +579,15 @@ int main(int argc, char* argv[]) {
 	//>::apply(2, g);
 
 
+
+	constexpr auto f0 = Map{ [](auto x) { return x + 3; } };
 	constexpr auto f1 = Map{ add1 };
 	constexpr auto f2 = Map{ mult2 };
 	constexpr auto f3 = Filter{ even };
 	constexpr auto f4 = Map{ toDouble };
+	constexpr auto f5 = Filter{ [](auto x) { return x % 3 == 0; } };
 
-	constexpr auto g = std::make_tuple(f1, f3, f3, f2, f1, f2, f1, f4);
+	constexpr auto g = std::make_tuple(f0, f1, f2, f1, f2, f1, f5, f4);
 	using namespace std::ranges::views;
 
 
@@ -593,8 +597,10 @@ int main(int argc, char* argv[]) {
 	vec.resize(100000000);
 	std::iota(vec.begin(), vec.end(), 1);
 
+
 	{
-		auto vi = vec | transform(add1) | filter(even) | filter(even) | transform(mult2) | transform(add1) | transform(mult2) | transform(add1) | transform(toDouble);
+		constexpr auto vie = transform([](auto x) { return x + 3; }) | transform(add1) | transform(mult2) | transform(add1) | transform(mult2) | transform(add1) | filter([](auto x) { return x % 3 == 0; }) | transform(toDouble);
+		auto vi = vec | vie;
 
 		auto start1 = std::chrono::system_clock::now();
 		std::vector<double> res3(vi.begin(), vi.end());
@@ -607,6 +613,8 @@ int main(int argc, char* argv[]) {
 		std::cout << "weird: " << duration2 << "\n";
 
 		std::cout << "same: " << (res3 == res2) << "\n";
+		std::cout << "size ranges: " << res3.size() << "\n";
+		std::cout << "size weird: " << res2.size() << "\n";
 	}
 
 
