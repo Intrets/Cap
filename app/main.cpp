@@ -291,6 +291,18 @@ struct Sequence
 	using value = typename ShiftSequence<Start, std::make_integer_sequence<int, Length::value>>::value;
 };
 
+template<class Is>
+struct head_is;
+
+template<int i, int... is>
+struct head_is<std::integer_sequence<int, i, is...>>
+{
+	static constexpr int value = i;
+};
+
+template<class Is>
+static constexpr int head_is_v = head_is<Is>::value;
+
 
 template<class T>
 struct Size;
@@ -415,22 +427,87 @@ struct Whole<A, Tuple, Pair, Pairs...>
 	}
 };
 
+template<class A, class Tuple, class... Iss>
+struct Whole3;
+
+template<class A, class Tuple>
+struct Whole3<A, Tuple>
+{
+	constexpr static std::optional<A> run(A x, Tuple tuple) {
+		return x;
+	}
+};
+
+template<class A, class Tuple, class Is, class... Iss>
+struct Whole3<A, Tuple, Is, Iss...>
+{
+	using t_type = get_t<head_is_v<Is>, Tuple>::type::type;
+
+	using a = std::conditional_t<std::same_as<t_type, map_type>
+		, te::return_type_t<decltype(&Run<A, Tuple, Is>::apply)>
+		, A
+	>;
+	using R = te::return_type_t<decltype(&Whole3<a, Tuple, Iss...>::run)>::value_type;
+
+	constexpr static std::optional<R> run(A x, Tuple tuple) {
+		if constexpr (std::same_as<t_type, map_type>) {
+			auto y = Run<A, Tuple, Is>::apply(x, tuple);
+			return Whole3<decltype(y), Tuple, Iss...>::run(y, tuple);
+		}
+		else if constexpr (std::same_as<t_type, filter_type>) {
+			if (Run<A, Tuple, Is>::apply(x, tuple)) {
+				return Whole3<A, Tuple, Iss...>::run(x, tuple);
+			}
+			else {
+				return std::nullopt;
+			}
+		}
+		else {
+			return std::nullopt;
+		}
+	}
+};
+
+template<class A, class Tuple, class Is>
+struct Whole4_;
+
+template<class A, class Tuple, class... Iss>
+struct Whole4_<A, Tuple, std::tuple<Iss...>>
+{
+	using type = Whole3<A, Tuple, Iss...>;
+};
+
+template<class A, class Tuple, class Is>
+using Whole4 = typename Whole4_<A, Tuple, Is>::type;
+
+template<class T>
+using get_type = typename T::type;
+
 
 template<class Tuple>
 using head = get_t<0, Tuple>;
 
 template<class To, class From, class F>
-To run(From const& from, F fff) {
-	std::vector<To::value_type> res;
+std::vector<To> run(std::vector<From> const& from, F fff) {
+	std::vector<To> res;
 
 	using FF = GroupBy<F, is_map>;
 	using GG = GroupBy<typename FF::R, is_filter>::R;
 	using C = Counts<std::integral_constant<int, 0>, GG>::R;
-	using D = te::map_t<head, GG>;
+
+	[[maybe_unused]]
+	typename FF::R ff;
+	[[maybe_unused]]
+	GG gg;
+
+	[[maybe_unused]]
+	C c;
 
 	for (auto const& f : from) {
-		//auto res =
-		(void)f;
+		auto r = Whole4<decltype(f), F, C>::run(f, fff);
+		if (r.has_value()) {
+			res.push_back(r.value());
+		}
 
 	}
 
@@ -506,19 +583,32 @@ int main(int argc, char* argv[]) {
 	constexpr auto f3 = Filter{ even };
 	constexpr auto f4 = Map{ toDouble };
 
-	constexpr auto g = std::make_tuple(f1, f2, f3, f4);
+	constexpr auto g = std::make_tuple(f1, f3, f3, f2, f1, f2, f1, f4);
+	using namespace std::ranges::views;
 
-	[[maybe_unused]]
-	constexpr auto res =
-		Whole<int, decltype(g),
-		Pair<map_type, std::integer_sequence<int, 0, 0, 0, 0>>,
-		Pair<filter_type, std::integer_sequence<int, 2>>,
-		Pair<map_type, std::integer_sequence<int, 1, 1, 1, 3>>
-		>::run(4, g);
 
-	std::vector<int> vec{ 1,2,3 };
 
-	auto res2 = run<std::vector<double>, std::vector<int>>(vec, g);
+
+	std::vector<int> vec;
+	vec.resize(100000000);
+	std::iota(vec.begin(), vec.end(), 1);
+
+	{
+		auto vi = vec | transform(add1) | filter(even) | filter(even) | transform(mult2) | transform(add1) | transform(mult2) | transform(add1) | transform(toDouble);
+
+		auto start1 = std::chrono::system_clock::now();
+		std::vector<double> res3(vi.begin(), vi.end());
+		std::chrono::duration<double> duration1 = std::chrono::system_clock::now() - start1;
+		std::cout << "ranges: " << duration1 << "\n";
+
+		auto start2 = std::chrono::system_clock::now();
+		auto res2 = run<double>(vec, g);
+		std::chrono::duration<double> duration2 = std::chrono::system_clock::now() - start2;
+		std::cout << "weird: " << duration2 << "\n";
+
+		std::cout << "same: " << (res3 == res2) << "\n";
+	}
+
 
 	rand();
 
