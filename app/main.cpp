@@ -410,13 +410,13 @@ struct Whole3<A, Tuple>
 template<class A, class Tuple, class Is, class... Iss>
 struct Whole3<A, Tuple, Is, Iss...>
 {
-	using t_type = get_t<head_is_v<Is>, Tuple>::type::type;
+	using t_type = typename get_t<head_is_v<Is>, Tuple>::type::type;
 
 	using a = std::conditional_t<std::same_as<t_type, map_type>
 		, te::return_type_t<decltype(&Run<A, Tuple, Is>::apply)>
 		, A
 	>;
-	using R = te::return_type_t<decltype(&Whole3<a, Tuple, Iss...>::run)>::value_type;
+	using R = typename te::return_type_t<decltype(&Whole3<a, Tuple, Iss...>::run)>::value_type;
 
 	constexpr static std::optional<R> run(A&& x, Tuple const& tuple) {
 		if constexpr (std::same_as<t_type, map_type>) {
@@ -452,6 +452,18 @@ using Whole4 = typename Whole4_<A, Tuple, Is>::type;
 template<class T>
 using get_type = typename T::type;
 
+template<class Tuple>
+struct tuplify;
+
+template<class... Args>
+struct tuplify<std::tuple<Args...>>
+{
+	using type = std::tuple<std::tuple<Args>...>;
+};
+
+template<class Tuple>
+using tuplify_t = typename tuplify<Tuple>::type;
+
 
 template<class Tuple>
 using head = get_t<0, Tuple>;
@@ -465,8 +477,9 @@ std::vector<To> run(std::vector<From> const& from, F fff) {
 	//using GG = GroupBy<typename FF::R, is_filter>::R;
 	//using C = Counts<std::integral_constant<int, 0>, GG>::R;
 
-	using GG = te::map<std::tuple, F>::type;
-	using C = Counts<std::integral_constant<int, 0>, GG>::R;
+	//using GG = typename te::map<std::tuple, F>::type;
+	using GG = tuplify_t<F>;
+	using C = typename Counts<std::integral_constant<int, 0>, GG>::R;
 
 	for (auto const& f : from) {
 		auto r = Whole4<decltype(f), F, C>::run(f, fff);
@@ -488,10 +501,10 @@ using Z = std::tuple<Map<int>, Map<int>, int, int, Map<int>, Map<float>>;
 /*
 
 
-		        |-- 'c' --|
-		        |-- 'b' --|
+				|-- 'c' --|
+				|-- 'b' --|
 start "a b c"---|-- 'a' --|-----"abc"
-		     split(' ')  join
+			 split(' ')  join
 
 
 
@@ -524,11 +537,12 @@ int main(int argc, char* argv[]) {
 		return x * 2;
 	};
 
+	[[maybe_unused]]
 	auto even = [](auto x) {
 		return x % 2 == 0;
 	};
 
-	auto f = std::make_tuple(Map{ add1 }, Map{ mult2 }, Filter{ even }, Filter{ even }, Map{ add1 });
+	//auto f = std::make_tuple(Map{ add1 }, Map{ mult2 }, Filter{ even }, Filter{ even }, Map{ add1 });
 	//using FF = GroupBy<decltype(f), is_map>;
 	//using GG = GroupBy<FF::R, is_filter>::R;
 	//[[maybe_unused]]
@@ -536,8 +550,7 @@ int main(int argc, char* argv[]) {
 	//[[maybe_unused]]
 	//GG gg;
 
-	constexpr auto test = (2 >> Map{ add1 }) >> Map{ mult2 };
-
+	[[maybe_unused]]
 	auto toDouble = [](int i) -> double {
 		return i;
 	};
@@ -560,11 +573,13 @@ int main(int argc, char* argv[]) {
 	constexpr auto f0 = Map{ [](auto x) { return x + 3; } };
 	constexpr auto f1 = Map{ add1 };
 	constexpr auto f2 = Map{ mult2 };
-	constexpr auto f3 = Filter{ even };
-	constexpr auto f4 = Map{ toDouble };
+	//constexpr auto f3 = Filter{ even };
+	//constexpr auto f4 = Map{ toDouble };
 	constexpr auto f5 = Filter{ [](auto x) { return x % 3 == 0; } };
+	auto add3 = [](auto x) {return x + 3; };
+	auto multiple3 = [](auto x) {return x % 3 == 0; };
 
-	constexpr auto g = std::make_tuple(f0, f1, f2, f1, f2, f1, f5, f4);
+	constexpr auto g = std::make_tuple(f0, f1, f2, f1, f2, f1, f5);
 	using namespace std::ranges::views;
 
 
@@ -576,16 +591,15 @@ int main(int argc, char* argv[]) {
 
 
 	{
-		constexpr auto vie = transform([](auto x) { return x + 3; }) | transform(add1) | transform(mult2) | transform(add1) | transform(mult2) | transform(add1) | filter([](auto x) { return x % 3 == 0; }) | transform(toDouble);
-		auto vi = vec | vie;
+		auto vi = vec | transform(add3) | transform(add1) | transform(mult2) | transform(add1) | transform(mult2) | transform(add1) | filter(multiple3);
 
 		auto start1 = std::chrono::system_clock::now();
-		std::vector<double> res3(vi.begin(), vi.end());
+		std::vector<int> res3(vi.begin(), vi.end());
 		std::chrono::duration<double> duration1 = std::chrono::system_clock::now() - start1;
 		std::cout << "ranges: " << duration1 << "\n";
 
 		auto start2 = std::chrono::system_clock::now();
-		auto res2 = run<double>(vec, g);
+		auto res2 = run<int>(vec, g);
 		std::chrono::duration<double> duration2 = std::chrono::system_clock::now() - start2;
 		std::cout << "weird: " << duration2 << "\n";
 

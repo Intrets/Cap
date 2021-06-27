@@ -84,6 +84,9 @@ namespace ra
 	template<class F>
 	Filter(F const&)->Filter<F>;
 
+
+
+
 	template<class F, class Initial>
 	struct Fold
 	{
@@ -223,23 +226,19 @@ namespace ra2
 
 
 	template<template<class List, class... Nexts> class T>
-	struct wrapped_function {};
+	struct wf {};
 
 	template<class wrapped, class List, class... Nexts>
-	struct apply_wrapped_function;
+	struct apply_wf;
 
 	template<template<class, class...> class unwrapped, class List, class... Nexts>
-	struct apply_wrapped_function<wrapped_function<unwrapped>, List, Nexts...>
+	struct apply_wf<wf<unwrapped>, List, Nexts...>
 	{
 		using type = unwrapped<List, Nexts...>;
 	};
 
 	template<class wrapped, class List, class... Nexts>
-	using apply_wrapped_function_t = typename apply_wrapped_function<wrapped, List, Nexts...>::type;
-
-	//struct value {};
-	//struct end {};
-	//struct cont {};
+	using apply_wf_t = typename apply_wf<wrapped, List, Nexts...>::type;
 
 	enum class Signal
 	{
@@ -271,7 +270,7 @@ namespace ra2
 
 		F f;
 
-		apply_wrapped_function_t<Next, NextLists, Nexts...> next;
+		apply_wf_t<Next, NextLists, Nexts...> next;
 
 		Return<ReturnType> run() {
 			auto r = this->next.run();
@@ -290,6 +289,18 @@ namespace ra2
 	};
 
 	template<class Lists, class Next, class... Nexts>
+	struct Id
+	{
+		apply_wf_t<Next, Lists, Nexts...> next;
+
+		using ReturnType = int;
+
+		Return<ReturnType> run() {
+			return this->next.run();
+		}
+	};
+
+	template<class Lists, class Next, class... Nexts>
 	struct Filter
 	{
 		using F = typename Lists::head;
@@ -299,7 +310,7 @@ namespace ra2
 
 		F f;
 
-		apply_wrapped_function_t<Next, NextLists, Nexts...> next;
+		apply_wf_t<Next, NextLists, Nexts...> next;
 
 		Return<ReturnType> run() {
 			while (true) {
@@ -322,7 +333,6 @@ namespace ra2
 			) {
 		}
 	};
-
 
 	template<class List>
 	struct End
@@ -352,29 +362,83 @@ namespace ra2
 		}
 	};
 
-	template<class... Args>
-	auto make_rangle(Args&&... args) {
+	template<class F>
+	struct map
+	{
+		using wrapped_type = wf<Map>;
+		F f;
 
+		map(F f_) : f(f_) {};
+	};
+
+	template<class F>
+	struct filter
+	{
+		using wrapped_type = wf<Filter>;
+		F f;
+
+		filter(F f_) : f(f_) {};
+	};
+
+	template<class It>
+	struct source
+	{
+		using wrapped_type = wf<End>;
+		It begin;
+		It end;
+
+		source(It begin_, It end_) : begin(begin_), end(end_) {};
+	};
+
+
+	template<class Arg, class... Args>
+	auto make_rangle(Arg&& arg, Args&&... args) {
+		//Id<te::list<Arg::
 
 	};
 
 	void test() {
-		auto f = [](int i) { return i + 1; };
-		auto even = [](auto i) { return i % 2 == 0; };
+		//auto f = [](int i) { return i + 1; };
+		//auto even = [](auto i) { return i % 2 == 0; };
+
+		auto add3 = [](auto i) { return i + 3; };
+		auto add1 = [](auto i) { return i + 1; };
+		auto mult2 = [](auto i) { return i * 2; };
+		auto multiple3 = [](auto i) { return i % 3 == 0; };
 
 		//constexpr auto vie = transform([](auto x) { return x + 3; }) | transform(add1) | transform(mult2) | transform(add1) | transform(mult2) | transform(add1) | filter([](auto x) { return x % 3 == 0; }) | transform(toDouble);
-		//Map<te::list<void, void>, wrapped_function<End>> wat;
+		//Map<te::list<void, void>, wf<End>> wat;
 
-		std::vector<int> source;
-		source.resize(1000000000);
-		std::iota(source.begin(), source.end(), 1);
+		std::vector<int> ints;
+		ints.resize(10000000);
+		std::iota(ints.begin(), ints.end(), 1);
 
-		auto sourcePair = std::make_pair(source.begin(), source.end());
+		auto sourcePair = std::make_pair(ints.begin(), ints.end());
 
-		[[maybe_unused]]
-		Map<te::list<decltype(f), decltype(even), decltype(f), decltype(sourcePair)>, wrapped_function<Filter>, wrapped_function<Map>, wrapped_function<End>> wat2(f, even, f, sourcePair);
+
+		double weird = 0.0;
+		double normal = 0.0;
 
 		{
+
+			using namespace std::ranges;
+
+			//auto vi = ints | transform(f) | filter(even) | transform(f);
+			auto vi = ints | views::transform(add3) | views::transform(add1) | views::transform(mult2) | views::transform(add1) | views::transform(mult2) | views::transform(add1) | views::filter(multiple3);
+
+			auto start = std::chrono::system_clock::now();
+			std::vector<int> result(vi.begin(), vi.end());
+
+			std::chrono::duration<double> duration = std::chrono::system_clock::now() - start;
+			normal += duration.count();
+			//std::cout << std::format("stl ranges duration: {} length: {}\n", duration.count(), result.size());
+
+		}
+		{
+			Filter<te::list<decltype(multiple3), decltype(add1), decltype(mult2), decltype(add1), decltype(mult2), decltype(add1), decltype(add3), decltype(sourcePair)>,
+				wf<Map>, wf<Map>, wf<Map>, wf<Map>, wf<Map>, wf<Map>, wf<End>
+			> wat2(multiple3, add1, mult2, add1, mult2, add1, add3, sourcePair);
+
 			auto start = std::chrono::system_clock::now();
 			std::vector<int> result;
 			while (true) {
@@ -388,21 +452,12 @@ namespace ra2
 			}
 
 			std::chrono::duration<double> duration = std::chrono::system_clock::now() - start;
-			std::cout << std::format("weird duration: {} length: {}\n", duration.count(), result.size());
+			weird += duration.count();
+			//std::cout << std::format("weird duration: {} length: {}\n", duration.count(), result.size());
 		}
-		{
-			auto start = std::chrono::system_clock::now();
 
-			using namespace std::ranges::views;
+		std::cout << std::format("normal: {} weird: {}\n", normal, weird);
 
-			auto vi = source | transform(f) | filter(even) | transform(f);
-
-			std::vector<int> result(vi.begin(), vi.end());
-
-			std::chrono::duration<double> duration = std::chrono::system_clock::now() - start;
-			std::cout << std::format("stl ranges duration: {} length: {}\n", duration.count(), result.size());
-
-		}
 
 
 		rand();
