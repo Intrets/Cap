@@ -237,11 +237,27 @@ namespace ra2
 	template<class wrapped, class List, class... Nexts>
 	using apply_wrapped_function_t = typename apply_wrapped_function<wrapped, List, Nexts...>::type;
 
-	struct end {};
-	struct cont {};
+	//struct value {};
+	//struct end {};
+	//struct cont {};
+
+	enum class Signal
+	{
+		value,
+		end,
+		cont
+	};
 
 	template<class T>
-	using Return = std::variant<T, end, cont>;
+	struct Return
+	{
+		T data;
+
+		Signal signal;
+	};
+
+	//template<class T>
+	//using Return = std::variant<T, end, cont>;
 
 	template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
 
@@ -259,8 +275,8 @@ namespace ra2
 
 		Return<ReturnType> run() {
 			auto r = this->next.run();
-			if (std::holds_alternative<ReturnType>(r)) {
-				return this->f(std::get<ReturnType>(r));
+			if (r.signal == Signal::value) {
+				return { .data = this->f(r.data), .signal = Signal::value };
 			}
 			return r;
 		}
@@ -288,30 +304,13 @@ namespace ra2
 		Return<ReturnType> run() {
 			while (true) {
 				auto r = this->next.run();
-				switch (r.index()) {
-					// value
-					case 0:
-					{
-						if (this->f(*std::get_if<0>(&r))) {
-							return r;
-						}
-						break;
-					}
-					// end
-					case 1:
-					{
+				if (r.signal == Signal::value) {
+					if (this->f(r.data)) {
 						return r;
-						break;
 					}
-					// cont
-					case 2:
-					{
-						return r;
-						break;
-					}
-					default:
-						assert(0);
-						break;
+				}
+				else {
+					return r;
 				}
 			}
 		}
@@ -338,10 +337,10 @@ namespace ra2
 
 		Return<int> run() {
 			if (this->begin == this->end) {
-				return ra2::end{};
+				return { .signal = Signal::end };
 			}
 			else {
-				return *(begin++);
+				return { .data = *(begin++), .signal = Signal::value };
 			}
 		}
 
@@ -353,15 +352,21 @@ namespace ra2
 		}
 	};
 
+	template<class... Args>
+	auto make_rangle(Args&&... args) {
+
+
+	};
+
 	void test() {
 		auto f = [](int i) { return i + 1; };
 		auto even = [](auto i) { return i % 2 == 0; };
 
-		//[[maybe_unused]]
+		//constexpr auto vie = transform([](auto x) { return x + 3; }) | transform(add1) | transform(mult2) | transform(add1) | transform(mult2) | transform(add1) | filter([](auto x) { return x % 3 == 0; }) | transform(toDouble);
 		//Map<te::list<void, void>, wrapped_function<End>> wat;
 
 		std::vector<int> source;
-		source.resize(10000000);
+		source.resize(1000000000);
 		std::iota(source.begin(), source.end(), 1);
 
 		auto sourcePair = std::make_pair(source.begin(), source.end());
@@ -372,30 +377,13 @@ namespace ra2
 		{
 			auto start = std::chrono::system_clock::now();
 			std::vector<int> result;
-			bool run = true;
-			while (run) {
+			while (true) {
 				auto r = wat2.run();
-				switch (r.index()) {
-					case 0:
-					{
-						result.push_back(*std::get_if<0>(&r));
-						break;
-					}
-					// end
-					case 1:
-					{
-						run = false;
-						break;
-					}
-					// cont
-					case 2:
-					{
-						run = false;
-						break;
-					}
-					default:
-						assert(0);
-						break;
+				if (r.signal == Signal::value) {
+					result.push_back(r.data);
+				}
+				else {
+					break;
 				}
 			}
 
