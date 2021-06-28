@@ -43,12 +43,33 @@ namespace ra
 
 		int data = 0;
 
-		Signal_s operator& (Signal_s other) const {
-			return { other.data & this->data };
+		Signal_s operator~ () const {
+			return { ~this->data };
 		}
 
+
+		Signal_s operator^ (Signal_s other) const {
+			return { this->data ^ other.data };
+		}
+
+		Signal_s& operator ^=(Signal_s other) {
+			this->data ^= other.data;
+			return *this;
+		}
+
+
+		Signal_s operator& (Signal_s other) const {
+			return { this->data & other.data };
+		}
+
+		Signal_s& operator &=(Signal_s other) {
+			this->data &= other.data;
+			return *this;
+		}
+
+
 		Signal_s operator| (Signal_s other) const {
-			return { other.data | this->data };
+			return { this->data | other.data };
 		}
 
 		Signal_s& operator |=(Signal_s other) {
