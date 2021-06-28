@@ -10,205 +10,8 @@
 #include <numeric>
 #include <ranges>
 #include <chrono>
+#include <string>
 
-namespace ra
-{
-	enum class Signal
-	{
-		cont,
-		end,
-		error
-	};
-
-	template<class A>
-	using Return = std::variant<A, Signal>;
-
-	template<class R>
-	struct held_value;
-
-	template<class A>
-	struct held_value<Return<A>>
-	{
-		using type = A;
-	};
-
-	template<class R>
-	using held_value_t = typename held_value<R>::type;
-
-	struct map_type {};
-	struct filter_type {};
-	struct fold_type {};
-	struct producer_type {};
-
-	template<class F>
-	struct Producer
-	{
-		using type = producer_type;
-		constexpr static bool stateful = true;
-
-		constexpr auto operator()(auto&& x) {
-			return 1;
-		}
-	};
-
-
-	template<class F>
-	struct Map
-	{
-		using type = map_type;
-		constexpr static bool stateful = false;
-
-		F f;
-
-		constexpr auto operator()(auto&& x) {
-			return this->f(std::forward<decltype(x)>(x));
-		}
-	};
-
-	template<class F>
-	Map(F const&)->Map<F>;
-
-	template<class F>
-	struct Filter
-	{
-		using type = filter_type;
-		constexpr static bool stateful = false;
-
-		F f;
-
-		constexpr bool operator()(auto&& x) const {
-			return this->f(std::forward<decltype(x)>(x));
-		}
-	};
-
-	template<class F>
-	Filter(F const&)->Filter<F>;
-
-
-
-
-	template<class F, class Initial>
-	struct Fold
-	{
-		using type = fold_type;
-		using value_type = Initial;
-		constexpr static bool stateful = true;
-
-		F f;
-
-		Initial initial;
-
-		constexpr bool operator()(auto&& acc, auto&& e) const {
-			return this->f(std::forward<decltype(acc)>(acc), std::forward<decltype(e)>(e));
-		}
-	};
-
-	template<class F, class Initial>
-	Fold(F const&, Initial&&)->Fold<F, Initial>;
-
-	template<class A, class E>
-	struct Run;
-
-	template<class A, class E>
-	requires std::same_as<typename E::type, map_type>
-		struct Run<A, E>
-	{
-		constexpr static auto apply(A&& x, E const& e) {
-			return e.f(std::forward<A>(x));
-		};
-	};
-
-	template<class A, class E>
-	requires std::same_as<typename E::type, filter_type>
-		struct Run<A, E>
-	{
-		constexpr static bool apply(A&& x, E const& e) {
-			return e.f(std::forward<A>(x));
-		};
-	};
-
-	template<class A, class... Es>
-	struct Whole;
-
-	template<class A>
-	struct Whole<A>
-	{
-		constexpr static Return<A> run(A&& x) {
-			return x;
-		}
-	};
-
-	template<class A, class E, class... Es>
-	requires std::same_as<typename E::type, map_type>
-		struct Whole<A, E, Es...>
-	{
-		// TODO: nested shenanigans, ie, E is a tuple of more Es
-		//using t_type = typename E::type;
-
-		using b = te::return_type_t_ptr<&Run<A, E>::apply>;
-
-		using B = held_value_t<te::return_type_t_ptr<&Whole<b, Es...>::run>>;
-
-		constexpr Return<B> run(A&& x, E const& e, Es const&... es) const {
-			auto y = Run<A, E>::apply(std::forward<A>(x), e);
-			using Y = decltype(y);
-			return Whole<Y, Es...>().run(std::forward<Y>(y), es...);
-		}
-	};
-
-	template<class A, class E, class... Es>
-	requires std::same_as<typename E::type, filter_type>
-		struct Whole<A, E, Es...>
-	{
-		// TODO: nested shenanigans, ie, E is a tuple of more Es
-		//using t_type = typename E::type;
-
-		using b = A;
-
-		using B = held_value_t<te::return_type_t_ptr<&Whole<b, Es...>::run>>;
-
-		constexpr static Return<B> run(A&& x, E const& e, Es const&... es) {
-			if (Run<A, E>::apply(std::forward<A>(x), e)) {
-				return Whole<A, Es...>().run(std::forward<A>(x), es...);
-			}
-			else {
-				return Signal::cont;
-			}
-		}
-	};
-
-	template<class A, class E, class... Es>
-	requires std::same_as<typename E::type, fold_type>
-		struct Whole<A, E, Es...>
-	{
-		typename E::value_type acc;
-
-		using b = A;
-
-		using B = held_value_t<te::return_type_t_ptr<&Whole<b, Es...>::run>>;
-
-		constexpr static Return<B> run(A&& x, E const& e, Es const&... es) {
-			if (Run<A, E>::apply(std::forward<A>(x), e)) {
-				return Whole<A, Es...>().run(std::forward<A>(x), es...);
-			}
-			else {
-				return Signal::cont;
-			}
-		}
-	};
-
-	template<class A, class T>
-	struct Whole2;
-
-	template<class A, class... Es>
-	struct Whole2<A, std::tuple<Es...>>
-	{
-		using type = Whole<A, Es...>;
-	};
-
-	template<class A, class T>
-	using WholeT = typename Whole2<A, T>::type;
-}
 
 namespace ra2
 {
@@ -225,92 +28,104 @@ namespace ra2
 	using apply_t = typename apply<T, List, Args...>::type;
 
 
-	template<template<class List, class... Nexts> class T>
+	template<template<class... Nexts> class T>
 	struct wf {};
 
-	template<class wrapped, class List, class... Nexts>
+	template<class wrapped, class... Nexts>
 	struct apply_wf;
 
-	template<template<class, class...> class unwrapped, class List, class... Nexts>
-	struct apply_wf<wf<unwrapped>, List, Nexts...>
+	template<template<class...> class unwrapped, class... Nexts>
+	struct apply_wf<wf<unwrapped>, Nexts...>
 	{
-		using type = unwrapped<List, Nexts...>;
+		using type = unwrapped<Nexts...>;
 	};
 
-	template<class wrapped, class List, class... Nexts>
-	using apply_wf_t = typename apply_wf<wrapped, List, Nexts...>::type;
+	template<class wrapped, class... Nexts>
+	using apply_wf_t = typename apply_wf<wrapped, Nexts...>::type;
 
 	enum class Signal
 	{
 		value,
 		end,
-		cont
+		cont,
+		join
 	};
 
 	template<class T>
 	struct Return
 	{
+		using value_type = T;
 		T data;
 
 		Signal signal;
 	};
 
-	//template<class T>
-	//using Return = std::variant<T, end, cont>;
+	struct MapCount
+	{
+		int count = 0;
+	};
+	struct FilterCount
+	{
+		int count = 0;
+	};
 
 	template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
 
-	template<class Lists, class Next, class... Nexts>
+	template<class Current, class Next, class... Nexts>
 	struct Map
 	{
-		using F = typename Lists::head;
-		using NextLists = typename Lists::tail;
+		using NextType = apply_wf_t<typename Next::wrapped_type, Next, Nexts...>;
+		using F = typename Current::function_type;
 
-		using ReturnType = int;
+		using a = typename te::return_type_t_ptr<&NextType::run>::value_type;
+		using ReturnType = decltype(std::declval<F>()(std::declval<a>()));
 
 		F f;
 
-		apply_wf_t<Next, NextLists, Nexts...> next;
+		NextType next;
 
 		Return<ReturnType> run() {
 			auto r = this->next.run();
 			if (r.signal == Signal::value) {
 				return { .data = this->f(r.data), .signal = Signal::value };
 			}
-			return r;
+			return { .signal = Signal::end };
 		}
 
-		template<class FArg, class... Args>
-		Map(FArg&& farg, Args&&... args) :
-			f(farg),
+		template<class Arg, class... Args>
+		Map(Arg&& arg, Args&&... args) :
+			f(arg.f),
 			next(std::forward<Args>(args)...
 			) {
 		}
 	};
 
-	template<class Lists, class Next, class... Nexts>
+	template<class Next, class... Nexts>
 	struct Id
 	{
-		apply_wf_t<Next, Lists, Nexts...> next;
+		using NextType = apply_wf_t<typename Next::wrapped_type, Next, Nexts...>;
+		using ReturnType = typename te::return_type_t_ptr<&NextType::run>::value_type;
 
-		using ReturnType = int;
+		NextType next;
 
 		Return<ReturnType> run() {
 			return this->next.run();
 		}
+
+		template<class... Args>
+		Id(Args&&... args) : next(std::forward<Args>(args)...) {}
 	};
 
-	template<class Lists, class Next, class... Nexts>
+	template<class Current, class Next, class... Nexts>
 	struct Filter
 	{
-		using F = typename Lists::head;
-		using NextLists = typename Lists::tail;
-
-		using ReturnType = int;
+		using NextType = apply_wf_t<typename Next::wrapped_type, Next, Nexts...>;
+		using ReturnType = typename te::return_type_t_ptr<&NextType::run>::value_type;
+		using F = typename Current::function_type;
 
 		F f;
 
-		apply_wf_t<Next, NextLists, Nexts...> next;
+		NextType next;
 
 		Return<ReturnType> run() {
 			while (true) {
@@ -319,6 +134,9 @@ namespace ra2
 					if (this->f(r.data)) {
 						return r;
 					}
+					else {
+						continue;
+					}
 				}
 				else {
 					return r;
@@ -326,39 +144,127 @@ namespace ra2
 			}
 		}
 
-		template<class FArg, class... Args>
-		Filter(FArg&& farg, Args&&... args) :
-			f(farg),
+		template<class Arg, class... Args>
+		Filter(Arg&& arg, Args&&... args) :
+			f(arg.f),
 			next(std::forward<Args>(args)...
 			) {
 		}
 	};
 
-	template<class List>
+	template<class Current, class Next, class... Nexts>
+	struct Length
+	{
+		using NextType = apply_wf_t<typename Next::wrapped_type, Next, Nexts...>;
+		using ReturnType = int;
+
+		int count = 0;
+
+		NextType next;
+
+		Return<ReturnType> run() {
+			auto r = this->next.run();
+			while (true) {
+				if (r.signal == Signal::value) {
+					this->count++;
+				}
+				else if (r.signal == Signal::join) {
+					auto val = ++this->count;
+					this->count = 0;
+					return { .data = val };
+				}
+				else {
+					return { .signal = r.signal };
+				}
+				r = this->next.run();
+			}
+		}
+
+		template<class Arg, class... Args>
+		Length(Arg&&, Args&&... args) :
+			next(std::forward<Args>(args)...
+			) {
+		}
+	};
+
+	template<class Current, class Next, class... Nexts>
+	struct SplitEvery
+	{
+		using NextType = apply_wf_t<typename Next::wrapped_type, Next, Nexts...>;
+		using ReturnType = typename te::return_type_t_ptr<&NextType::run>::value_type;
+
+		int every;
+		int count = 0;
+
+		NextType next;
+
+		Return<ReturnType> run() {
+			auto r = this->next.run();
+			if (r.signal == Signal::value) {
+				if (++count == every) {
+					count = 0;
+					r.signal = Signal::join;
+				}
+				return r;
+			}
+			return r;
+		}
+
+		template<class Arg, class... Args>
+		SplitEvery(Arg&& arg, Args&&... args) :
+			every(arg.every),
+			next(std::forward<Args>(args)...
+			) {
+		}
+	};
+
+	template<class Current, class Next, class... Nexts>
+	struct Drop
+	{
+		using NextType = apply_wf_t<typename Next::wrapped_type, Next, Nexts...>;
+		using ReturnType = typename te::return_type_t_ptr<NextType::run>::value_type;
+
+		int count = 0;
+
+		NextType next;
+
+		Return<ReturnType> run() {
+			while (this->count > 0) {
+				this->next.run();
+				count--;
+			}
+			return this->next.run();
+		}
+
+		template<class Arg, class... Args>
+		Drop(Arg&& arg, Args&&... args) :
+			count(arg.count),
+			next(std::forward<Args>(args)...
+			) {
+		}
+	};
+
+	template<class Current>
 	struct End
 	{
-		using IteratorPair = typename List::head;
+		typename Current::iterator_type begin;
+		typename Current::iterator_type end;
 
-		using BeginIt = typename IteratorPair::first_type;
-		using EndIt = typename IteratorPair::second_type;
+		using ReturnType = typename Current::iterator_type::value_type;
 
-		BeginIt begin;
-		EndIt end;
-
-		Return<int> run() {
+		Return<ReturnType> run() {
 			if (this->begin == this->end) {
 				return { .signal = Signal::end };
 			}
 			else {
-				return { .data = *(begin++), .signal = Signal::value };
+				return { .data = *(this->begin++), .signal = Signal::value };
 			}
 		}
 
-
-		template<class FBeginIt, class FEndIt>
-		End(std::pair<FBeginIt, FEndIt>pair) :
-			begin(pair.first),
-			end(pair.second) {
+		template<class Arg>
+		End(Arg&& arg) :
+			begin(arg.begin),
+			end(arg.end) {
 		}
 	};
 
@@ -366,6 +272,7 @@ namespace ra2
 	struct map
 	{
 		using wrapped_type = wf<Map>;
+		using function_type = F;
 		F f;
 
 		map(F f_) : f(f_) {};
@@ -375,89 +282,138 @@ namespace ra2
 	struct filter
 	{
 		using wrapped_type = wf<Filter>;
+		using function_type = F;
 		F f;
 
 		filter(F f_) : f(f_) {};
+	};
+
+	struct drop
+	{
+		using wrapped_type = wf<Drop>;
+		int count;
+
+		drop(int count_) :count(count_) {};
 	};
 
 	template<class It>
 	struct source
 	{
 		using wrapped_type = wf<End>;
+		using iterator_type = It;
 		It begin;
 		It end;
 
 		source(It begin_, It end_) : begin(begin_), end(end_) {};
 	};
 
+	struct split_every
+	{
+		using wrapped_type = wf<SplitEvery>;
+		int every;
 
-	template<class Arg, class... Args>
-	auto make_rangle(Arg&& arg, Args&&... args) {
-		//Id<te::list<Arg::
+		split_every(int every_) :every(every_) {};
+	};
 
+	struct length
+	{
+		using wrapped_type = wf<Length>;
+
+		length() {};
+	};
+
+
+
+	template<class... Args>
+	auto make_rangle(Args&&... args) {
+		return Id<Args...>(std::forward<Args>(args)...);
 	};
 
 	void test() {
 		//auto f = [](int i) { return i + 1; };
-		//auto even = [](auto i) { return i % 2 == 0; };
+		auto even = [](auto i) -> bool { return i % 2 == 0; };
 
+		[[maybe_unused]]
 		auto add3 = [](auto i) { return i + 3; };
+		[[maybe_unused]]
 		auto add1 = [](auto i) { return i + 1; };
+		[[maybe_unused]]
 		auto mult2 = [](auto i) { return i * 2; };
-		auto multiple3 = [](auto i) { return i % 3 == 0; };
+		[[maybe_unused]]
+		auto multiple3 = [](auto i) -> bool { return i % 3 == 0; };
 
 		//constexpr auto vie = transform([](auto x) { return x + 3; }) | transform(add1) | transform(mult2) | transform(add1) | transform(mult2) | transform(add1) | filter([](auto x) { return x % 3 == 0; }) | transform(toDouble);
 		//Map<te::list<void, void>, wf<End>> wat;
 
 		std::vector<int> ints;
-		ints.resize(10000000);
+		//ints.resize(1000000000);
+		ints.resize(100);
 		std::iota(ints.begin(), ints.end(), 1);
+		//std::for_each(ints.begin(), ints.end(), [](int& i) { i = rand(); });
 
-		auto sourcePair = std::make_pair(ints.begin(), ints.end());
+		//auto sourcePair = std::make_pair(ints.begin(), ints.end());
 
 
 		double weird = 0.0;
 		double normal = 0.0;
 
-		{
+		auto rangle1 = make_rangle(length(), split_every(10), source(ints.begin(), ints.end()));
 
-			using namespace std::ranges;
-
-			//auto vi = ints | transform(f) | filter(even) | transform(f);
-			auto vi = ints | views::transform(add3) | views::transform(add1) | views::transform(mult2) | views::transform(add1) | views::transform(mult2) | views::transform(add1) | views::filter(multiple3);
-
-			auto start = std::chrono::system_clock::now();
-			std::vector<int> result(vi.begin(), vi.end());
-
-			std::chrono::duration<double> duration = std::chrono::system_clock::now() - start;
-			normal += duration.count();
-			//std::cout << std::format("stl ranges duration: {} length: {}\n", duration.count(), result.size());
-
-		}
-		{
-			Filter<te::list<decltype(multiple3), decltype(add1), decltype(mult2), decltype(add1), decltype(mult2), decltype(add1), decltype(add3), decltype(sourcePair)>,
-				wf<Map>, wf<Map>, wf<Map>, wf<Map>, wf<Map>, wf<Map>, wf<End>
-			> wat2(multiple3, add1, mult2, add1, mult2, add1, add3, sourcePair);
-
-			auto start = std::chrono::system_clock::now();
-			std::vector<int> result;
-			while (true) {
-				auto r = wat2.run();
-				if (r.signal == Signal::value) {
-					result.push_back(r.data);
-				}
-				else {
-					break;
-				}
+		std::vector<int> result0;
+		while (true) {
+			auto r = rangle1.run();
+			if (r.signal != Signal::end) {
+				result0.push_back(r.data);
 			}
+			else {
+				break;
+			}
+		}
 
-			std::chrono::duration<double> duration = std::chrono::system_clock::now() - start;
-			weird += duration.count();
-			//std::cout << std::format("weird duration: {} length: {}\n", duration.count(), result.size());
+		rand();
+
+		//std::vector<int> result2;
+		for (size_t i = 0; i < 0; i++) {
+			{
+				auto rangle = make_rangle(map([](auto i) { return std::to_string(i); }), filter(multiple3), map(add1), map(mult2), map(add1), map(mult2), map(add1), map(add3), filter(even), source(ints.begin(), ints.end()));
+
+				//map(map(add1));
+
+				std::vector<std::string> result1;
+				auto start = std::chrono::system_clock::now();
+				while (true) {
+					auto r = rangle.run();
+					if (r.signal == Signal::value) {
+						result1.push_back(r.data);
+					}
+					else {
+						break;
+					}
+				}
+
+				std::chrono::duration<double> duration = std::chrono::system_clock::now() - start;
+				weird += duration.count();
+				std::cout << std::format("weird duration: {} length: {}\n", duration.count(), result1.size());
+			}
+			{
+
+				using namespace std::ranges;
+
+				//auto vi = ints | transform(f) | filter(even) | transform(f);
+				auto vi = ints | views::filter(even) | views::transform(add3) | views::transform(add1) | views::transform(mult2) | views::transform(add1) | views::transform(mult2) | views::transform(add1) | views::filter(multiple3);
+				//auto vi = ints | views::filter(multiple3);
+
+				auto start = std::chrono::system_clock::now();
+				std::vector<int> result2(vi.begin(), vi.end());
+
+				std::chrono::duration<double> duration = std::chrono::system_clock::now() - start;
+				normal += duration.count();
+				std::cout << std::format("stl ranges duration: {} length: {}\n", duration.count(), result2.size());
+
+			}
 		}
 
 		std::cout << std::format("normal: {} weird: {}\n", normal, weird);
-
 
 
 		rand();
@@ -503,7 +459,4 @@ namespace ra2
 //	}
 
 //};
-
-
-
 
