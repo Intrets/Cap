@@ -4,6 +4,6 @@
 
 
 int main() {
-	ra2::test();
+	ra::test();
 	return 1;
 }

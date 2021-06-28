@@ -11,23 +11,12 @@
 #include <ranges>
 #include <chrono>
 #include <string>
+#include <vector>
+#include <format>
 
 
-namespace ra2
+namespace ra
 {
-	template<template<class...> class T, class List, class... Args>
-	struct apply;
-
-	template<template<class...> class T, class... Ls, class... Args>
-	struct apply<T, te::list<Ls...>, Args...>
-	{
-		using type = T<Ls..., Args...>;
-	};
-
-	template<template<class...> class T, class List, class... Args>
-	using apply_t = typename apply<T, List, Args...>::type;
-
-
 	template<template<class... Nexts> class T>
 	struct wf {};
 
@@ -43,13 +32,41 @@ namespace ra2
 	template<class wrapped, class... Nexts>
 	using apply_wf_t = typename apply_wf<wrapped, Nexts...>::type;
 
-	enum class Signal
+	struct Signal_s
 	{
-		value,
-		end,
-		cont,
-		join
+		enum Enum : int
+		{
+			value = 1 << 0,
+			end = 1 << 1,
+			join = 1 << 2
+		};
+
+		int data = 0;
+
+		Signal_s operator& (Signal_s other) const {
+			return { other.data & this->data };
+		}
+
+		Signal_s operator| (Signal_s other) const {
+			return { other.data | this->data };
+		}
+
+		Signal_s& operator |=(Signal_s other) {
+			this->data |= other.data;
+			return *this;
+		}
+
+		operator bool() {
+			return data;
+		}
 	};
+
+	namespace Signal
+	{
+		constexpr Signal_s value = Signal_s{ Signal_s::Enum::value };
+		constexpr Signal_s end = Signal_s{ Signal_s::Enum::end };
+		constexpr Signal_s join = Signal_s{ Signal_s::Enum::join };
+	}
 
 	template<class T>
 	struct Return
@@ -57,7 +74,7 @@ namespace ra2
 		using value_type = T;
 		T data;
 
-		Signal signal;
+		Signal_s signal;
 	};
 
 	struct MapCount
@@ -86,7 +103,7 @@ namespace ra2
 
 		Return<ReturnType> run() {
 			auto r = this->next.run();
-			if (r.signal == Signal::value) {
+			if (r.signal & Signal::value) {
 				return { .data = this->f(r.data), .signal = Signal::value };
 			}
 			return { .signal = Signal::end };
@@ -130,7 +147,7 @@ namespace ra2
 		Return<ReturnType> run() {
 			while (true) {
 				auto r = this->next.run();
-				if (r.signal == Signal::value) {
+				if (r.signal & Signal::value) {
 					if (this->f(r.data)) {
 						return r;
 					}
@@ -165,10 +182,10 @@ namespace ra2
 		Return<ReturnType> run() {
 			auto r = this->next.run();
 			while (true) {
-				if (r.signal == Signal::value) {
+				if (r.signal & Signal::value) {
 					this->count++;
 				}
-				else if (r.signal == Signal::join) {
+				else if (r.signal & (Signal::join | Signal::value)) {
 					auto val = ++this->count;
 					this->count = 0;
 					return { .data = val };
@@ -200,10 +217,10 @@ namespace ra2
 
 		Return<ReturnType> run() {
 			auto r = this->next.run();
-			if (r.signal == Signal::value) {
+			if (r.signal & Signal::value) {
 				if (++count == every) {
 					count = 0;
-					r.signal = Signal::join;
+					r.signal |= Signal::join;
 				}
 				return r;
 			}
@@ -346,8 +363,8 @@ namespace ra2
 		//Map<te::list<void, void>, wf<End>> wat;
 
 		std::vector<int> ints;
-		//ints.resize(1000000000);
-		ints.resize(100);
+		ints.resize(1000000000);
+		//ints.resize(100);
 		std::iota(ints.begin(), ints.end(), 1);
 		//std::for_each(ints.begin(), ints.end(), [](int& i) { i = rand(); });
 
@@ -362,7 +379,7 @@ namespace ra2
 		std::vector<int> result0;
 		while (true) {
 			auto r = rangle1.run();
-			if (r.signal != Signal::end) {
+			if (r.signal & Signal::value) {
 				result0.push_back(r.data);
 			}
 			else {
@@ -373,17 +390,17 @@ namespace ra2
 		rand();
 
 		//std::vector<int> result2;
-		for (size_t i = 0; i < 0; i++) {
+		for (size_t i = 0; i < 10; i++) {
 			{
-				auto rangle = make_rangle(map([](auto i) { return std::to_string(i); }), filter(multiple3), map(add1), map(mult2), map(add1), map(mult2), map(add1), map(add3), filter(even), source(ints.begin(), ints.end()));
+				auto rangle = make_rangle(filter(multiple3), map(add1), map(mult2), map(add1), map(mult2), map(add1), map(add3), filter(even), source(ints.begin(), ints.end()));
 
 				//map(map(add1));
 
-				std::vector<std::string> result1;
+				std::vector<int> result1;
 				auto start = std::chrono::system_clock::now();
 				while (true) {
 					auto r = rangle.run();
-					if (r.signal == Signal::value) {
+					if (r.signal & Signal::value) {
 						result1.push_back(r.data);
 					}
 					else {
@@ -415,48 +432,9 @@ namespace ra2
 
 		std::cout << std::format("normal: {} weird: {}\n", normal, weird);
 
-
 		rand();
 
 	}
 
 }
-
-
-
-
-
-
-
-
-
-
-
-////template<class F, template <class...> class Next, class List, class... Nexts>
-//template<
-//	class Lists,
-//	//template<class, template<class> class...> class Next,
-//	template<class, template<class> class...> class... Nexts>
-////template<class F, template<class...> class Rangle, class... Rangles>
-////template<class F, template<class Current, class...> class Rangle, class... Rangles>
-//struct Map
-//{
-//	using Next = typename te::list<Nexts...>::head;
-//	using NextTail = typename te::list<Nexts...>::tail;
-
-//	using List = typename Lists::head;
-//	using NextLists = typename Lists::tail;
-
-//	//typename Next<Lists, NextTail> next;
-//	apply_t<Next, typename NextTail::prepend<Lists>> next;
-
-//	//apply_t<Next
-//	//apply_t<Next, List, Nexts...> next;
-
-//	//F f;
-
-//	std::optional<int> run() {
-//	}
-
-//};
 
