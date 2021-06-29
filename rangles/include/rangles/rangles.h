@@ -44,12 +44,12 @@ namespace ra
 		int data = 0;
 
 		Signal_s operator~ () const {
-			return { ~this->data };
+			return { .data = ~this->data };
 		}
 
 
 		Signal_s operator^ (Signal_s other) const {
-			return { this->data ^ other.data };
+			return { .data = this->data ^ other.data };
 		}
 
 		Signal_s& operator ^=(Signal_s other) {
@@ -59,7 +59,7 @@ namespace ra
 
 
 		Signal_s operator& (Signal_s other) const {
-			return { this->data & other.data };
+			return { .data = this->data & other.data };
 		}
 
 		Signal_s& operator &=(Signal_s other) {
@@ -69,7 +69,7 @@ namespace ra
 
 
 		Signal_s operator| (Signal_s other) const {
-			return { this->data | other.data };
+			return { .data = this->data | other.data };
 		}
 
 		Signal_s& operator |=(Signal_s other) {
@@ -191,6 +191,44 @@ namespace ra
 	};
 
 	template<class Current, class Next, class... Nexts>
+	struct Intersperse
+	{
+		using NextType = apply_wf_t<typename Next::wrapped_type, Next, Nexts...>;
+		using ReturnType = typename te::return_type_t_ptr<&NextType::run>::value_type;
+
+		using T = typename Current::value_type;
+
+		T t;
+
+		std::optional<ReturnType> cache;
+
+		NextType next;
+
+		Return<ReturnType> run() {
+			if (this->cache) {
+				Return<ReturnType> r = { .data = *cache, .signal = Signal::value };
+				this->cache.reset();
+				return r;
+			}
+			else {
+				auto r = this->next.run();
+				if (r.signal & Signal::value) {
+					this->cache = r.data;
+					return { .data = this->t, .signal = Signal::value };
+				}
+				return r;
+			}
+		}
+
+		template<class Arg, class... Args>
+		Intersperse(Arg&& arg, Args&&... args) :
+			t(arg.t),
+			next(std::forward<Args>(args)...
+			) {
+		}
+	};
+
+	template<class Current, class Next, class... Nexts>
 	struct Length
 	{
 		using NextType = apply_wf_t<typename Next::wrapped_type, Next, Nexts...>;
@@ -206,13 +244,19 @@ namespace ra
 				if (r.signal & Signal::value) {
 					this->count++;
 				}
-				else if (r.signal & (Signal::join | Signal::value)) {
-					auto val = ++this->count;
-					this->count = 0;
-					return { .data = val };
+
+				if (r.signal & Signal::end) {
+					if (count > 0) {
+						return { .data = count, .signal = Signal::value | Signal::end };
+					}
+					else {
+						return { .signal = Signal::end };
+					}
 				}
-				else {
-					return { .signal = r.signal };
+				else if (r.signal & Signal::join) {
+					auto val = this->count;
+					this->count = 0;
+					return { .data = val, .signal = Signal::value };
 				}
 				r = this->next.run();
 			}
@@ -350,8 +394,30 @@ namespace ra
 		using wrapped_type = wf<SplitEvery>;
 		int every;
 
-		split_every(int every_) :every(every_) {};
+		split_every(int every_) : every(every_) {};
 	};
+
+	template<class T>
+	struct intersperse
+	{
+		using wrapped_type = wf<Intersperse>;
+		using value_type = T;
+
+		T t;
+
+		intersperse(T t_) : t(t_) {};
+	};
+
+	//template<class... Args>
+	//struct wrapped
+	//{
+	//	template<template<class...> class T>
+	//	using w = Id<Args..., T>;
+
+	//	using wrapped_type = wf<w>;
+
+
+	//};
 
 	struct length
 	{
@@ -367,7 +433,13 @@ namespace ra
 		return Id<Args...>(std::forward<Args>(args)...);
 	};
 
+	template<class... Args>
+	auto make_wrapped(Args&&... args) {
+
+	}
+
 	void test() {
+
 		//auto f = [](int i) { return i + 1; };
 		auto even = [](auto i) -> bool { return i % 2 == 0; };
 
@@ -384,8 +456,8 @@ namespace ra
 		//Map<te::list<void, void>, wf<End>> wat;
 
 		std::vector<int> ints;
-		ints.resize(1000000000);
-		//ints.resize(100);
+		//ints.resize(1000000000);
+		ints.resize(101);
 		std::iota(ints.begin(), ints.end(), 1);
 		//std::for_each(ints.begin(), ints.end(), [](int& i) { i = rand(); });
 
@@ -395,7 +467,7 @@ namespace ra
 		double weird = 0.0;
 		double normal = 0.0;
 
-		auto rangle1 = make_rangle(length(), split_every(10), source(ints.begin(), ints.end()));
+		auto rangle1 = make_rangle(/*length(),*/ length(), split_every(2), split_every(10), source(ints.begin(), ints.end()));
 
 		std::vector<int> result0;
 		while (true) {
@@ -403,19 +475,21 @@ namespace ra
 			if (r.signal & Signal::value) {
 				result0.push_back(r.data);
 			}
-			else {
+			if (r.signal & Signal::end) {
 				break;
 			}
+		}
+
+		for (auto& i : result0) {
+			std::cout << std::format("{}\n", i);
 		}
 
 		rand();
 
 		//std::vector<int> result2;
-		for (size_t i = 0; i < 10; i++) {
+		for (size_t i = 0; i < 0; i++) {
 			{
 				auto rangle = make_rangle(filter(multiple3), map(add1), map(mult2), map(add1), map(mult2), map(add1), map(add3), filter(even), source(ints.begin(), ints.end()));
-
-				//map(map(add1));
 
 				std::vector<int> result1;
 				auto start = std::chrono::system_clock::now();
@@ -451,7 +525,7 @@ namespace ra
 			}
 		}
 
-		std::cout << std::format("normal: {} weird: {}\n", normal, weird);
+		//std::cout << std::format("normal: {} weird: {}\n", normal, weird);
 
 		rand();
 
