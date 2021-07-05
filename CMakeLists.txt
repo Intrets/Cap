@@ -65,6 +65,8 @@ find_package(GLI REQUIRED)
 find_package(SDL2 REQUIRED)
 find_package(SDL_Mixer REQUIRED)
 
+add_compile_definitions(LIB_SERIAL)
+
 
 add_subdirectory(ui)
 add_subdirectory(mem)
