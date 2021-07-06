@@ -13,3 +13,6 @@
 [submodule "sound"]
 	path = sound
 	url = https://github.com/intrets/sound
+[submodule "ui"]
+	path = ui
+	url = https://github.com/intrets/ui
