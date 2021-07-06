@@ -19,3 +19,6 @@
 [submodule "wrapped_glm"]
 	path = wrapped_glm
 	url = https://github.com/intrets/wrapped_glm
+[submodule "render"]
+	path = render
+	url = https://github.com/intrets/render
