@@ -7,3 +7,6 @@
 [submodule "serial"]
 	path = serial
 	url = https://github.com/intrets/serial
+[submodule "misc"]
+	path = misc
+	url = https://github.com/intrets/misc
