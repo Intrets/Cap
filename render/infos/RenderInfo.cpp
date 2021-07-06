@@ -1,1 +1,0 @@
-#include "infos/RenderInfo.h"
