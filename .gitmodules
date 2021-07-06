@@ -16,3 +16,6 @@
 [submodule "ui"]
 	path = ui
 	url = https://github.com/intrets/ui
+[submodule "wrapped_glm"]
+	path = wrapped_glm
+	url = https://github.com/intrets/wrapped_glm
