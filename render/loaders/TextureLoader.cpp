@@ -249,4 +249,7 @@ namespace render
 		res.size = size;
 		return res;
 	}
+	bwo::Texture2D load2DTexture(std::filesystem::path path) {
+		return load2DTexture(path.string());
+	}
 }

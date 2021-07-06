@@ -7,6 +7,7 @@
 
 #include "BlitRenderer.h"
 #include "GLStateWrapper.h"
+#include "loaders/TextureLoader.h"
 
 namespace render
 {
@@ -24,7 +25,7 @@ namespace render
 	}
 
 	void BlockIDTextures::loadBlockTexture(std::string name) {
-		bwo::Texture2D newTex(Global<misc::PathManager>->LoadTexture2DP(name));
+		auto newTex = render::load2DTexture(Global<misc::PathManager>->getTexturesPath() / name);
 
 		// Failed to load texture
 		if (newTex.ID == 0) {

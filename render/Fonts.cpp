@@ -8,11 +8,12 @@
 
 #include <render/BlitRenderer.h>
 #include <render/infos/BlitRenderInfo.h>
+#include <render/loaders/TextureLoader.h>
 
 namespace render
 {
 	FontInfo Fonts::loadMonospacedFont(std::string name, glm::ivec2 charDim, glm::ivec2 gridDim) {
-		auto tex = Global<misc::PathManager>->LoadFont(name);
+		auto tex = render::load2DTexture(Global<misc::PathManager>->getFontsPath() / name);
 
 		render::BlitRenderInfo blitInfo;
 
