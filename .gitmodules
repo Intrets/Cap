@@ -10,3 +10,6 @@
 [submodule "misc"]
 	path = misc
 	url = https://github.com/intrets/misc
+[submodule "sound"]
+	path = sound
+	url = https://github.com/intrets/sound
